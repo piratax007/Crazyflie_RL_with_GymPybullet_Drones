@@ -9,7 +9,7 @@ module load GCC/12.3.0 OpenMPI/4.1.5 Stable-Baselines3/2.3.2 gym-pybullet-drones
 
 cp -r ../environments/HoverCrazyflieSim2Real.py $TMPDIR
 cp -r ../python_scripts/learning_script.py $TMPDIR
-cp -r ../python_scripts/execute_secuencial_learning.py $TPMDIR
+cp -r ../python_scripts/execute_secuencial_learning.py $TMPDIR
 
 cd $TMPDIR
 
