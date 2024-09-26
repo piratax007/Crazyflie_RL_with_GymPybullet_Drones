@@ -114,7 +114,7 @@ def run_learning(environment,
     model.learn(total_timesteps=int(time_steps),
                 callback=callback_list,
                 log_interval=1,
-                progress_bar=True)
+                progress_bar=False)
 
     model.save(path_to_results + '/final_model.zip')
 
