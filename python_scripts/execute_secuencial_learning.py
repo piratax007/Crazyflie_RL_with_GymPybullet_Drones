@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from environments import HoverCrazyflieSim2Real
+from environments.HoverCrazyflieSim2Real import HoverCrazyflieSim2Real
 from python_scripts.learning_script import run_learning
 
 print("""############# Base training #############
