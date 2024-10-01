@@ -11,7 +11,7 @@ Target = [0 0 1 Nan Nan Nan]
 results = run_learning(environment=HoverCrazyflieSim2Real,
                        learning_id="HOVER_NOISED_TRAINING-02",
                        continuous_learning=False,
-                       parallel_environments=4,
+                       parallel_environments=10,
                        time_steps=int(1e6),
                        stop_on_max_episodes=dict(stop=False, episodes=0),
                        stop_on_reward_threshold=dict(stop=False, threshold=600.),

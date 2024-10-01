@@ -27,7 +27,7 @@ def results_directory(base_directory, results_id):
 def get_ppo_model(environment, path, reuse_model=False):
     if reuse_model:
         return PPO.load(path=path,
-                        device='auto',
+                        device='cuda',
                         env=environment,
                         force_reset=True)
 
@@ -41,7 +41,7 @@ def get_ppo_model(environment, path, reuse_model=False):
                clip_range=0.12,
                ent_coef=0.001,
                verbose=0,
-               device='auto')
+               device='cuda')
 
 
 def callbacks(evaluation_environment, parallel_environments, path_to_results, stop_on_max_episodes:dict, stop_on_reward_threshold:dict, save_checkpoints:dict):

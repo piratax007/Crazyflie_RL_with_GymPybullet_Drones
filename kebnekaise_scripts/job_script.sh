@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH -A hpc2n2024-120
 #SBATCH -t 00:20:00
-#SBATCH -n 10
+#SBATCH -n 1
 #SBATCH --job-name=Crazyflie_training
 
 module purge
