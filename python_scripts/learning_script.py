@@ -34,12 +34,7 @@ def get_ppo_model(environment, path, reuse_model=False):
     return PPO('MlpPolicy',
                environment,
                tensorboard_log=path + '/tb/',
-               batch_size=256,
-               learning_rate=2e-4,
-               n_steps=8192,
-               n_epochs=6,
-               clip_range=0.12,
-               ent_coef=0.001,
+               batch_size=128,
                verbose=0,
                device='cuda')
 
@@ -105,7 +100,7 @@ def run_learning(environment,
                                           )
 
     model = get_ppo_model(learning_environment,
-                          'continuous_learning/best_model.zip' if continuous_learning else path_to_results,
+                          'best_model' if continuous_learning else path_to_results,
                           continuous_learning)
 
     callback_list = callbacks(evaluation_environment, parallel_environments, path_to_results,

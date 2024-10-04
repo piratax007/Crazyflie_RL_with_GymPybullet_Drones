@@ -1,6 +1,5 @@
 import numpy as np
-
-from gym_pybullet_drones.envs.Obs12Stage1 import ObS12Stage1
+from environments.ObS12Stage1 import ObS12Stage1
 from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, ObservationType
 import pybullet as p
 
@@ -15,7 +14,6 @@ class ObS12Stage2(ObS12Stage1):
                  physics: Physics = Physics.PYB,
                  pyb_freq: int = 240,
                  ctrl_freq: int = 30,
-                 wind=False,
                  gui=False,
                  record=False,
                  obs: ObservationType = ObservationType.KIN,
@@ -60,7 +58,6 @@ class ObS12Stage2(ObS12Stage1):
                          physics=physics,
                          pyb_freq=pyb_freq,
                          ctrl_freq=ctrl_freq,
-                         wind=wind,
                          gui=gui,
                          record=record,
                          obs=obs,

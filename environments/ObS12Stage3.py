@@ -1,5 +1,5 @@
 import numpy as np
-from gym_pybullet_drones.envs.ObS12Stage2 import ObS12Stage2
+from environments.ObS12Stage2 import ObS12Stage2
 from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, ObservationType
 import pybullet as p
 
@@ -131,12 +131,12 @@ class ObS12Stage3(ObS12Stage2):
         self.INIT_RPYS = np.array([[
             np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
             np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
-            np.random.uniform(-1.5, 1.5 + 1e-10, 1)[0]
+            np.random.uniform(-3.14, 3.14 + 1e-10, 1)[0]
         ]])
         initial_linear_velocity = [
             np.random.uniform(-1, 1 + 1e-10, 1)[0],
             np.random.uniform(-1, 1 + 1e-10, 1)[0],
-            np.random.uniform(-3.14, 3.14 + 1e-10, 1)[0]
+            np.random.uniform(-1, 1 + 1e-10, 1)[0]
         ]
         initial_anguler_velocity = [
             np.random.uniform(-1, 1 + 1e-10, 1)[0],
