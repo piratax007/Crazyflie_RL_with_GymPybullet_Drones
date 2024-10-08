@@ -6,8 +6,8 @@
 #SBATCH --job-name=sub-task_1_4-env-cuda
 
 module purge
-module load GCC/12.3.0 OpenMPI/4.1.5 Stable-Baselines3/2.3.2 gym-pybullet-drones/2.0.0-3d7b12edd4915a27e6cec9f2c0eb4b5479f7735e
-module load GCC/12.3.0 tensorboard/2.15.1
+module load GCC/12.3.0 OpenMPI/4.1.5 Stable-Baselines3/2.3.2 gym-pybullet-drones/2.0.0-3d7b12e-CUDA-12.1.1
+module load GCC/12.3.0 TensorFlow/2.15.1-CUDA-12.1.1
 
 cd ..
 
