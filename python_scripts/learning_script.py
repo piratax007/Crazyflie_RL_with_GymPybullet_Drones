@@ -41,6 +41,7 @@ def get_ppo_model(environment, path, reuse_model=False):
                clip_range=0.12,
                ent_coef=0.001,
                verbose=0,
+               seed=42,
                device='auto')
 
 
