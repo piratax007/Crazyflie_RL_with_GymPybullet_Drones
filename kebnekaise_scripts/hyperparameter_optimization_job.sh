@@ -7,9 +7,9 @@
 
 module purge
 module load GCC/12.3.0 OpenMPI/4.1.5 Stable-Baselines3/2.3.2 gym-pybullet-drones/2.0.0-3d7b12edd4915a27e6cec9f2c0eb4b5479f7735e
-module load GCC/12.3.0 TensorFlow/2.15.1-CUDA-12.1.1
+module load GCC/12.3.0 OpenMPI/4.1.1 tensorboard/2.15.1
 module load GCC/12.3.0 OpenMPI/4.1.5 Optuna/3.5.0
 
 cd ..
 
-python3 -m python_scripts.fine_tuning.py
+python3 -m python_scripts.fine_tuning

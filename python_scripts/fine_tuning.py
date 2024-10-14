@@ -7,12 +7,12 @@ from environments.WithoutCurriculumLearning import WithoutCurriculumLearning
 
 def optimize_ppo(trial):
     batch_size = trial.suggest_categorical("batch_size", [16, 32, 64, 128, 256])
-    learning_rate = trial.suggest_loguniform("learning_rate", 1e-5, 3e-4)
+    learning_rate = trial.suggest_float("learning_rate", 1e-5, 3e-4, log=True)
     n_steps = trial.suggest_int("n_steps", 2048, 8192)
     n_epochs = trial.suggest_int("n_epochs", 1, 12)
-    clip_range = trial.suggest_uniform('clip_range', 0.1, 0.25)
-    ent_coef = trial.suggest_loguniform('ent_coef', 0.0, 0.1)
-    target_kl = trial.suggest_loguniform('target_kl', 0.000001, 0.001)
+    clip_range = trial.suggest_float('clip_range', 0.1, 0.25)
+    ent_coef = trial.suggest_float('ent_coef', 1e-8, 0.1, log=True)
+    target_kl = trial.suggest_float('target_kl', 0.000001, 0.001, log=True)
     seed = trial.suggest_categorical("seed", [0, 1234, 42, 37, 100, 83, 27, 7, 9, 10])
 
     env = make_vec_env(WithoutCurriculumLearning, n_envs=4)
@@ -36,8 +36,16 @@ def optimize_ppo(trial):
     return mean_reward
 
 if __name__ == '__main__':
-    study = optuna.create_study(direction="maximize")
-    study.optimize(optimize_ppo, n_trials=100)
+    study = optuna.create_study(
+        study_name="optimization_without_curriculum_learning",
+        storage="sqlite:///results/hyperparameters.db",
+        direction="maximize"
+    )
+
+    study.optimize(
+        optimize_ppo,
+        n_trials=100,
+    )
 
     best_hyperparams = study.best_params
     with open('best_hyperparams.json', 'w') as f:
