@@ -19,8 +19,8 @@ def optimize_ppo(trial):
 
     eval_callback = EvalCallback(
         env,
-        best_model_save_path='results/hyperparams-study-log/no-normalized-reward/',
-        log_path='results/hyperparams-study-log/no-normalized-reward/',
+        best_model_save_path='results/hyperparams-study-log/no-normalized-reward-5S/',
+        log_path='results/hyperparams-study-log/no-normalized-reward-5S/',
         eval_freq=int(10000 / 4),
         deterministic=True,
         render=False,
@@ -51,10 +51,10 @@ def optimize_ppo(trial):
     return eval_callback.best_mean_reward
 
 if __name__ == '__main__':
-    storage = "sqlite:///results/hyperparams-study_stage-1_no-normalized-reward.db"
-    study = optuna.create_study(direction="maximize", pruner=MedianPruner(n_startup_trials=5, n_warmup_steps=1_000_000), storage=storage, study_name="ppo_hyperparams_stage-1_no-normalized-reward", load_if_exists=True)
+    storage = "sqlite:///results/hyperparams-study_stage-1_no-normalized-reward-5S.db"
+    study = optuna.create_study(direction="maximize", pruner=MedianPruner(n_startup_trials=5, n_warmup_steps=1_000_000), storage=storage, study_name="ppo_hyperparams_stage-1_no-normalized-reward-5S", load_if_exists=True)
     study.optimize(optimize_ppo, n_trials=100)
 
     best_hyperparams = study.best_params
-    with open('best-hyperparams_Stage-1_no-normalized-reward.json', 'w') as f:
+    with open('best-hyperparams_Stage-1_no-normalized-reward-5S.json', 'w') as f:
         json.dump(best_hyperparams, f)

@@ -68,12 +68,6 @@ class ObS12Stage3(ObS12Stage2):
                          act=act
                          )
 
-    ################################################################################
-
-    def _target_error(self, state):
-        return (np.linalg.norm(self.TARGET_POS - state[0:3]) +
-                np.linalg.norm(self.TARGET_ORIENTATION - state[7:10]))
-
     @staticmethod
     def _random_cylindrical_positions(
             inner_radius: float = 0.0,
