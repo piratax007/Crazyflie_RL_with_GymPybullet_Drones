@@ -34,10 +34,10 @@ def optimize_ppo(trial):
     return mean_reward
 
 if __name__ == '__main__':
-    storage = "sqlite:///results/hyperparams-study_stage-1_normalized-reward.db"
-    study = optuna.create_study(direction="maximize", storage=storage, study_name="ppo_hyperparams_stage-1_normalized-reward", load_if_exists=True)
+    storage = "sqlite:///results/hyperparams-study_stage-1_no-normalized-reward.db"
+    study = optuna.create_study(direction="maximize", storage=storage, study_name="ppo_hyperparams_stage-1_no-normalized-reward", load_if_exists=True)
     study.optimize(optimize_ppo, n_trials=100)
 
     best_hyperparams = study.best_params
-    with open('best-hyperparams_Stage-1_normalized-reward.json', 'w') as f:
+    with open('best-hyperparams_Stage-1_no-normalized-reward.json', 'w') as f:
         json.dump(best_hyperparams, f)
