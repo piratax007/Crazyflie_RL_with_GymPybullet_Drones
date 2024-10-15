@@ -8,9 +8,9 @@ from environments.ObS12Stage1 import ObS12Stage1
 def optimize_ppo(trial):
     batch_size = trial.suggest_categorical("batch_size", [64, 128, 256])
     learning_rate = trial.suggest_float("learning_rate", 1e-4, 3e-4, log=True)
-    n_steps = trial.suggest_int("n_steps", 512, 8192, 256)
+    n_steps = trial.suggest_int("n_steps", 512, 8192, step=256)
     n_epochs = trial.suggest_int("n_epochs", 1, 12)
-    clip_range = trial.suggest_uniform('clip_range', 0.1, 0.25)
+    clip_range = trial.suggest_float('clip_range', 0.1, 0.25)
     ent_coef = trial.suggest_float('ent_coef', 1e-8, 0.1, log=True)
     target_kl = trial.suggest_float('target_kl', 1e-6, 1e-3, log=True)
 
@@ -18,8 +18,8 @@ def optimize_ppo(trial):
 
     eval_callback = EvalCallback(
         env,
-        best_model_save_path='/results/hyperparams-study-log/no-normalized-reward/',
-        log_path='/results/hyperparams-study-logs/no-normalized-reward/',
+        best_model_save_path='results/hyperparams-study-log/no-normalized-reward/',
+        log_path='results/hyperparams-study-log/no-normalized-reward/',
         eval_freq=int(10000 / 4),
         deterministic=True,
         render=False,
