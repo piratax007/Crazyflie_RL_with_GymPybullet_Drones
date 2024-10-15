@@ -2,7 +2,7 @@
 #SBATCH -A hpc2n2024-120
 #SBATCH -t 3-12:00:00
 #SBATCH -n 1
-#SBATCH -c 2
+#SBATCH -c 6
 #SBATCH --gpus=2
 
 module purge

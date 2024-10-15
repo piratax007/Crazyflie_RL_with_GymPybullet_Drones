@@ -27,14 +27,15 @@ def optimize_ppo(trial):
                 target_kl=target_kl,
     )
 
-    model.learn(total_timesteps=int(1e6))
+    model.learn(total_timesteps=int(10e6))
 
     mean_reward, _ = evaluate_policy(model, env, n_eval_episodes=10)
 
     return mean_reward
 
 if __name__ == '__main__':
-    study = optuna.create_study(direction="maximize")
+    storage = "sqlite:///hyperparams-study_stage-1_reward_no_normalized.db"
+    study = optuna.create_study(direction="maximize", storage=storage, study_name="ppo_hyperparams_stage-1_reward_no_normalized", load_if_exists=True)
     study.optimize(optimize_ppo, n_trials=100)
 
     best_hyperparams = study.best_params
