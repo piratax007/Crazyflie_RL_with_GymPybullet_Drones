@@ -1,4 +1,5 @@
 import optuna
+from optuna.pruners import MedianPruner
 import json
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback
@@ -36,8 +37,11 @@ def optimize_ppo(trial):
                 target_kl=target_kl,
     )
 
-    for step in range(0, 30_000_000, 1_000_000):
-        model.learn(total_timesteps=int(10e6), reset_num_timesteps=False, callback=eval_callback)
+    total_timesteps = 30_000_000
+    step_size = 1_000_000
+
+    for step in range(0, total_timesteps, step_size):
+        model.learn(total_timesteps=step_size, reset_num_timesteps=False, callback=eval_callback)
 
         trial.report(eval_callback.best_mean_reward, step)
 
@@ -48,7 +52,7 @@ def optimize_ppo(trial):
 
 if __name__ == '__main__':
     storage = "sqlite:///results/hyperparams-study_stage-1_no-normalized-reward.db"
-    study = optuna.create_study(direction="maximize", storage=storage, study_name="ppo_hyperparams_stage-1_no-normalized-reward", load_if_exists=True)
+    study = optuna.create_study(direction="maximize", pruner=MedianPruner(n_startup_trials=5, n_warmup_steps=1_000_000), storage=storage, study_name="ppo_hyperparams_stage-1_no-normalized-reward", load_if_exists=True)
     study.optimize(optimize_ppo, n_trials=100)
 
     best_hyperparams = study.best_params
