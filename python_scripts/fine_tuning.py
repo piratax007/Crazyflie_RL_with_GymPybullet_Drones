@@ -1,7 +1,7 @@
 import optuna
 import json
 from stable_baselines3 import PPO
-from stable_baselines3.common.evaluation import evaluate_policy
+from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.env_util import make_vec_env
 from environments.ObS12Stage1 import ObS12Stage1
 
@@ -16,6 +16,15 @@ def optimize_ppo(trial):
 
     env = make_vec_env(ObS12Stage1, n_envs=4)
 
+    eval_callback = EvalCallback(
+        env,
+        best_model_save_path='/results/hyperparams-study-log/no-normalized-reward/',
+        log_path='/results/hyperparams-study-logs/no-normalized-reward/',
+        eval_freq=int(10000 / 4),
+        deterministic=True,
+        render=False,
+    )
+
     model = PPO('MlpPolicy',
                 env,
                 batch_size=batch_size,
@@ -27,11 +36,15 @@ def optimize_ppo(trial):
                 target_kl=target_kl,
     )
 
-    model.learn(total_timesteps=int(10e6))
+    for step in range(0, 30_000_000, 1_000_000):
+        model.learn(total_timesteps=int(10e6), reset_num_timesteps=False, callback=eval_callback)
 
-    mean_reward, _ = evaluate_policy(model, env, n_eval_episodes=10)
+        trial.report(eval_callback.best_mean_reward, step)
 
-    return mean_reward
+        if trial.should_prune():
+            raise optuna.TrialPruned()
+
+    return eval_callback.best_mean_reward
 
 if __name__ == '__main__':
     storage = "sqlite:///results/hyperparams-study_stage-1_no-normalized-reward.db"
