@@ -9,7 +9,7 @@ from stable_baselines3 import PPO
 from environments.CurriculumStage1 import CurriculumStage1
 from gym_pybullet_drones.utils.Logger import Logger
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
-from gym_pybullet_drones.utils.utils import sync, str2bool, FIRFilter
+from gym_pybullet_drones.utils.utils import sync, str2bool
 
 
 def in_degrees(angles):
@@ -115,10 +115,10 @@ def run_simulation(
 
     start = time.time()
 
-    firfilter = FIRFilter()
+    # firfilter = FIRFilter()
     #
-    for _ in range(firfilter.buffer_size):
-        firfilter.buffer.append(np.zeros((1, 4)))
+    # for _ in range(firfilter.buffer_size):
+    #     firfilter.buffer.append(np.zeros((1, 4)))
 
     # x_straight = np.linspace(-2, 2, simulation_length)
     # y_straight = np.linspace(-2, 2, simulation_length)
@@ -209,7 +209,6 @@ def run_simulation(
                              obs2[3:12],
                              actions2
                              ]),
-            reward=reward,
             control=np.zeros(12)
         )
 
