@@ -10,7 +10,7 @@ class EjcCLStage1(BaseRLAviary):
             self,
             drone_model: DroneModel = DroneModel.CF2X,
             initial_xyzs = np.array([[0, 0, 0]]),
-            target_xyzs = np.array([[0, 0, 1]]),
+            target_xyzs = np.array([0, 0, 1]),
             physics: Physics = Physics.PYB_GND,
             pybullet_frequency: int = 240,
             ctrl_freq: int = 30,
