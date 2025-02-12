@@ -2,6 +2,7 @@
 import argparse
 
 from environments.ejc_cl_stage1 import EjcCLStage1
+from environments.ejc_cl_stage2 import EjcCLStage2
 from environments.ejc_cl_stage3 import EjcCLStage3
 from python_scripts.learning_script import run_learning
 
@@ -61,7 +62,7 @@ if __name__ == '__main__':
     #######################################################
     """)
 
-    results = run_learning(environment=EjcCLStage3,
+    results = run_learning(environment=EjcCLStage2,
                            learning_id=args.learning_id,
                            continuous_learning=args.continuous_learning,
                            parallel_environments=4,
