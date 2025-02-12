@@ -13,6 +13,6 @@ ml TensorFlow/2.15.1-foss-2023a-CUDA-12.1.1
 cd ..
 echo "Training started at $(date)"
 
-python3 -m python_scripts.execute_secuencial_learning --learning-id 'EJC_CL_Stage1_seed-7_fixed-initial-attitude' --seed 7
+python3 -m python_scripts.execute_secuencial_learning --learning-id 'EJC_CL_Stage1_seed-90_fixed-initial-attitude_kebnekaise' --seed 90
 
 echo "Training finished at $(date)"
