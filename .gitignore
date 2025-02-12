@@ -1,5 +1,6 @@
 ./.idea
 .idea
+.venv/
 environments/__pycache__/
 python_scripts/__pycache__/
 /results
