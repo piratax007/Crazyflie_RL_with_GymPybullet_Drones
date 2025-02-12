@@ -6,12 +6,12 @@ from python_scripts.learning_script import run_learning
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Single Agent learning')
-    parser.add_argument(
-        '--environment',
-        default=EjcCLStage1,
-        type=str,
-        help='An imported environment'
-    )
+    # parser.add_argument(
+    #     '--environment',
+    #     default=EjcCLStage1,
+    #     type=str,
+    #     help='An imported environment'
+    # )
     parser.add_argument(
         '--learning-id',
         type=str,
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     reward_stop_flag = args.stop_on_reward_threshold_flag
     reward_stop_threshold = args.stop_on_reward_threshold_threshold
 
-    results = run_learning(environment=args.environment,
+    results = run_learning(environment=EjcCLStage1,
                            learning_id=args.learning_id,
                            continuous_learning=args.continuous_learning,
                            parallel_environments=4,
