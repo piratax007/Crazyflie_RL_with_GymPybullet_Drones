@@ -24,7 +24,7 @@ def results_directory(base_directory, results_id):
     return str(path)
 
 
-def get_ppo_model(environment, path, reuse_model=False):
+def get_ppo_model(environment, path, reuse_model=False, seed: int = 0):
     if reuse_model:
         return PPO.load(path=path,
                         device='auto',
@@ -35,7 +35,7 @@ def get_ppo_model(environment, path, reuse_model=False):
                environment,
                tensorboard_log=path + '/tb/',
                batch_size=128,
-               seed=90,
+               seed=seed,
                verbose=0,
                device='auto')
 
@@ -85,6 +85,7 @@ def run_learning(environment,
                  continuous_learning=False,
                  parallel_environments=4,
                  time_steps=10e7,
+                 seed=0,
                  stop_on_max_episodes=None,
                  stop_on_reward_threshold=None,
                  save_checkpoints=None,
@@ -100,9 +101,12 @@ def run_learning(environment,
                                           n_envs=parallel_environments
                                           )
 
-    model = get_ppo_model(learning_environment,
-                          'best_model' if continuous_learning else path_to_results,
-                          continuous_learning)
+    model = get_ppo_model(
+        learning_environment,
+        'best_model' if continuous_learning else path_to_results,
+        continuous_learning,
+        seed = seed
+    )
 
     callback_list = callbacks(evaluation_environment, parallel_environments, path_to_results,
                               stop_on_max_episodes, stop_on_reward_threshold, save_checkpoints)
@@ -132,6 +136,12 @@ if __name__ == '__main__':
         '--env_parameters',
         default=dict(obs=DEFAULT_OBS, act=DEFAULT_ACT),
         help="Parameters for the environment to learn"
+    )
+    parser.add_argument(
+        '--seed',
+        default=0,
+        type=int,
+        help='Random seed for reproducibility'
     )
 
     results_path = run_learning(**vars(parser.parse_args()))
