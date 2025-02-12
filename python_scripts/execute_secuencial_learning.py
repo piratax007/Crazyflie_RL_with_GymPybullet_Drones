@@ -53,6 +53,13 @@ if __name__ == '__main__':
     reward_stop_flag = args.stop_on_reward_threshold_flag
     reward_stop_threshold = args.stop_on_reward_threshold_threshold
 
+    print(f"""
+    ################# Learning Started ########################
+    Learning ID: {args.learning_id}
+    Seed: {args.seed}
+    #######################################################
+    """)
+
     results = run_learning(environment=EjcCLStage1,
                            learning_id=args.learning_id,
                            continuous_learning=args.continuous_learning,

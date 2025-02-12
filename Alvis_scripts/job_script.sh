@@ -12,4 +12,4 @@ ml tensorboard/2.15.1-gfbf-2023a
 
 cd ..
 
-python3 -m python_scripts.execute_secuencial_learning --learning-id 'EJC_CL_Stage1' --seed 90
+python3 -m python_scripts.execute_secuencial_learning --learning-id 'EJC_CL_Stage1_seed-7' --seed 7
