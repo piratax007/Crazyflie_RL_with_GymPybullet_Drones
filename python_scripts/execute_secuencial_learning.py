@@ -9,12 +9,12 @@ Target = [0 0 1 Nan Nan Nan]
 """)
 
 results = run_learning(environment=ObS12Stage1,
-                       learning_id="Curriculum-Stage-1_reward-normalized_Standard-hyperparams",
+                       learning_id="ACTION-SPACE-VEL",
                        continuous_learning=False,
                        parallel_environments=4,
-                       time_steps=int(30e6),
+                       time_steps=int(10e7),
                        stop_on_max_episodes=dict(stop=False, episodes=0),
-                       stop_on_reward_threshold=dict(stop=False, threshold=800.),
+                       stop_on_reward_threshold=dict(stop=True, threshold=610.),
                        save_checkpoints=dict(save=True, save_frequency=250000)
                        )
 
