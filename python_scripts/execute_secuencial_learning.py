@@ -68,7 +68,7 @@ if __name__ == '__main__':
                            seed=args.seed,
                            stop_on_max_episodes=dict(stop=False, episodes=0),
                            stop_on_reward_threshold=dict(stop=reward_stop_flag, threshold=reward_stop_threshold),
-                           save_checkpoints=dict(save=True, save_frequency=1000000)
+                           save_checkpoints=dict(save=True, save_frequency=250000)
                            )
 
     print(f"""
