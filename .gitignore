@@ -3,4 +3,5 @@
 environments/__pycache__/
 python_scripts/__pycache__/
 /results
+/Alvis_scripts/history
 slurm-*
