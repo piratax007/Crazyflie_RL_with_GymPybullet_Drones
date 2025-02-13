@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import argparse
-
 from environments.ejc_cl_stage1 import EjcCLStage1
 from environments.ejc_cl_stage2 import EjcCLStage2
 from environments.ejc_cl_stage3 import EjcCLStage3
@@ -14,7 +13,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Single Agent learning')
     parser.add_argument(
         '--environment',
-        default=EjcCLStage1,
+        default='EjcCLStage1',
         type=str,
         choices=[
             EjcCLStage1,
@@ -33,10 +32,22 @@ if __name__ == '__main__':
         help='A string to be added to the results directory name'
     )
     parser.add_argument(
+        '--algorithm',
+        default='ppo',
+        type=str,
+        help='The algorithm for training (ppo, sac, ddpg)'
+    )
+    parser.add_argument(
         '--continuous-learning',
         default=False,
         type=bool,
         help='A boolean indicating whether to use continuous learning or not'
+    )
+    parser.add_argument(
+        '--parallel-environments',
+        default=4,
+        type=int,
+        help='The number of parallel environments (1 for ddpg, 4 suggested for ppo and sac)'
     )
     parser.add_argument(
         '--time-steps',
@@ -105,8 +116,9 @@ if __name__ == '__main__':
 
     results = run_learning(environment=environment_class,
                            learning_id=args.learning_id,
+                           algorithm=args.algorithm,
                            continuous_learning=args.continuous_learning,
-                           parallel_environments=4,
+                           parallel_environments=args.parallel_environments,
                            time_steps=int(args.time_steps),
                            seed=args.seed,
                            stop_on_max_episodes=dict(stop=stop_episodes_flag, episodes=stop_episodes),

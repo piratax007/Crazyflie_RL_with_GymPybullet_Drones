@@ -3,10 +3,9 @@
 import os
 from datetime import datetime
 import argparse
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, SAC, DDPG
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnMaxEpisodes, StopTrainingOnRewardThreshold, CheckpointCallback
-
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 
 DEFAULT_OUTPUT_FOLDER = 'results'
@@ -24,20 +23,24 @@ def results_directory(base_directory, results_id):
     return str(path)
 
 
-def get_ppo_model(environment, path, reuse_model=False, seed: int = 0):
+def get_model(model_class, environment, path, reuse_model=False, seed: int = 0, **kwargs):
     if reuse_model:
-        return PPO.load(path=path,
-                        device='auto',
-                        env=environment,
-                        force_reset=True)
+        return model_class.load(
+            path=path,
+            device='auto',
+            env=environment,
+            force_reset=True
+        )
 
-    return PPO('MlpPolicy',
-               environment,
-               tensorboard_log=path + '/tb/',
-               batch_size=128,
-               seed=seed,
-               verbose=0,
-               device='auto')
+    return model_class(
+        'MlpPolicy',
+        environment,
+        tensorboard_log=path + '/tb/',
+        seed=seed,
+        verbose=0,
+        device='auto',
+        **kwargs
+    )
 
 
 def callbacks(evaluation_environment, parallel_environments, path_to_results, stop_on_max_episodes:dict, stop_on_reward_threshold:dict, save_checkpoints:dict):
@@ -82,6 +85,7 @@ def callbacks(evaluation_environment, parallel_environments, path_to_results, st
 
 def run_learning(environment,
                  learning_id,
+                 algorithm='ppo',
                  continuous_learning=False,
                  parallel_environments=4,
                  time_steps=10e7,
@@ -101,11 +105,24 @@ def run_learning(environment,
                                           n_envs=parallel_environments
                                           )
 
-    model = get_ppo_model(
+    mode_mapping = {
+        'ppo': (PPO, {'batch_size': 128}),
+        'sac': (SAC, {}),
+        'ddpg': (DDPG, {}),
+    }
+
+    try:
+        model_class, extra_args = mode_mapping[algorithm]
+    except KeyError:
+        raise ValueError(f"{algorithm} is not supported.")
+
+    model = get_model(
+        model_class,
         learning_environment,
         'best_model' if continuous_learning else path_to_results,
-        continuous_learning,
-        seed = seed
+        reuse_model=continuous_learning,
+        seed=seed,
+        **extra_args
     )
 
     callback_list = callbacks(evaluation_environment, parallel_environments, path_to_results,
@@ -126,6 +143,13 @@ if __name__ == '__main__':
     parser.add_argument(
         '--env_name',
         help='The name of the environment to learn, registered with gym_pybullet_drones'
+    )
+    parser.add_argument(
+        '--algorithm',
+        default='ppo',
+        choices=['ppo', 'sac', 'ddpg'],
+        type=str,
+        help='The algorithm for training (ppo, sac, ddpg)'
     )
     parser.add_argument(
         '--output_directory',
