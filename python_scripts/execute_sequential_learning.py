@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import argparse
 from environments.ejc_cl_stage1 import EjcCLStage1
+from environments.ejc_cl_stage1_ctrl_freq_100 import EjcCLStage1CtrlFreq100
+from environments.ejc_cl_stage1_ctrl_freq_200 import EjcCLStage1CtrlFreq200
 from environments.ejc_cl_stage2 import EjcCLStage2
 from environments.ejc_cl_stage3 import EjcCLStage3
 from environments.basic_reward import BasicReward
@@ -19,6 +21,8 @@ if __name__ == '__main__':
             'EjcCLStage1',
             'EjcCLStage2',
             'EjcCLStage3',
+            'EjcCLStage1CtrlFreq100',
+            'EjcCLStage1CtrlFreq200',
             'BasicReward',
             'ExplorationRewardContribution',
             'StabilityRewardContribution',
@@ -92,6 +96,8 @@ if __name__ == '__main__':
         'EjcCLStage1': EjcCLStage1,
         'EjcCLStage2': EjcCLStage2,
         'EjcCLStage3': EjcCLStage3,
+        'EjcCLStage1CtrlFreq100': EjcCLStage1CtrlFreq100,
+        'EjcCLStage1CtrlFreq200': EjcCLStage1CtrlFreq200,
         'BasicReward': BasicReward,
         'ExplorationRewardContribution': ExplorationRewardContribution,
         'StabilityRewardContribution': StabilityRewardContribution,
