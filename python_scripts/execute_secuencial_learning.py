@@ -12,12 +12,21 @@ from python_scripts.learning_script import run_learning
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Single Agent learning')
-    # parser.add_argument(
-    #     '--environment',
-    #     default=EjcCLStage1,
-    #     type=str,
-    #     help='An imported environment'
-    # )
+    parser.add_argument(
+        '--environment',
+        default=EjcCLStage1,
+        type=str,
+        choices=[
+            EjcCLStage1,
+            EjcCLStage2,
+            EjcCLStage3,
+            BasicReward,
+            ExplorationRewardContribution,
+            StabilityRewardContribution,
+            NavigationRewardContribution,
+        ],
+        help='An imported environment'
+    )
     parser.add_argument(
         '--learning-id',
         type=str,
@@ -42,6 +51,18 @@ if __name__ == '__main__':
         help='Seed for reproducibility'
     )
     parser.add_argument(
+        '--stop-on-max-episodes-flag',
+        default=False,
+        type=bool,
+        help='A boolean indicating whether to stop on max episodes'
+    )
+    parser.add_argument(
+        '--stop-episodes',
+        default=30000000,
+        type=int,
+        help='The number of episodes to stop on'
+    )
+    parser.add_argument(
         '--stop-on-reward-threshold-flag',
         default=True,
         type=bool,
@@ -56,6 +77,22 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    environment_map = {
+        'EjcCLStage1': EjcCLStage1,
+        'EjcCLStage2': EjcCLStage2,
+        'EjcCLStage3': EjcCLStage3,
+        'BasicReward': BasicReward,
+        'ExplorationRewardContribution': ExplorationRewardContribution,
+        'StabilityRewardContribution': StabilityRewardContribution,
+        'NavigationRewardContribution': NavigationRewardContribution
+    }
+
+    environment_class = environment_map.get(args.environment)
+    if environment_class is None:
+        raise ValueError(f'Invalid environment: {args.environment}')
+
+    stop_episodes_flag = args.stop_on_max_episodes_flag
+    stop_episodes = args.stop_episodes
     reward_stop_flag = args.stop_on_reward_threshold_flag
     reward_stop_threshold = args.stop_on_reward_threshold_threshold
 
@@ -66,13 +103,13 @@ if __name__ == '__main__':
     #######################################################
     """)
 
-    results = run_learning(environment=EjcCLStage1,
+    results = run_learning(environment=environment_class,
                            learning_id=args.learning_id,
                            continuous_learning=args.continuous_learning,
                            parallel_environments=4,
                            time_steps=int(args.time_steps),
                            seed=args.seed,
-                           stop_on_max_episodes=dict(stop=False, episodes=0),
+                           stop_on_max_episodes=dict(stop=stop_episodes_flag, episodes=stop_episodes),
                            stop_on_reward_threshold=dict(stop=reward_stop_flag, threshold=reward_stop_threshold),
                            save_checkpoints=dict(save=True, save_frequency=250000)
                            )
