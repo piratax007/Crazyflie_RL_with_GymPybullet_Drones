@@ -13,7 +13,7 @@ ml TensorFlow/2.15.1-foss-2023a-CUDA-12.1.1
 cd ..
 echo "Training started at $(date)"
 
-python3 -m python_scripts.execute_secuencial_learning  --environment 'EjcCLStage3' --learning-id 'EJC_WCL_PPO_90' \
---algorithm 'ppo' --parallel-environments 4 --seed 90 --time-steps 10e7 --stop-on-reward-threshod-flag Fase
+python3 -m python_scripts.execute_secuencial_learning  --environment 'EjcCLStage3' --learning-id 'EJC_WCL_DDPG_39' \
+--algorithm 'ddpg' --parallel-environments 1 --seed 39 --time-steps 100000000 --stop-on-reward-threshold-flag Fase
 
 echo "Training finished at $(date)"
