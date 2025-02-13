@@ -12,7 +12,7 @@ ml TensorFlow/2.15.1-CUDA-12.1.1
 cd ..
 echo "Training started at $(date)"
 
-python3 -m python_scripts.execute_secuencial_learning  --environment 'NavigationRewardContribution' \
+python3 -m python_scripts.execute_sequential_learning  --environment 'NavigationRewardContribution' \
  --learning-id 'EJC_Navigation-Reward-Contribution_90' \
 --algorithm 'ppo' --parallel-environments 4 --seed 90 --time-steps 30000000 --stop-on-reward-threshold-flag Fase
 
