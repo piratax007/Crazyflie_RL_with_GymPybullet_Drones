@@ -66,7 +66,7 @@ if __name__ == '__main__':
     #######################################################
     """)
 
-    results = run_learning(environment=NavigationRewardContribution,
+    results = run_learning(environment=EjcCLStage1,
                            learning_id=args.learning_id,
                            continuous_learning=args.continuous_learning,
                            parallel_environments=4,
