@@ -6,7 +6,8 @@ import numpy as np
 from scipy.interpolate import splprep, splev
 from scipy.spatial.transform import Rotation as R
 from stable_baselines3 import PPO
-from environments.CurriculumStage1 import CurriculumStage1
+from gym_pybullet_drones.envs import ObS12Stage1
+from environments.ejc_cl_stage1 import EjcCLStage1
 from gym_pybullet_drones.utils.Logger import Logger
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 from gym_pybullet_drones.utils.utils import sync, str2bool
@@ -17,15 +18,13 @@ def in_degrees(angles):
 
 
 def get_policy(policy_path, model):
-    # if os.path.isfile(policy_path + '/best_model.zip'):
     if os.path.isfile(policy_path + '/' + model):
-        # return PPO.load(policy_path + '/best_model.zip')
         return PPO.load(policy_path + '/' + model)
 
     raise Exception("[ERROR]: no model under the specified path", policy_path)
 
 
-def spiral_trajectory(number_of_points: int = 50, radius: int = 2, angle_range: float = 30.0) -> tuple:
+def helix_trajectory(number_of_points: int = 50, radius: int = 2, angle_range: float = 30.0) -> tuple:
     angles = np.linspace(0, 4 * np.pi, number_of_points)
     x_coordinates = radius * np.cos(angles)
     y_coordinates = radius * np.sin(angles)
@@ -44,9 +43,20 @@ def spiral_trajectory(number_of_points: int = 50, radius: int = 2, angle_range: 
     return x_coordinates, y_coordinates, z_coordinates, yaw_angles
 
 
+def lemniscata_trajectory(number_of_points: int = 50, a: float = 2) -> tuple:
+    t = np.linspace(0, 2.125 * np.pi, number_of_points)
+    x_coordinates = a * np.sin(t) / (1 + np.cos(t) ** 2)
+    y_coordinates = a * np.sin(t) * np.cos(t) / (1 + np.cos(t) ** 2)
+    z_coordinates = np.zeros(number_of_points)
+
+    yaw_angles = np.arctan2(-y_coordinates, -x_coordinates)
+
+    return x_coordinates, y_coordinates, z_coordinates, yaw_angles
+
+
 def smooth_trajectory(points, num_points=100):
     points = np.array(points)
-    tck, u = splprep([points[:,0], points[:,1], points[:,2]], s=0)
+    tck, u = splprep([points[:, 0], points[:, 1], points[:, 2]], s=0)
     u_fine = np.linspace(0, 1, num_points)
     x_fine, y_fine, z_fine = splev(u_fine, tck)
     smooth_points = np.vstack((x_fine, y_fine, z_fine)).T
@@ -92,16 +102,17 @@ def run_simulation(
         save=False,
         plot=False,
         debug=False,
-        apply_filter=False,
         comment=""
 ):
     policy = get_policy(policy_path, model)
 
-    test_env = test_env(gui=gui,
-                        obs=ObservationType('kin'),
-                        act=ActionType('rpm'),
-                        # initial_xyzs=np.array([[0, 0, 0]]),
-                        record=record_video)
+    test_env = test_env(
+        initial_xyzs=np.array([[0, 0, 0]]),
+        initial_rpys=np.array([[0, 0, 0]]),
+        gui=gui,
+        observation_space=ObservationType('kin'),
+        action_space=ActionType('rpm'),
+        record=record_video)
 
     logger = Logger(
         logging_freq_hz=int(test_env.CTRL_FREQ),
@@ -110,74 +121,24 @@ def run_simulation(
         colab=False
     )
 
-    obs, info = test_env.reset(seed=42, options={})
-    simulation_length = (test_env.EPISODE_LEN_SEC + 5) * test_env.CTRL_FREQ
+    obs, info = test_env.reset(options={})
+    simulation_length = (test_env.EPISODE_LENGTH_SECONDS + 5) * test_env.CTRL_FREQ
 
     start = time.time()
 
-    # firfilter = FIRFilter()
-    #
-    # for _ in range(firfilter.buffer_size):
-    #     firfilter.buffer.append(np.zeros((1, 4)))
-
-    # x_straight = np.linspace(-2, 2, simulation_length)
-    # y_straight = np.linspace(-2, 2, simulation_length)
-    x_target, y_target, z_target, yaw_target = spiral_trajectory(simulation_length, 2)
-    # points = [
-    #     [-4, 0, 0],
-    #     [-2, 1, 0.75],
-    #     [-1, -2, 1.5],
-    #     [1, 0, 2],
-    #     [4, 1, 1],
-    #     [6, -1, 0.5]
-    # ]
-    # x_target, y_target, z_target, yaw_target = smooth_trajectory(points, num_points=simulation_length)
+    # x_target, y_target, z_target, yaw_target = spiral_trajectory(simulation_length, 2)
+    # x_target, y_target, z_target, yaw_target = spiral_trajectory(simulation_length, 2)
 
     for i in range(simulation_length):
-        # WAY-POINT TRACKING
-        # if i < simulation_length / 5:
-        #     x_target = -1
-        #     y_target = 1
-        #     z_target = 0
-        #     yaw_target = -0.52
-        # elif simulation_length / 5 < i < 2 * simulation_length / 5:
-        #     x_target = -2
-        #     y_target = 0
-        #     z_target = 0.5
-        #     yaw_target = 0
-        # elif 2 * simulation_length / 5 < i < 3 * simulation_length / 5:
-        #     x_target = -2
-        #     y_target = -2
-        #     z_target = 1.5
-        #     yaw_target = 0.35
-        # elif 3 * simulation_length / 5 < i < 4 * simulation_length / 5:
-        #     x_target = -1
-        #     y_target = -3
-        #     z_target = 0
-        #     yaw_target = 0.7
-        # else:
-        #     x_target = -2.8
-        #     y_target = -3.8
-        #     z_target = 1
-        #     yaw_target = 0
-        #
-        # obs[0][0] -= x_target
-        # obs[0][1] -= y_target
-        # obs[0][2] -= z_target
-        # obs[0][5] -= 1
-
-        # TRAJECTORY TRACKING
         # obs[0][0] -= x_target[i]
         # obs[0][1] -= y_target[i]
         # obs[0][2] -= z_target[i]
-        # obs[0][5] -= yaw_target[i]
 
         action, _states = policy.predict(obs,
                                          deterministic=True
                                          )
 
-        if apply_filter:
-            action = firfilter.filter_actions(action)
+        print(f"############### PREDICTED ACTION: {action} ####################")
 
         obs, reward, terminated, truncated, info = test_env.step(action)
         actions = test_env._getDroneStateVector(0)[16:20]
@@ -209,6 +170,7 @@ def run_simulation(
                              obs2[3:12],
                              actions2
                              ]),
+            reward=reward,
             control=np.zeros(12)
         )
 
@@ -222,12 +184,12 @@ def run_simulation(
 
     if plot:
         logger.plot_position_and_orientation()
+        # logger.plot()
         # logger.plot_rpms()
         # logger.plot_trajectory()
 
     if save:
         logger.save_as_csv(comment)
-        # save_to_csv(tuple([log_timestamp, log_reward]), policy_path, 'instantaneous_reward', 'full-task')
 
 
 if __name__ == '__main__':
@@ -242,7 +204,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--test_env',
-        default=CurriculumStage1,
+        default=EjcCLStage1,
         help='The name of the environment to learn, registered with gym_pybullet_drones'
     )
     parser.add_argument(
@@ -286,12 +248,6 @@ if __name__ == '__main__':
         default=False,
         type=str2bool,
         help="Prints debug information"
-    )
-    parser.add_argument(
-        '--apply_filter',
-        default=False,
-        type=str2bool,
-        help="Applies a low pass to the actions coming from the policy"
     )
 
     run_simulation(**vars(parser.parse_args()))
