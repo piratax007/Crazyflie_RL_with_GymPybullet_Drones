@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH -A NAISS2024-5-442 -p alvis
-#SBATCH -t 12:00:00
+#SBATCH -t 48:00:00
 #SBATCH -n 1
 #SBATCH -c 2
 #SBATCH --gpus-per-node=T4:1
@@ -13,6 +13,7 @@ ml TensorFlow/2.15.1-foss-2023a-CUDA-12.1.1
 cd ..
 echo "Training started at $(date)"
 
-python3 -m python_scripts.execute_secuencial_learning --learning-id 'EJC_CL_Stage1_seed-70_fixed-initial-attitude' --seed 70
+python3 -m python_scripts.execute_secuencial_learning  --environment 'EjcCLStage3' --learning-id 'EJC_WCL_PPO_90' \
+--algorithm 'ppo' --parallel-environments 4 --seed 90 --time-steps 10e7 --stop-on-reward-threshod-flag Fase
 
 echo "Training finished at $(date)"
