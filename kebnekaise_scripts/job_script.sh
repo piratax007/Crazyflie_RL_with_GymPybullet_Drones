@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH -A hpc2n2024-120
-#SBATCH -t 12:00:00
+#SBATCH -t 24:00:00
 #SBATCH -n 1
 #SBATCH -c 1
 
@@ -12,6 +12,6 @@ ml TensorFlow/2.15.1-CUDA-12.1.1
 cd ..
 echo "Training started at $(date)"
 
-python3 -m python_scripts.execute_secuencial_learning --learning-id 'EJC_Navigation-Reward-Contribution_seed-7' --seed 7
+python3 -m python_scripts.execute_secuencial_learning --learning-id 'EJC_CL_Stage1_seed-70_fixed-initial-attitude' --seed 70
 
 echo "Training finished at $(date)"
