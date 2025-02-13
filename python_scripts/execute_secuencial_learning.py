@@ -16,13 +16,13 @@ if __name__ == '__main__':
         default='EjcCLStage1',
         type=str,
         choices=[
-            EjcCLStage1,
-            EjcCLStage2,
-            EjcCLStage3,
-            BasicReward,
-            ExplorationRewardContribution,
-            StabilityRewardContribution,
-            NavigationRewardContribution,
+            'EjcCLStage1',
+            'EjcCLStage2',
+            'EjcCLStage3',
+            'BasicReward',
+            'ExplorationRewardContribution',
+            'StabilityRewardContribution',
+            'NavigationRewardContribution',
         ],
         help='An imported environment'
     )
