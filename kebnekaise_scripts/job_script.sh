@@ -13,7 +13,7 @@ cd ..
 echo "Training started at $(date)"
 
 python3 -m python_scripts.execute_sequential_learning  --environment 'EjcCLStage1' \
- --learning-id 'EJC_stage-1_80' \
---algorithm 'ppo' --parallel-environments 4 --seed 80 --time-steps 30000000 --stop-on-reward-threshold-flag False
+ --learning-id 'EJC_stage-1_39' \
+--algorithm 'ppo' --parallel-environments 4 --seed 39 --time-steps 30000000
 
 echo "Training finished at $(date)"
