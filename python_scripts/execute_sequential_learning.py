@@ -79,7 +79,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--stop-on-reward-threshold-flag',
-        default=True,
+        default=False,
         type=bool,
         help='A boolean indicating whether to stop on reward threshold'
     )
