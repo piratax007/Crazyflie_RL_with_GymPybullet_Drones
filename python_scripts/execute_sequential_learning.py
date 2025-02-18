@@ -11,6 +11,7 @@ from environments.exploration_reward_contribution import ExplorationRewardContri
 from environments.stability_reward_contribution import StabilityRewardContribution
 from environments.navigation_reward_contribution import NavigationRewardContribution
 from python_scripts.learning_script import run_learning
+from gym_pybullet_drones.utils.utils import str2bool
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Single Agent learning')
@@ -46,7 +47,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--continuous-learning',
         default=False,
-        type=bool,
+        type=str2bool,
         help='A boolean indicating whether to use continuous learning or not'
     )
     parser.add_argument(
@@ -70,7 +71,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--stop-on-max-episodes-flag',
         default=False,
-        type=bool,
+        type=str2bool,
         help='A boolean indicating whether to stop on max episodes'
     )
     parser.add_argument(
@@ -82,7 +83,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--stop-on-reward-threshold-flag',
         default=False,
-        type=bool,
+        type=str2bool,
         help='A boolean indicating whether to stop on reward threshold'
     )
     parser.add_argument(
