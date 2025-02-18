@@ -8,6 +8,7 @@ from scipy.spatial.transform import Rotation as R
 from stable_baselines3 import PPO
 from gym_pybullet_drones.envs import ObS12Stage1
 from environments.ejc_cl_stage1 import EjcCLStage1
+from environments.ejc_cl_stage2 import EjcCLStage2
 from gym_pybullet_drones.utils.Logger import Logger
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 from gym_pybullet_drones.utils.utils import sync, str2bool
@@ -121,7 +122,7 @@ def run_simulation(
         colab=False
     )
 
-    obs, info = test_env.reset(options={})
+    obs, info = test_env.reset()
     simulation_length = (test_env.EPISODE_LENGTH_SECONDS + 5) * test_env.CTRL_FREQ
 
     start = time.time()
@@ -204,7 +205,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--test_env',
-        default=EjcCLStage1,
+        default=EjcCLStage2,
         help='The name of the environment to learn, registered with gym_pybullet_drones'
     )
     parser.add_argument(
