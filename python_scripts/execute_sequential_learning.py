@@ -6,6 +6,7 @@ from environments.ejc_cl_stage1_ctrl_freq_200 import EjcCLStage1CtrlFreq200
 from environments.ejc_cl_stage2 import EjcCLStage2
 from environments.ejc_cl_stage3 import EjcCLStage3
 from environments.basic_reward import BasicReward
+from environments.basic_reward_stage2 import BasicRewardStage2
 from environments.exploration_reward_contribution import ExplorationRewardContribution
 from environments.stability_reward_contribution import StabilityRewardContribution
 from environments.navigation_reward_contribution import NavigationRewardContribution
@@ -24,6 +25,7 @@ if __name__ == '__main__':
             'EjcCLStage1CtrlFreq100',
             'EjcCLStage1CtrlFreq200',
             'BasicReward',
+            'BasicRewardStage2',
             'ExplorationRewardContribution',
             'StabilityRewardContribution',
             'NavigationRewardContribution',
@@ -99,6 +101,7 @@ if __name__ == '__main__':
         'EjcCLStage1CtrlFreq100': EjcCLStage1CtrlFreq100,
         'EjcCLStage1CtrlFreq200': EjcCLStage1CtrlFreq200,
         'BasicReward': BasicReward,
+        'BasicRewardStage2': BasicRewardStage2,
         'ExplorationRewardContribution': ExplorationRewardContribution,
         'StabilityRewardContribution': StabilityRewardContribution,
         'NavigationRewardContribution': NavigationRewardContribution

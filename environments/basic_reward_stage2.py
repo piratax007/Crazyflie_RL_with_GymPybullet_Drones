@@ -6,7 +6,7 @@ from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, Obs
 import pybullet as p
 
 
-class BasicReward(BaseRLAviary):
+class BasicRewardStage2(BaseRLAviary):
     def __init__(
             self,
             drone_model: DroneModel = DroneModel.CF2X,
