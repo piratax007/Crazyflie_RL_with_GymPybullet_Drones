@@ -53,15 +53,7 @@ def run(
         comment=""
         ):
 
-    INIT_XYZS = np.array(
-        [
-            [
-                *_random_cylindrical_positions(
-                    outer_radius=2.0, cylinder_height=2, mode='inside'
-                )
-            ]
-        ]
-    )
+    INIT_XYZS = np.array([[*_random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]])
     INIT_RPYS = np.array([[
         np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
         np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
