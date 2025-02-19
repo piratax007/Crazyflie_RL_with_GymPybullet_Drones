@@ -14,7 +14,7 @@ class EjcCLStage3(EjcCLStage2):
             target_rpys = np.array([0, 0, 0]),
             physics: Physics = Physics.PYB_GND,
             pybullet_frequency: int = 240,
-            ctrl_freq: int = 30,
+            ctrl_freq: int = 240,
             gui = False,
             record = False,
             observation_space: ObservationType = ObservationType.KIN,
