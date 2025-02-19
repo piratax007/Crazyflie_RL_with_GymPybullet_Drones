@@ -3,6 +3,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import pandas as pd
 
 
 class PATH:
@@ -193,7 +194,7 @@ def _add_vertical_lines(axes: plt.Axes, x_positions: list, y_min: float = 0, y_m
     axes.legend()
 
 
-def add_double_arrow_with_label_2D(
+def add_double_arrow_with_label_2d(
         axes: plt.Axes,
         start: tuple[float, float],
         end: tuple[float, float],
@@ -214,7 +215,7 @@ def add_double_arrow_with_label_2D(
     )
 
 
-def single_axis_2D(files: list, labels: list, references: dict, colors: dict, settings: dict, callbacks: list = None) -> None:
+def single_axis_2d(files: list, labels: list, references: dict, colors: dict, settings: dict, callbacks: list = None) -> None:
     _, axis = plt.subplots(1)
 
     _traces_from_csv(files, labels, axis, references, **colors)
@@ -228,8 +229,8 @@ def single_axis_2D(files: list, labels: list, references: dict, colors: dict, se
     # _add_vertical_lines(axis, x_positions=[6000000, 6200000, 7000000, 17950000], y_min=0.0, y_max=1.0, label='Training stopped')
     # _add_vertical_lines(axis, x_positions=[17950000], y_min=0.0, y_max=1.0)
     #  TRANSFERENCE KNOWLEDGE
-    add_double_arrow_with_label_2D(axis, (73, 35), (146, 35), 'Time to Threshold', label_position=(75.4, 35.5), vertical_offset=2.7)
-    add_double_arrow_with_label_2D(axis, (588, 36.86), (588, 42.4), 'Asymptotic Performance', label_position=(375, 39), vertical_offset=-1)
+    add_double_arrow_with_label_2d(axis, (73, 35), (146, 35), 'Time to Threshold', label_position=(75.4, 35.5), vertical_offset=2.7)
+    add_double_arrow_with_label_2d(axis, (588, 36.86), (588, 42.4), 'Asymptotic Performance', label_position=(375, 39), vertical_offset=-1)
 
     plt.show()
 
@@ -240,7 +241,7 @@ def _select_equally_spaced_sample(data: tuple, sample_size: int) -> tuple:
     return r
 
 
-def single_axis_3D(
+def single_axis_3d(
         files: list,
         labels: list,
         references: dict,
@@ -363,7 +364,7 @@ def single_axis_3D(
     plt.show()
 
 
-def multiple_axis_2D(
+def multiple_axis_2d(
         subplots: dict,
         content_specification: dict,
         colors: dict,
@@ -424,7 +425,7 @@ def animate(data: dict, references: dict, settings: dict, colors: dict, video_na
         anim.save(video_name + str(i) + '.mp4', 'ffmpeg', fps=30, dpi=300)
 
 
-def animation_3D(
+def animation_3d(
         data: dict,
         references: dict,
         settings: dict,
@@ -628,6 +629,7 @@ def add_inertial_frame(position: tuple, axes: plt.Axes, label_offset: tuple = (0
         fontsize=18
     )
 
+
 def compose_sources(parent_directory: str, common_name: str) -> list:
     sources = []
 
@@ -641,3 +643,27 @@ def compose_sources(parent_directory: str, common_name: str) -> list:
     sources.sort()
 
     return sources
+
+
+def moving_average(data, window_size):
+    return np.convolve(data, np.ones(window_size), 'valid') / window_size
+
+
+def read_from_csv(files: list):
+    all_values = []
+    steps = None
+
+    for file in files:
+        data = pd.read_csv(file)
+        if steps is None:
+            steps = data['Step']
+        all_values.append(data['Value'])
+
+    return steps, pd.DataFrame(all_values)
+
+
+def calculate_statistics(rewards: pd.DataFrame):
+    mean_rewards = rewards.mean(axis=0)
+    std_rewards = rewards.std(axis=0)
+
+    return mean_rewards, std_rewards

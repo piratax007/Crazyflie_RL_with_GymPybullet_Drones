@@ -2,7 +2,7 @@
 
 import os
 from aquarel import load_theme
-from easy_plots import multiple_axis_2D, GENERAL_PATH
+from easy_plots import multiple_axis_2d, GENERAL_PATH
 
 if __name__ == '__main__':
     GENERAL_PATH.path = os.path.dirname(
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     #     )
     # )
 
-    multiple_axis_2D(
+    multiple_axis_2d(
         subplots=dict(rows=3, columns=1),
         content_specification={
             '(0, 0)': dict(

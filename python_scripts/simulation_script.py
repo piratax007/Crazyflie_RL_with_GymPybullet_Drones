@@ -9,6 +9,7 @@ from stable_baselines3 import PPO
 from gym_pybullet_drones.envs import ObS12Stage1
 from environments.ejc_cl_stage1 import EjcCLStage1
 from environments.ejc_cl_stage2 import EjcCLStage2
+from environments.ejc_cl_stage3 import EjcCLStage3
 from gym_pybullet_drones.utils.Logger import Logger
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 from gym_pybullet_drones.utils.utils import sync, str2bool
@@ -205,7 +206,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--test_env',
-        default=EjcCLStage2,
+        default=EjcCLStage3,
         help='The name of the environment to learn, registered with gym_pybullet_drones'
     )
     parser.add_argument(

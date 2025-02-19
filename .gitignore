@@ -7,3 +7,5 @@ python_scripts/__pycache__/
 /Alvis_scripts/history
 slurm-*
 best_model.zip
+poetry.lock
+pyproject.toml
