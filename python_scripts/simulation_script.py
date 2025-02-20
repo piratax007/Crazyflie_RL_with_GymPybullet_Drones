@@ -206,7 +206,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--test_env',
-        default=EjcCLStage3,
+        default=EjcCLStage1,
         help='The name of the environment to learn, registered with gym_pybullet_drones'
     )
     parser.add_argument(

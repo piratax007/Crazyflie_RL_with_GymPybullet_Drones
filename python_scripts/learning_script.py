@@ -106,7 +106,15 @@ def run_learning(environment,
                                           )
 
     mode_mapping = {
-        'ppo': (PPO, {'batch_size': 128}),
+        'ppo': (
+            PPO, {
+                'batch_size': 256,
+                'learning_rate': 3e-4,
+                'n_steps': 7680,
+                'n_epochs': 10,
+                'clip_range': 0.15
+            }
+        ),
         'sac': (SAC, {}),
         'ddpg': (DDPG, {}),
     }
