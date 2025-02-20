@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH -A NAISS2024-22-1107
+#SBATCH -A hpc2n2024-120
 #SBATCH -t 48:00:00
 #SBATCH -n 1
 #SBATCH -c 1
@@ -13,7 +13,7 @@ cd ..
 echo "Training started at $(date)"
 
 python3 -m python_scripts.execute_sequential_learning  --environment 'EjcCLStage2ScaledReward' \
- --learning-id 'EJC_stage-2_scaled-reward_39' \
---algorithm 'ppo' --parallel-environments 4 --seed 39 --time-steps 30000000 --continuous-learning True
+ --learning-id 'EJC_stage-2_scaled-reward_90' \
+--algorithm 'ppo' --parallel-environments 4 --seed 90 --time-steps 30000000 --continuous-learning True
 
 echo "Training finished at $(date)"
