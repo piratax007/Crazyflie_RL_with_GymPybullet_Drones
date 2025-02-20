@@ -32,7 +32,8 @@ if __name__ == '__main__':
             'ExplorationRewardContribution',
             'StabilityRewardContribution',
             'NavigationRewardContribution',
-            'EjcCLStage1ScaledReward'
+            'EjcCLStage1ScaledReward',
+            'EjcCLStage2ScaledReward'
         ],
         help='An imported environment'
     )
