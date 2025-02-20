@@ -11,6 +11,7 @@ from environments.exploration_reward_contribution import ExplorationRewardContri
 from environments.stability_reward_contribution import StabilityRewardContribution
 from environments.navigation_reward_contribution import NavigationRewardContribution
 from environments.ejc_cl_stage1_scaled_reward import EjcCLStage1ScaledReward
+from environments.ejc_cl_stage2_scaled_reward import EjcCLStage2ScaledReward
 from python_scripts.learning_script import run_learning
 from gym_pybullet_drones.utils.utils import str2bool
 
@@ -108,7 +109,8 @@ if __name__ == '__main__':
         'ExplorationRewardContribution': ExplorationRewardContribution,
         'StabilityRewardContribution': StabilityRewardContribution,
         'NavigationRewardContribution': NavigationRewardContribution,
-        'EjcCLStage1ScaledReward': EjcCLStage1ScaledReward
+        'EjcCLStage1ScaledReward': EjcCLStage1ScaledReward,
+        'EjcCLStage2ScaledReward': EjcCLStage2ScaledReward
     }
 
     environment_class = environment_map.get(args.environment)
