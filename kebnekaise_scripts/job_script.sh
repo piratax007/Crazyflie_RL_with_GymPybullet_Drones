@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH -A hpc2n2024-120
+#SBATCH -A hpc2n2024-119
 #SBATCH -t 48:00:00
 #SBATCH -n 1
 #SBATCH -c 1
@@ -12,8 +12,8 @@ ml TensorFlow/2.15.1-CUDA-12.1.1
 cd ..
 echo "Training started at $(date)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'EjcCLStage1' \
- --learning-id 'EJC_stage-1_90' \
---algorithm 'ppo' --parallel-environments 4 --seed 90 --time-steps 30000000 --continuous-learning False
+python3 -m python_scripts.execute_sequential_learning  --environment 'EjcCLStage1ScaledReward' \
+ --learning-id 'EJC_stage-1_scaled-reward_SAC_90' \
+--algorithm 'sac' --parallel-environments 4 --seed 90 --time-steps 30000000 --continuous-learning False
 
 echo "Training finished at $(date)"

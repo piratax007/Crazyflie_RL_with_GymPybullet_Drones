@@ -14,7 +14,7 @@ class EjcCLStage1ScaledReward(BaseRLAviary):
             target_xyzs = np.array([0, 0, 1]),
             physics: Physics = Physics.PYB_GND,
             pybullet_frequency: int = 400,
-            ctrl_freq: int = 240,
+            ctrl_freq: int = 200,
             gui = False,
             record = False,
             observation_space: ObservationType = ObservationType.KIN,
