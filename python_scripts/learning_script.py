@@ -25,14 +25,12 @@ def results_directory(base_directory, results_id):
 
 def get_model(model_class, environment, path, reuse_model=False, seed: int = 0, **kwargs):
     if reuse_model:
-        model = model_class.load(
+        return model_class.load(
             path=path,
             device='auto',
             env=environment,
             force_reset=True
         )
-        model.set_random_seed(seed)
-        return model
 
     return model_class(
         'MlpPolicy',
@@ -89,6 +87,7 @@ def run_learning(environment,
                  learning_id,
                  algorithm='ppo',
                  continuous_learning=False,
+                 path_to_previous_model=None,
                  parallel_environments=4,
                  time_steps=10e7,
                  seed=0,
@@ -129,7 +128,7 @@ def run_learning(environment,
     model = get_model(
         model_class,
         learning_environment,
-        'best_model' if continuous_learning else path_to_results,
+        f'{path_to_previous_model}/best_model' if continuous_learning else path_to_results,
         reuse_model=continuous_learning,
         seed=seed,
         **extra_args

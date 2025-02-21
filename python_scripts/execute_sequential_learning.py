@@ -55,6 +55,12 @@ if __name__ == '__main__':
         help='A boolean indicating whether to use continuous learning or not'
     )
     parser.add_argument(
+        '--path-to-previous-model',
+        default=None,
+        type=str,
+        help='A string indicating the path to the previous model'
+    )
+    parser.add_argument(
         '--parallel-environments',
         default=4,
         type=int,
@@ -134,6 +140,7 @@ if __name__ == '__main__':
                            learning_id=args.learning_id,
                            algorithm=args.algorithm,
                            continuous_learning=args.continuous_learning,
+                           path_to_previous_model=args.path_to_previous_model,
                            parallel_environments=args.parallel_environments,
                            time_steps=int(args.time_steps),
                            seed=args.seed,
