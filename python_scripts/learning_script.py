@@ -25,12 +25,14 @@ def results_directory(base_directory, results_id):
 
 def get_model(model_class, environment, path, reuse_model=False, seed: int = 0, **kwargs):
     if reuse_model:
-        return model_class.load(
+        model = model_class.load(
             path=path,
             device='auto',
             env=environment,
             force_reset=True
         )
+        model.set_random_seed(seed)
+        return model
 
     return model_class(
         'MlpPolicy',
