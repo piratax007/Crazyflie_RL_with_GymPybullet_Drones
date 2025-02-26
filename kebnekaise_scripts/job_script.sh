@@ -12,8 +12,9 @@ ml TensorFlow/2.15.1-CUDA-12.1.1
 cd ..
 echo "Training started at $(date)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'EjcCLStage2ScaledReward' \
- --learning-id 'EJC_stage-2_scaled-reward_90' \
---algorithm 'ppo' --parallel-environments 4 --seed 90 --time-steps 30000000 --continuous-learning True
+python3 -m python_scripts.execute_sequential_learning  --environment 'EjcCLStage3ScaledReward' \
+ --learning-id 'EJC_stage-3_scaled-reward_90' \
+--algorithm 'ppo' --parallel-environments 4 --time-steps 100000000 --continuous-learning True \
+--path-to-previous-model results/save-EJC_stage-2_scaled-reward_90-02.24.2025_17.09.13
 
 echo "Training finished at $(date)"
