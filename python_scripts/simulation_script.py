@@ -6,12 +6,15 @@ import numpy as np
 from scipy.interpolate import splprep, splev
 from scipy.spatial.transform import Rotation as R
 from stable_baselines3 import PPO
-from gym_pybullet_drones.envs import ObS12Stage1
+from environments.ObS12Stage1 import ObS12Stage1
+from environments.ObS12Stage2 import ObS12Stage2
+from environments.ObS12Stage3 import ObS12Stage3
 from environments.ejc_cl_stage1 import EjcCLStage1
 from environments.ejc_cl_stage2 import EjcCLStage2
 from environments.ejc_cl_stage3 import EjcCLStage3
 from environments.ejc_cl_stage1_scaled_reward import EjcCLStage1ScaledReward
 from environments.ejc_cl_stage2_scaled_reward import EjcCLStage2ScaledReward
+from environments.ejc_cl_stage3_scaled_reward import EjcCLStage3ScaledReward
 from gym_pybullet_drones.utils.Logger import Logger
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 from gym_pybullet_drones.utils.utils import sync, str2bool
@@ -111,8 +114,9 @@ def run_simulation(
     policy = get_policy(policy_path, model)
 
     test_env = test_env(
-        initial_xyzs=np.array([[0, 0, 0]]),
-        initial_rpys=np.array([[0, 0, 0]]),
+        initial_xyzs=np.array([[-1, 0, 0]]),
+        initial_rpys=np.array([[0.0, 0.0, 0.5]]),
+        target_rpys=np.array([0.0, 0.0, 0.0]),
         gui=gui,
         observation_space=ObservationType('kin'),
         action_space=ActionType('rpm'),
@@ -134,9 +138,10 @@ def run_simulation(
     # x_target, y_target, z_target, yaw_target = spiral_trajectory(simulation_length, 2)
 
     for i in range(simulation_length):
-        # obs[0][0] -= x_target[i]
-        # obs[0][1] -= y_target[i]
+        obs[0][0] += 0.025
+        obs[0][1] -= 0.023
         # obs[0][2] -= z_target[i]
+#         obs[0][5] -= 0.37
 
         action, _states = policy.predict(obs,
                                          deterministic=True
@@ -208,7 +213,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--test_env',
-        default=EjcCLStage2ScaledReward,
+        default=EjcCLStage3ScaledReward,
         help='The name of the environment to learn, registered with gym_pybullet_drones'
     )
     parser.add_argument(
