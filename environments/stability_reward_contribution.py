@@ -13,8 +13,8 @@ class StabilityRewardContribution(BaseRLAviary):
             initial_rpys = np.array([[0, 0, 0]]),
             target_xyzs = np.array([0, 0, 1]),
             physics: Physics = Physics.PYB_GND,
-            pybullet_frequency: int = 240,
-            ctrl_freq: int = 30,
+            pybullet_frequency: int = 400,
+            ctrl_freq: int = 200,
             gui = False,
             record = False,
             observation_space: ObservationType = ObservationType.KIN,
@@ -46,27 +46,26 @@ class StabilityRewardContribution(BaseRLAviary):
                 np.linalg.norm(self.INIT_XYZS[0][0:2] - self.TARGET_POSITION[0:2]) + 0.025 or
                 state[2] > self.TARGET_POSITION[2] + 0.025)
 
+    def _is_closed(self, state: np.ndarray) -> bool:
+        return np.linalg.norm(state[0:3] - self.TARGET_POSITION[0:3]) < 0.025
+
+    def _performance(self, state: np.ndarray) -> float:
+        if self._is_closed(state) and state[7]**2 + state[8]**2 < 0.001:
+            return 2
+
+        return -(state[7]**2 + state[8]**2)
+
     def _get_previous_current_we(self, current_state: np.ndarray) -> np.ndarray:
         if np.shape(self.LOG_ANGULAR_VELOCITY)[0] > 2:
             self.LOG_ANGULAR_VELOCITY = np.delete(self.LOG_ANGULAR_VELOCITY, 0, axis=0)
 
         return np.vstack((self.LOG_ANGULAR_VELOCITY, current_state[13:16]))
 
-    def _get_we_differences(self, state: np.ndarray) -> dict:
-        log = self._get_previous_current_we(state)
-        differences = {
-            'roll': log[0][0] - log[1][0],
-            'pitch': log[0][1] - log[1][1],
-            'yaw': log[0][2] - log[1][2],
-        }
-        return differences
-
     def _computeReward(self) -> float:
         state = self._getDroneStateVector(0)
-        we_differences = self._get_we_differences(state)
-        ret = (25 - 20 * self._target_error(state) -
-               100 * (1 if self._is_away_from_exploration_area(state) else -0.2) -
-               18 * (we_differences['roll'] ** 2 + we_differences['pitch'] ** 2 + we_differences['yaw'] ** 2))
+        ret = (0.25 - 0.20 * self._target_error(state) -
+               1 * (1 if self._is_away_from_exploration_area(state) else -0.2) +
+               0.20 * self._performance(state))
         return ret
 
     def _computeTerminated(self) -> bool:

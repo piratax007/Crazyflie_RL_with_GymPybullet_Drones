@@ -13,8 +13,8 @@ class BasicReward(BaseRLAviary):
             initial_rpys = np.array([[0, 0, 0]]),
             target_xyzs = np.array([0, 0, 1]),
             physics: Physics = Physics.PYB_GND,
-            pybullet_frequency: int = 240,
-            ctrl_freq: int = 30,
+            pybullet_frequency: int = 400,
+            ctrl_freq: int = 200,
             gui = False,
             record = False,
             observation_space: ObservationType = ObservationType.KIN,
@@ -43,7 +43,7 @@ class BasicReward(BaseRLAviary):
 
     def _computeReward(self) -> float:
         state = self._getDroneStateVector(0)
-        ret = 25 - 20 * self._target_error(state)
+        ret = 0.25 - 0.2 * self._target_error(state)
         return ret
 
     def _computeTerminated(self) -> bool:

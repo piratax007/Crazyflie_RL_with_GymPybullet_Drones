@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 import argparse
 from environments.ejc_cl_stage1 import EjcCLStage1
-from environments.ejc_cl_stage1_ctrl_freq_100 import EjcCLStage1CtrlFreq100
-from environments.ejc_cl_stage1_ctrl_freq_200 import EjcCLStage1CtrlFreq200
 from environments.ejc_cl_stage2 import EjcCLStage2
 from environments.ejc_cl_stage3 import EjcCLStage3
 from environments.basic_reward import BasicReward
-from environments.basic_reward_stage2 import BasicRewardStage2
 from environments.exploration_reward_contribution import ExplorationRewardContribution
 from environments.stability_reward_contribution import StabilityRewardContribution
-from environments.navigation_reward_contribution import NavigationRewardContribution
 from environments.ejc_cl_stage1_scaled_reward import EjcCLStage1ScaledReward
 from environments.ejc_cl_stage2_scaled_reward import EjcCLStage2ScaledReward
 from environments.ejc_cl_stage3_scaled_reward import EjcCLStage3ScaledReward
@@ -26,13 +22,9 @@ if __name__ == '__main__':
             'EjcCLStage1',
             'EjcCLStage2',
             'EjcCLStage3',
-            'EjcCLStage1CtrlFreq100',
-            'EjcCLStage1CtrlFreq200',
             'BasicReward',
-            'BasicRewardStage2',
             'ExplorationRewardContribution',
             'StabilityRewardContribution',
-            'NavigationRewardContribution',
             'EjcCLStage1ScaledReward',
             'EjcCLStage2ScaledReward',
             'EjcCLStage3ScaledReward'
@@ -111,13 +103,9 @@ if __name__ == '__main__':
         'EjcCLStage1': EjcCLStage1,
         'EjcCLStage2': EjcCLStage2,
         'EjcCLStage3': EjcCLStage3,
-        'EjcCLStage1CtrlFreq100': EjcCLStage1CtrlFreq100,
-        'EjcCLStage1CtrlFreq200': EjcCLStage1CtrlFreq200,
         'BasicReward': BasicReward,
-        'BasicRewardStage2': BasicRewardStage2,
         'ExplorationRewardContribution': ExplorationRewardContribution,
         'StabilityRewardContribution': StabilityRewardContribution,
-        'NavigationRewardContribution': NavigationRewardContribution,
         'EjcCLStage1ScaledReward': EjcCLStage1ScaledReward,
         'EjcCLStage2ScaledReward': EjcCLStage2ScaledReward,
         'EjcCLStage3ScaledReward': EjcCLStage3ScaledReward
