@@ -4,6 +4,7 @@ from environments.ejc_cl_stage1 import EjcCLStage1
 from environments.ejc_cl_stage2 import EjcCLStage2
 from environments.ejc_cl_stage3 import EjcCLStage3
 from environments.basic_reward import BasicReward
+from environments.basic_reward_second_stage import BasicRewardSecondStage
 from environments.exploration_reward_contribution import ExplorationRewardContribution
 from environments.stability_reward_contribution import StabilityRewardContribution
 from environments.ejc_cl_stage1_scaled_reward import EjcCLStage1ScaledReward
@@ -23,6 +24,7 @@ if __name__ == '__main__':
             'EjcCLStage2',
             'EjcCLStage3',
             'BasicReward',
+            'BasicRewardSecondStage',
             'ExplorationRewardContribution',
             'StabilityRewardContribution',
             'EjcCLStage1ScaledReward',
@@ -104,6 +106,7 @@ if __name__ == '__main__':
         'EjcCLStage2': EjcCLStage2,
         'EjcCLStage3': EjcCLStage3,
         'BasicReward': BasicReward,
+        'BasicRewardSecondStage': BasicRewardSecondStage,
         'ExplorationRewardContribution': ExplorationRewardContribution,
         'StabilityRewardContribution': StabilityRewardContribution,
         'EjcCLStage1ScaledReward': EjcCLStage1ScaledReward,
