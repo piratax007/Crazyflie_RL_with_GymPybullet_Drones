@@ -15,12 +15,9 @@ class BasicRewardSecondStage(BasicReward):
             target_xyzs = np.array([0, 0, 1]),
             target_rpys = np.array([0, 0, 0]),
             physics: Physics = Physics.PYB_GND,
-            pybullet_frequency: int = 400,
             ctrl_freq: int = 200,
             gui = False,
             record = False,
-            observation_space: ObservationType = ObservationType.KIN,
-            action_space: ActionType = ActionType.RPM,
     ):
         self.INIT_XYZS = initial_xyzs
         self.TARGET_POSITION = target_xyzs
@@ -29,16 +26,12 @@ class BasicRewardSecondStage(BasicReward):
         self.LOG_ANGULAR_VELOCITY = np.zeros((1, 3))
         super().__init__(
             drone_model=drone_model,
-            num_drones=1,
             initial_xyzs=initial_xyzs,
             initial_rpys=initial_rpys,
             physics=physics,
-            pyb_freq=pybullet_frequency,
             ctrl_freq=ctrl_freq,
             gui=gui,
             record=record,
-            obs=observation_space,
-            act=action_space
         )
 
     def _target_error(self, state: np.ndarray) -> np.floating:
