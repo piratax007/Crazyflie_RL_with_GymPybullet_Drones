@@ -99,6 +99,34 @@ def smooth_trajectory(points, num_points=100):
     return x_tuple, y_tuple, z_tuple, yaw_tuple
 
 
+def random_cylindrical_positions(
+        inner_radius: float = 0.0,
+        outer_radius: float = 1.5,
+        cylinder_height: float = 1.5,
+        cylinder_center: tuple = (0, 0, 1),
+        mode: str = "inside",
+        min_distance: float = 0.0,
+        max_distance: float = 0.0
+) -> tuple:
+    cx, cy, cz = cylinder_center
+
+    if mode == "inside":
+        r = np.sqrt(np.random.uniform(inner_radius ** 2, outer_radius ** 2))
+    elif mode == "outside":
+        r = np.sqrt(np.random.uniform((outer_radius + min_distance) ** 2, (outer_radius + max_distance) ** 2))
+    else:
+        r = 0
+
+    theta = np.random.uniform(0, 2 * np.pi)
+    z = np.random.uniform(-cylinder_height / 2, cylinder_height / 2 + max_distance)
+
+    x = cx + r * np.cos(theta)
+    y = cy + r * np.sin(theta)
+    z = cz + z
+
+    return x, y, z
+
+
 def run_simulation(
         test_env,
         policy_path,
@@ -114,9 +142,17 @@ def run_simulation(
     policy = get_policy(policy_path, model)
 
     test_env = test_env(
-        initial_xyzs=np.array([[-1, 0, 0]]),
-        initial_rpys=np.array([[0.0, 0.0, 0.5]]),
-        target_rpys=np.array([0.0, 0.0, 0.0]),
+        initial_xyzs=np.array([[0.0, 0.0, 0.0]]),
+        initial_rpys=np.array([[0.0, 0.0, 0.0]]),
+        # initial_xyzs=np.array([[1, 2, 0.5]]),
+        # initial_rpys=np.array([[0.15, 0.1, 0.85]]),
+        # target_rpys=np.array([0.0, 0.0, 0.0]),
+        # initial_xyzs = np.array([[*random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]]),
+        # initial_rpys = np.array([[
+        #         np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
+        #         np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
+        #         np.random.uniform(-3.14, 3.14 + 1e-10, 1)[0]
+        #     ]]),
         gui=gui,
         observation_space=ObservationType('kin'),
         action_space=ActionType('rpm'),
@@ -138,10 +174,36 @@ def run_simulation(
     # x_target, y_target, z_target, yaw_target = spiral_trajectory(simulation_length, 2)
 
     for i in range(simulation_length):
-        obs[0][0] += 0.025
-        obs[0][1] -= 0.023
-        # obs[0][2] -= z_target[i]
-#         obs[0][5] -= 0.37
+        # obs[0][0] += 0.025
+        # obs[0][1] -= 0.023
+        # obs[0][2] -= 0.05
+        # obs[0][5] -= 0.05
+        # if i < 20 * test_env.CTRL_FREQ:
+        #     obs[0][0] += 1
+        #     obs[0][1] -= 1
+        #     obs[0][2] += 0
+        #     obs[0][5] += 0.52
+        # elif 20 * test_env.CTRL_FREQ < i < 40 * test_env.CTRL_FREQ:
+        #     obs[0][0] += 2
+        #     obs[0][1] -= 0
+        #     obs[0][2] -= 0.5
+        #     obs[0][5] += 0.0
+        # elif 40 * test_env.CTRL_FREQ < i < 60 * test_env.CTRL_FREQ:
+        #     obs[0][0] += 2
+        #     obs[0][1] += 2
+        #     obs[0][2] -= 1.5
+        #     obs[0][5] -= 0.35
+        # elif 60 * test_env.CTRL_FREQ < i < 80 * test_env.CTRL_FREQ:
+        #     obs[0][0] += 1
+        #     obs[0][1] += 3
+        #     obs[0][2] -= 0
+        #     obs[0][5] -= 0.69
+        # elif 80 * test_env.CTRL_FREQ < i:
+        #     obs[0][0] += 3
+        #     obs[0][1] += 3.5
+        #     obs[0][2] -= 1
+        #     obs[0][5] += 0
+
 
         action, _states = policy.predict(obs,
                                          deterministic=True
@@ -193,6 +255,7 @@ def run_simulation(
 
     if plot:
         logger.plot_position_and_orientation()
+        logger.plot_instantaneous_reward()
         # logger.plot()
         # logger.plot_rpms()
         # logger.plot_trajectory()

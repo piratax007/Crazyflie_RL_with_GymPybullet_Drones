@@ -44,8 +44,8 @@ def run(
         plot=False,
         user_debug_gui=False,
         obstacles=False,
-        simulation_freq_hz=240,
-        control_freq_hz=240,
+        simulation_freq_hz=400,
+        control_freq_hz=200,
         duration_sec=10,
         output_folder='results',
         colab=False,
@@ -53,12 +53,14 @@ def run(
         comment=""
         ):
 
-    INIT_XYZS = np.array([[*_random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]])
-    INIT_RPYS = np.array([[
-        np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
-        np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
-        np.random.uniform(-1.57, 1.57 + 1e-10, 1)[0]
-    ]])
+    # INIT_XYZS = np.array([[*_random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]])
+    # INIT_RPYS = np.array([[
+    #     np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
+    #     np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
+    #     np.random.uniform(-1.57, 1.57 + 1e-10, 1)[0]
+    # ]])
+    INIT_XYZS = np.array([[-1, 1, 0]])
+    INIT_RPYS = np.array([[0, 0, 0.78]])
     target_pos = np.array([0.0, 0.0, 1.0])
     target_rpy = np.array([0.0, 0.0, 0.0])
 
@@ -86,9 +88,35 @@ def run(
 
     action = np.zeros((num_drones,4))
     START = time.time()
-
     for i in range(int(duration_sec * env.CTRL_FREQ)):
         obs, reward, terminated, truncated, info = env.step(action)
+
+        if i < 20 *  env.CTRL_FREQ:
+            target_pos[0] = -1
+            target_pos[1] = 1
+            target_pos[2] = 1
+            target_rpy[2] = -0.52
+        elif 20 *  env.CTRL_FREQ < i < 40 *  env.CTRL_FREQ:
+            target_pos[0] = -2
+            target_pos[1] = 0
+            target_pos[2] = 1.5
+            target_rpy[2] = 0.0
+        elif 40 *  env.CTRL_FREQ < i < 60 *  env.CTRL_FREQ:
+            target_pos[0] = -2
+            target_pos[1] = -2
+            target_pos[2] = 2.5
+            target_rpy[2] = 0.35
+        elif 60 *  env.CTRL_FREQ < i < 80 *  env.CTRL_FREQ:
+            target_pos[0] = -1
+            target_pos[1] = -3
+            target_pos[2] = 1
+            target_rpy[2] = 0.69
+        elif 80 *  env.CTRL_FREQ < i:
+            target_pos[0] = -3
+            target_pos[1] = -3.5
+            target_pos[2] = 2
+            target_rpy[2] = 0
+
         for j in range(num_drones):
             action[j, :], _, _ = ctrl[j].computeControlFromState(
                 control_timestep=env.CTRL_TIMESTEP,
@@ -126,7 +154,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '--duration_sec',
-        default=10,
+        default=100,
         type=int,
         help='Duration of the simulation in seconds (default: 5)',
         metavar=''

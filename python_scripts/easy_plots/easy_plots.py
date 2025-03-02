@@ -148,9 +148,9 @@ def _traces_from_csv(
 
     # axis.legend()
     # 2D
-    axis.legend(bbox_to_anchor=(0, 1, 1, 0.25), loc="lower right", borderaxespad=0.5, ncol=3)
+    axis.legend(bbox_to_anchor=(0, 1, 1, 0.25), loc="lower right", borderaxespad=0.5, ncol=4)
     # 3D
-    # axis.legend(bbox_to_anchor=(0, 0.8, 1, 0.75), loc="lower left", borderaxespad=0, ncol=4)
+    # axis.legend(bbox_to_anchor=(0, 0.85, 1, 0.75), loc="lower left", borderaxespad=0, ncol=4)
 
 
 def _parse_settings(settings: dict) -> dict:
@@ -183,8 +183,9 @@ def _set_axis(axis: plt.Axes, settings: dict) -> None:
         pass
 
     axis.set_title(parsed_settings['labels']['title'])
-    axis.ticklabel_format(axis='y', style=parsed_settings['axes_format'], scilimits=(0, 0))
+    axis.ticklabel_format(axis='both', style=parsed_settings['axes_format'], scilimits=(0, 0))
     axis.set_aspect(parsed_settings['axes_aspect'])
+    # axis.set_box_aspect([6,9,4])
 
 
 def _add_vertical_lines(axes: plt.Axes, x_positions: list, y_min: float = 0, y_max: float = 1, label: str = '') -> None:
@@ -229,9 +230,8 @@ def single_axis_2d(files: list, labels: list, references: dict, colors: dict, se
     # _add_vertical_lines(axis, x_positions=[6000000, 6200000, 7000000, 17950000], y_min=0.0, y_max=1.0, label='Training stopped')
     # _add_vertical_lines(axis, x_positions=[17950000], y_min=0.0, y_max=1.0)
     #  TRANSFERENCE KNOWLEDGE
-    add_double_arrow_with_label_2d(axis, (73, 35), (146, 35), 'Time to Threshold', label_position=(75.4, 35.5), vertical_offset=2.7)
-    add_double_arrow_with_label_2d(axis, (588, 36.86), (588, 42.4), 'Asymptotic Performance', label_position=(375, 39), vertical_offset=-1)
-
+    # add_double_arrow_with_label_2d(axis, (73, 35), (146, 35), 'Time to Threshold', label_position=(75.4, 35.5), vertical_offset=2.7)
+    # add_double_arrow_with_label_2d(axis, (588, 36.86), (588, 42.4), 'Asymptotic Performance', label_position=(375, 39), vertical_offset=-1)
     plt.show()
 
 
@@ -281,18 +281,18 @@ def single_axis_3d(
             callback(axis)
 
     # WAY POINT TRACKER
-    # axis.text(-1, 0.5, 0, '$P_0$', color='black', fontsize=20)
-    # axis.text(-1.25, 1, 1.25, '$P_1$', color='black', fontsize=20)
-    # axis.text(-2.25, 0, 1.75, '$P_2$', color='black', fontsize=20)
-    # axis.text(-2.25, -2, 2.75, '$P_3$', color='black', fontsize=20)
-    # axis.text(-1.25, -3, 1.25, '$P_4$', color='black', fontsize=20)
-    # axis.text(-3.05, -3.8, 2.25, '$P_5$', color='black', fontsize=20)
-    # add_cylinder(axis, center=(-1, 1, 1), alpha=0.09)
-    # add_cylinder(axis, center=(-2, 0, 1.5), color='red', alpha=0.09)
-    # add_cylinder(axis, center=(-2, -2, 2.5), color='green', alpha=0.09)
-    # add_cylinder(axis, center=(-1, -3, 1), color='orange', alpha=0.09),
-    # add_cylinder(axis, center=(-2.8, -3.8, 2), color='gray', alpha=0.09)
-    # add_inertial_frame((-5, -6, 0), axis)
+    axis.text(-1, 0.5, 0, '$P_0$', color='black', fontsize=20)
+    axis.text(-1.25, 1, 1.25, '$P_1$', color='black', fontsize=20)
+    axis.text(-2.25, 0, 1.75, '$P_2$', color='black', fontsize=20)
+    axis.text(-2.25, -2, 2.75, '$P_3$', color='black', fontsize=20)
+    axis.text(-1.25, -3, 1.25, '$P_4$', color='black', fontsize=20)
+    axis.text(-3.05, -3.8, 2.25, '$P_5$', color='black', fontsize=20)
+    add_cylinder(axis, center=(-1, 1, 1), alpha=0.09)
+    add_cylinder(axis, center=(-2, 0, 1.5), color='red', alpha=0.09)
+    add_cylinder(axis, center=(-2, -2, 2.5), color='green', alpha=0.09)
+    add_cylinder(axis, center=(-1, -3, 1), color='orange', alpha=0.09),
+    add_cylinder(axis, center=(-2.8, -3.5, 2), color='gray', alpha=0.09)
+    add_inertial_frame((-5, -6, 0), axis)
 
     # TRAJECTORY TRACKING
     # add_inertial_frame((-2, -2, 0), axis)
@@ -355,8 +355,8 @@ def single_axis_3d(
     # add_cylinder(axis, radius=2, height=2, center=(0, 0, 1))
 
     # SUB-TASKS COMPARISON
-    # add_inertial_frame((-1, -4, 0), axis)
-    # axis.scatter(2, 1, 0.5, color='black', s=100, marker='o')
+    # add_inertial_frame((-1, -0.5, 0), axis)
+    # axis.scatter(1, 2, 0.5, color='black', s=100, marker='o')
     # axis.scatter(0, 0, 1, color='black', s=150, marker='x')
 
     _set_axis(axis, settings)
@@ -532,9 +532,9 @@ def add_body_frame(positions: tuple, attitudes: tuple, axes: plt.Axes) -> None:
         body_frame_y = rotation_matrix[i] @ np.array([0, 1, 0])
         body_frame_z = rotation_matrix[i] @ np.array([0, 0, 1])
 
-        axes.quiver(*origin, *body_frame_x, color='red', length=0.25, normalize=True)
-        axes.quiver(*origin, *body_frame_y, color='green', length=0.25, normalize=True)
-        axes.quiver(*origin, *body_frame_z, color='blue', length=0.25, normalize=True)
+        axes.quiver(*origin, *body_frame_x, color='red', length=0.1, normalize=True)
+        axes.quiver(*origin, *body_frame_y, color='green', length=0.1, normalize=True)
+        axes.quiver(*origin, *body_frame_z, color='blue', length=0.1, normalize=True)
 
 
 def add_cylinder(
@@ -616,9 +616,9 @@ def add_inertial_frame(position: tuple, axes: plt.Axes, label_offset: tuple = (0
     inertial_frame_y = rotation_matrix @ np.array([0, 1, 0])
     inertial_frame_z = rotation_matrix @ np.array([0, 0, 1])
 
-    axes.quiver(*origin, *inertial_frame_x, color='red', length=0.35, normalize=True)
-    axes.quiver(*origin, *inertial_frame_y, color='green', length=0.35, normalize=True)
-    axes.quiver(*origin, *inertial_frame_z, color='blue', length=0.35, normalize=True)
+    axes.quiver(*origin, *inertial_frame_x, color='red', length=0.5, normalize=True)
+    axes.quiver(*origin, *inertial_frame_y, color='green', length=0.5, normalize=True)
+    axes.quiver(*origin, *inertial_frame_z, color='blue', length=0.5, normalize=True)
 
     axes.text(
         position[0] + label_offset[0],

@@ -79,18 +79,18 @@ class EjcCLStage2ScaledReward(EjcCLStage1ScaledReward):
 
         return x, y, z
 
-    def reset(
-            self,
-            seed: int = None,
-            option: dict = None,
-    ):
-        p.resetSimulation(physicsClientId=self.CLIENT)
-        self._housekeeping()
-        self._updateAndStoreKinematicInformation()
-        self.INIT_XYZS = np.array(
-            [[*self._random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]])
-        p.resetBasePositionAndOrientation(self.DRONE_IDS[0], self.INIT_XYZS[0],
-                                          p.getQuaternionFromEuler(self.INIT_RPYS[0]))
-        initial_obs = self._computeObs()
-        initial_info = self._computeInfo()
-        return initial_obs, initial_info
+    # def reset(
+    #         self,
+    #         seed: int = None,
+    #         option: dict = None,
+    # ):
+    #     p.resetSimulation(physicsClientId=self.CLIENT)
+    #     self._housekeeping()
+    #     self._updateAndStoreKinematicInformation()
+    #     self.INIT_XYZS = np.array(
+    #         [[*self._random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]])
+    #     p.resetBasePositionAndOrientation(self.DRONE_IDS[0], self.INIT_XYZS[0],
+    #                                       p.getQuaternionFromEuler(self.INIT_RPYS[0]))
+    #     initial_obs = self._computeObs()
+    #     initial_info = self._computeInfo()
+    #     return initial_obs, initial_info
