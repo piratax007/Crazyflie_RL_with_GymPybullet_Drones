@@ -5,7 +5,7 @@ from gym_pybullet_drones.envs.BaseRLAviary import BaseRLAviary
 from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, ObservationType
 
 
-class EjcCLStage1ScaledReward(BaseRLAviary):
+class StabilityRewardOut(BaseRLAviary):
     def __init__(
             self,
             drone_model: DroneModel = DroneModel.CF2X,

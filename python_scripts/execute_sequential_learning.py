@@ -7,6 +7,9 @@ from environments.basic_reward import BasicReward
 from environments.basic_reward_second_stage import BasicRewardSecondStage
 from environments.exploration_reward_contribution import ExplorationRewardContribution
 from environments.stability_reward_contribution import StabilityRewardContribution
+from environments.exploration_reward_out import ExplorationRewardOut
+from environments.stability_reward_out import StabilityRewardOut
+from environments.navigation_reward_out import NavigationRewardOut
 from environments.ejc_cl_stage1_scaled_reward import EjcCLStage1ScaledReward
 from environments.ejc_cl_stage2_scaled_reward import EjcCLStage2ScaledReward
 from environments.ejc_cl_stage3_scaled_reward import EjcCLStage3ScaledReward
@@ -24,6 +27,9 @@ if __name__ == '__main__':
             'EjcCLStage2',
             'EjcCLStage3',
             'BasicReward',
+            'ExplorationRewardOut',
+            'StabilityRewardOut',
+            'NavigationRewardOut',
             'BasicRewardSecondStage',
             'ExplorationRewardContribution',
             'StabilityRewardContribution',
@@ -106,6 +112,9 @@ if __name__ == '__main__':
         'EjcCLStage2': EjcCLStage2,
         'EjcCLStage3': EjcCLStage3,
         'BasicReward': BasicReward,
+        'ExplorationRewardOut': ExplorationRewardOut,
+        'StabilityRewardOut': StabilityRewardOut,
+        'NavigationRewardOut': NavigationRewardOut,
         'BasicRewardSecondStage': BasicRewardSecondStage,
         'ExplorationRewardContribution': ExplorationRewardContribution,
         'StabilityRewardContribution': StabilityRewardContribution,
