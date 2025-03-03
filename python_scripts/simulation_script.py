@@ -142,17 +142,17 @@ def run_simulation(
     policy = get_policy(policy_path, model)
 
     test_env = test_env(
-        initial_xyzs=np.array([[0.0, 0.0, 0.0]]),
-        initial_rpys=np.array([[0.0, 0.0, 0.0]]),
+        # initial_xyzs=np.array([[0.0, 0.0, 0.0]]),
+        # initial_rpys=np.array([[0.0, 0.0, 0.0]]),
         # initial_xyzs=np.array([[1, 2, 0.5]]),
         # initial_rpys=np.array([[0.15, 0.1, 0.85]]),
         # target_rpys=np.array([0.0, 0.0, 0.0]),
-        # initial_xyzs = np.array([[*random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]]),
-        # initial_rpys = np.array([[
-        #         np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
-        #         np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
-        #         np.random.uniform(-3.14, 3.14 + 1e-10, 1)[0]
-        #     ]]),
+        initial_xyzs = np.array([[*random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]]),
+        initial_rpys = np.array([[
+                np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
+                np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
+                np.random.uniform(-3.14, 3.14 + 1e-10, 1)[0]
+            ]]),
         gui=gui,
         observation_space=ObservationType('kin'),
         action_space=ActionType('rpm'),
@@ -166,7 +166,7 @@ def run_simulation(
     )
 
     obs, info = test_env.reset()
-    simulation_length = (test_env.EPISODE_LENGTH_SECONDS + 15) * test_env.CTRL_FREQ
+    simulation_length = (test_env.EPISODE_LENGTH_SECONDS + 5) * test_env.CTRL_FREQ
 
     start = time.time()
 
@@ -174,8 +174,8 @@ def run_simulation(
     # x_target, y_target, z_target, yaw_target = spiral_trajectory(simulation_length, 2)
 
     for i in range(simulation_length):
-        # obs[0][0] += 0.025
-        # obs[0][1] -= 0.023
+        obs[0][0] += 0.025
+        obs[0][1] -= 0.023
         # obs[0][2] -= 0.05
         # obs[0][5] -= 0.05
         # if i < 20 * test_env.CTRL_FREQ:
@@ -255,7 +255,7 @@ def run_simulation(
 
     if plot:
         logger.plot_position_and_orientation()
-        logger.plot_instantaneous_reward()
+        # logger.plot_instantaneous_reward()
         # logger.plot()
         # logger.plot_rpms()
         # logger.plot_trajectory()
