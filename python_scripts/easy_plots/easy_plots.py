@@ -488,7 +488,7 @@ def animation_3d(
         return [trace] + all_quivers
 
     anim = animation.FuncAnimation(figure, update, frames=len(x), interval=3, repeat=False)
-    anim.save(video_name + '.mp4', 'ffmpeg', fps=30, dpi=300)
+    anim.save(video_name + '.mp4', 'ffmpeg', fps=60, dpi=300)
 
 
 def euler_to_rotation_matrix(euler_angles: tuple) -> np.ndarray:
@@ -638,7 +638,9 @@ def compose_sources(parent_directory: str, common_name: str) -> list:
 
     for source in os.listdir(parent_directory):
         if common_name in source:
-            sources.append(source + '/')
+            sources.append(parent_directory + source + '/')
+        else:
+            print(f'SOMETHING WENT WRONG WITH THE COMMON NAME {source}/')
 
     sources.sort()
 
@@ -667,3 +669,33 @@ def calculate_statistics(rewards: pd.DataFrame):
     std_rewards = rewards.std(axis=0)
 
     return mean_rewards, std_rewards
+
+
+def get_starting_points(sources: list, csv_filename: str) -> list:
+    points = []
+
+    for source in sources:
+        csv_path = os.path.join(source, csv_filename)
+
+        if os.path.isfile(csv_path):
+            with open(csv_path, newline='') as csv_file:
+                reader = csv.reader(csv_file)
+                first_raw = next(reader, None)
+                if first_raw:
+                    points.append(tuple(float(coordinate) for coordinate in first_raw))
+
+    return points
+
+def add_body_frame(position: tuple, attitude: tuple, axes: plt.Axes) -> None:
+    rotation_matrix = euler_to_rotation_matrix(attitude)
+
+    origin = np.array(position)
+    rotated_vectors = rotation_matrix @ np.identity(3)
+
+    axes.quiver(*origin, *rotated_vectors[:, 0], color='red', length=0.25, normalize=True)
+    axes.quiver(*origin, *rotated_vectors[:, 1], color='green', length=0.25, normalize=True)
+    axes.quiver(*origin, *rotated_vectors[:, 2], color='blue', length=0.25, normalize=True)
+
+def add_linear_velocity_vector(body_frame_origin: tuple, velocities: tuple, axes: plt.Axes) -> None:
+    origin = np.array(body_frame_origin)
+    axes.quiver(*origin, *velocities, color='black', length=0.5, arrow_length_ratio=0.25, linestyle='solid', linewidth=1.5)
