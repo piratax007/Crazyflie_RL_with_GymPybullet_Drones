@@ -8,8 +8,11 @@ from environments.basic_reward_second_stage import BasicRewardSecondStage
 from environments.exploration_reward_contribution import ExplorationRewardContribution
 from environments.stability_reward_contribution import StabilityRewardContribution
 from environments.exploration_reward_out import ExplorationRewardOut
+from environments.exploration_reward_out_30hz import ExplorationRewardOut30Hz
 from environments.stability_reward_out import StabilityRewardOut
+from environments.stability_reward_out_30hz import StabilityRewardOut30Hz
 from environments.navigation_reward_out import NavigationRewardOut
+from environments.navigation_reward_out_30hz import NavigationRewardOut30Hz
 from environments.ejc_cl_stage1_scaled_reward import EjcCLStage1ScaledReward
 from environments.ejc_cl_stage2_scaled_reward import EjcCLStage2ScaledReward
 from environments.ejc_cl_stage3_scaled_reward import EjcCLStage3ScaledReward
@@ -30,6 +33,9 @@ if __name__ == '__main__':
             'ExplorationRewardOut',
             'StabilityRewardOut',
             'NavigationRewardOut',
+            'ExplorationRewardOut30Hz',
+            'StabilityRewardOut30Hz',
+            'NavigationRewardOut30Hz',
             'BasicRewardSecondStage',
             'ExplorationRewardContribution',
             'StabilityRewardContribution',
@@ -116,6 +122,9 @@ if __name__ == '__main__':
         'StabilityRewardOut': StabilityRewardOut,
         'NavigationRewardOut': NavigationRewardOut,
         'BasicRewardSecondStage': BasicRewardSecondStage,
+        'ExplorationRewardOut30Hz': ExplorationRewardOut30Hz,
+        'StabilityRewardOut30Hz': StabilityRewardOut30Hz,
+        'NavigationRewardOut30Hz': NavigationRewardOut30Hz,
         'ExplorationRewardContribution': ExplorationRewardContribution,
         'StabilityRewardContribution': StabilityRewardContribution,
         'EjcCLStage1ScaledReward': EjcCLStage1ScaledReward,
