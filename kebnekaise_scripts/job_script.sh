@@ -12,8 +12,8 @@ ml TensorFlow/2.15.1-CUDA-12.1.1
 cd ..
 echo "Training started at $(date)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'NavigationRewardOut' \
- --learning-id 'navigation-reward-out_39' \
---algorithm 'ppo' --parallel-environments 4 --seed 39 --time-steps 100000000 --continuous-learning False
+python3 -m python_scripts.execute_sequential_learning  --environment 'NavigationRewardOut30Hz' \
+ --learning-id 'navigation-reward-out_30hz_39' \
+--algorithm 'ppo' --parallel-environments 4 --seed 39 --time-steps 30000000 --continuous-learning False
 
 echo "Training finished at $(date)"
