@@ -5,7 +5,7 @@ import time
 import numpy as np
 from scipy.interpolate import splprep, splev
 from scipy.spatial.transform import Rotation as R
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, SAC, DDPG, TD3
 from environments.ObS12Stage1 import ObS12Stage1
 from environments.ObS12Stage2 import ObS12Stage2
 from environments.ObS12Stage3 import ObS12Stage3
@@ -28,9 +28,9 @@ def in_degrees(angles):
     return list(map(lambda angle: angle * 180 / np.pi, angles))
 
 
-def get_policy(policy_path, model):
+def get_policy(model_class, policy_path, model):
     if os.path.isfile(policy_path + '/' + model):
-        return PPO.load(policy_path + '/' + model)
+        return model_class.load(policy_path + '/' + model)
 
     raise Exception("[ERROR]: no model under the specified path", policy_path)
 
@@ -134,6 +134,7 @@ def random_cylindrical_positions(
 def run_simulation(
         test_env,
         policy_path,
+        algorithm='ppo',
         model='best_model.zip',
         gui=True,
         record_video=True,
@@ -143,10 +144,18 @@ def run_simulation(
         debug=False,
         comment=""
 ):
-    policy = get_policy(policy_path, model)
+
+    model_map = {
+        'ppo': PPO,
+        'sac': SAC,
+        'ddpg': DDPG,
+        'td3': TD3
+    }
+
+    policy = get_policy(model_map[algorithm], policy_path, model)
 
     test_env = test_env(
-        initial_xyzs=np.array([[-1.5, 1.5, 1.5]]),
+        initial_xyzs=np.array([[0.0, 0.0, 0.0]]),
         initial_rpys=np.array([[0.0, 0.0, 0.0]]),
         # initial_xyzs=np.array([[1, 2, 0.5]]),
         # initial_rpys=np.array([[0.15, 0.1, 0.85]]),
@@ -279,8 +288,13 @@ if __name__ == '__main__':
         help='The zip file containing the trained policy'
     )
     parser.add_argument(
+        '--algorithm',
+        default='ppo',
+        help='The algorithm used for training'
+    )
+    parser.add_argument(
         '--test_env',
-        default=StabilityRewardOutStage2,
+        default=EjcCLStage1,
         help='The name of the environment to learn, registered with gym_pybullet_drones'
     )
     parser.add_argument(
