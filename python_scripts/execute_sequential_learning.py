@@ -20,6 +20,8 @@ from environments.navigation_reward_out_30hz import NavigationRewardOut30Hz
 from environments.ejc_cl_stage1_scaled_reward import EjcCLStage1ScaledReward
 from environments.ejc_cl_stage2_scaled_reward import EjcCLStage2ScaledReward
 from environments.ejc_cl_stage3_scaled_reward import EjcCLStage3ScaledReward
+from environments.WithoutCurriculumLearning_30Hz import WithoutCurriculumLearning30Hz
+from environments.WithoutCurriculumLearning_200Hz import WithoutCurriculumLearning200Hz
 from python_scripts.learning_script import run_learning
 from gym_pybullet_drones.utils.utils import str2bool
 
@@ -49,7 +51,9 @@ if __name__ == '__main__':
             'StabilityRewardContribution',
             'EjcCLStage1ScaledReward',
             'EjcCLStage2ScaledReward',
-            'EjcCLStage3ScaledReward'
+            'EjcCLStage3ScaledReward',
+            'WithoutCurriculumLearning30Hz',
+            'WithoutCurriculumLearning200Hz',
         ],
         help='An imported environment'
     )
@@ -141,7 +145,9 @@ if __name__ == '__main__':
         'StabilityRewardContribution': StabilityRewardContribution,
         'EjcCLStage1ScaledReward': EjcCLStage1ScaledReward,
         'EjcCLStage2ScaledReward': EjcCLStage2ScaledReward,
-        'EjcCLStage3ScaledReward': EjcCLStage3ScaledReward
+        'EjcCLStage3ScaledReward': EjcCLStage3ScaledReward,
+        'WithoutCurriculumLearning30Hz': WithoutCurriculumLearning30Hz,
+        'WithoutCurriculumLearning200Hz': WithoutCurriculumLearning200Hz
     }
 
     environment_class = environment_map.get(args.environment)

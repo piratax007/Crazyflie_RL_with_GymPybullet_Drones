@@ -5,7 +5,7 @@ from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, Obs
 import pybullet as p
 
 
-class WithoutCurriculumLearning(BaseRLAviary):
+class WithoutCurriculumLearning200Hz(BaseRLAviary):
     """Single agent RL problem: hover at position."""
 
     ################################################################################
