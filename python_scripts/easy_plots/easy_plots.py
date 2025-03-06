@@ -400,7 +400,7 @@ def animate(data: dict, references: dict, settings: dict, colors: dict, video_na
     figure = plt.figure(figsize=(16, 9), dpi=720 / 16)
     axis = plt.gca()
     figure.subplots_adjust(left=0.13, right=0.87, top=0.85, bottom=0.15)
-    _set_axis(axis, **settings)
+    _set_axis(axis, settings)
     parsed_references = _parse_references(references)
 
     if parsed_references['show']:
