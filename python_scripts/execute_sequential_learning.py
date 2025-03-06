@@ -5,6 +5,8 @@ from environments.ejc_cl_stage2 import EjcCLStage2
 from environments.ejc_cl_stage3 import EjcCLStage3
 from environments.basic_reward import BasicReward
 from environments.basic_reward_second_stage import BasicRewardSecondStage
+from environments.target_reward_out_30hz_39 import TargetRewardOut30Hz
+from environments.target_reward_out_200hz_39 import TargetRewardOut200Hz
 from environments.exploration_reward_contribution import ExplorationRewardContribution
 from environments.stability_reward_contribution import StabilityRewardContribution
 from environments.exploration_reward_out import ExplorationRewardOut
@@ -32,6 +34,8 @@ if __name__ == '__main__':
             'EjcCLStage2',
             'EjcCLStage3',
             'BasicReward',
+            'TargetRewardOut30Hz',
+            'TargetRewardOut200Hz',
             'ExplorationRewardOut',
             'StabilityRewardOut',
             'StabilityRewardOutStage2',
@@ -122,6 +126,8 @@ if __name__ == '__main__':
         'EjcCLStage2': EjcCLStage2,
         'EjcCLStage3': EjcCLStage3,
         'BasicReward': BasicReward,
+        'TargetRewardOut30Hz': TargetRewardOut30Hz,
+        'TargetRewardOut200Hz': TargetRewardOut200Hz,
         'ExplorationRewardOut': ExplorationRewardOut,
         'StabilityRewardOut': StabilityRewardOut,
         'StabilityRewardOutStage2': StabilityRewardOutStage2,
