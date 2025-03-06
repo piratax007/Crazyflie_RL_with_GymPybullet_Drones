@@ -3,7 +3,7 @@
 import os
 from datetime import datetime
 import argparse
-from stable_baselines3 import PPO, SAC, DDPG
+from stable_baselines3 import PPO, SAC, DDPG, TD3
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnMaxEpisodes, StopTrainingOnRewardThreshold, CheckpointCallback
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
@@ -118,6 +118,12 @@ def run_learning(environment,
         ),
         'sac': (SAC, {}),
         'ddpg': (DDPG, {}),
+        'td3': (
+            TD3, {
+                'batch_size': 256,
+                'learning_rate': 10e-3,
+            }
+        )
     }
 
     try:
