@@ -106,7 +106,7 @@ def run_learning(environment,
                                           n_envs=parallel_environments
                                           )
 
-    mode_mapping = {
+    model_map = {
         'ppo': (
             PPO, {
                 'batch_size': 256,
@@ -127,7 +127,7 @@ def run_learning(environment,
     }
 
     try:
-        model_class, extra_args = mode_mapping[algorithm]
+        model_class, extra_args = model_map[algorithm]
     except KeyError:
         raise ValueError(f"{algorithm} is not supported.")
 
