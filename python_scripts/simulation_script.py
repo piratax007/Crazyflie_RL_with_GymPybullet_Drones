@@ -3,12 +3,14 @@ import argparse
 import os
 import time
 import numpy as np
+import pybullet as p
 from scipy.interpolate import splprep, splev
 from scipy.spatial.transform import Rotation as R
 from stable_baselines3 import PPO, SAC, DDPG, TD3
 from environments.ObS12Stage1 import ObS12Stage1
 from environments.ObS12Stage2 import ObS12Stage2
 from environments.ObS12Stage3 import ObS12Stage3
+from environments.basic_reward import BasicReward
 from environments.ejc_cl_stage1 import EjcCLStage1
 from environments.ejc_cl_stage2 import EjcCLStage2
 from environments.ejc_cl_stage3 import EjcCLStage3
@@ -17,8 +19,13 @@ from environments.ejc_cl_stage2_scaled_reward import EjcCLStage2ScaledReward
 from environments.ejc_cl_stage3_scaled_reward import EjcCLStage3ScaledReward
 from environments.exploration_reward_out_30hz import ExplorationRewardOut30Hz
 from environments.exploration_reward_out import ExplorationRewardOut
+from environments.stability_reward_out_30hz import StabilityRewardOut30Hz
 from environments.stability_reward_out_30hz_stage_2 import StabilityRewardOut30HzStage2
+from environments.stability_reward_out import StabilityRewardOut
 from environments.stability_reward_out_stage2_39 import StabilityRewardOutStage2
+from environments.target_reward_out_30hz_39 import TargetRewardOut30Hz
+from environments.target_reward_out_200hz_39 import TargetRewardOut200Hz
+from environments.WithoutCurriculumLearning_200Hz import WithoutCurriculumLearning200Hz
 from gym_pybullet_drones.utils.Logger import Logger
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 from gym_pybullet_drones.utils.utils import sync, str2bool
@@ -131,6 +138,21 @@ def random_cylindrical_positions(
     return x, y, z
 
 
+def add_way_point(position, radius=0.1, color=(1, 0, 0, 0.5)):
+    sphere_visual = p.createVisualShape(
+        shapeType=p.GEOM_SPHERE,
+        radius=radius,
+        rgbaColor=color,
+    )
+    sphere_id = p.createMultiBody(
+        baseMass=0,
+        baseCollisionShapeIndex=-1,
+        baseVisualShapeIndex=sphere_visual,
+        basePosition=position,
+    )
+    return sphere_id
+
+
 def run_simulation(
         test_env,
         policy_path,
@@ -155,10 +177,10 @@ def run_simulation(
     policy = get_policy(model_map[algorithm], policy_path, model)
 
     test_env = test_env(
-        initial_xyzs=np.array([[0.0, 0.0, 0.0]]),
+        initial_xyzs=np.array([[2.0, -2.0, 1.5]]),
         initial_rpys=np.array([[0.0, 0.0, 0.0]]),
-        # initial_xyzs=np.array([[1, 2, 0.5]]),
-        # initial_rpys=np.array([[0.15, 0.1, 0.85]]),
+        # initial_xyzs=np.array([[-1, 1, 0]]),
+        # initial_rpys=np.array([[0.0, 0.0, 0.78]]),
         # target_rpys=np.array([0.0, 0.0, 0.0]),
         # initial_xyzs = np.array([[*random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]]),
         # initial_rpys = np.array([[
@@ -183,6 +205,17 @@ def run_simulation(
 
     start = time.time()
 
+    # p.resetDebugVisualizerCamera(1, 125, -10, [1, 1, 1])
+    # p.resetDebugVisualizerCamera(1, 0, -90, [-2, -1.5, 3])
+    # _ = {
+    #     0: add_way_point((-1, 1, 0), radius=0.025),
+    #     1: add_way_point((-1, 1, 1), radius=0.025),
+    #     2: add_way_point((-2, 0, 1.5), radius=0.025),
+    #     3: add_way_point((-2, -2, 2.5), radius=0.025),
+    #     4: add_way_point((-1, -3, 1), radius=0.025),
+    #     5: add_way_point((-3, -3.5, 2), radius=0.025),
+    # }
+
     # x_target, y_target, z_target, yaw_target = spiral_trajectory(simulation_length, 2)
     # x_target, y_target, z_target, yaw_target = spiral_trajectory(simulation_length, 2)
 
@@ -190,7 +223,9 @@ def run_simulation(
         # obs[0][0] += 0.025
         # obs[0][1] -= 0.023
         # obs[0][2] -= 0.05
-        # obs[0][5] -= 0.05
+        # if i > 6 * test_env.CTRL_FREQ:
+        #     obs[0][2] -= (0.05+0.001*i/test_env.CTRL_FREQ)*np.sin(5*i/test_env.CTRL_FREQ)
+        # obs[0][5] -= 0.7
         # if i < 20 * test_env.CTRL_FREQ:
         #     obs[0][0] += 1
         #     obs[0][1] -= 1
@@ -294,7 +329,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--test_env',
-        default=EjcCLStage1,
+        default=StabilityRewardOutStage2,
         help='The name of the environment to learn, registered with gym_pybullet_drones'
     )
     parser.add_argument(

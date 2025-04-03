@@ -37,7 +37,7 @@ class PIDControl(BaseControl):
         self.I_COEFF_FOR = np.array([0.005, 0.005, 0.2])
         self.D_COEFF_FOR = np.array([0.23, 0.23, 0.5])
         self.P_COEFF_TOR = np.array([70000., 70000., 60000.])
-        self.I_COEFF_TOR = np.array([.0, .0, 500.])
+        self.I_COEFF_TOR = np.array([0.0, 0.0, 0.0])
         self.D_COEFF_TOR = np.array([20000., 20000., 12000.])
         self.PWM2RPM_SCALE = 0.2685
         self.PWM2RPM_CONST = 4070.3
@@ -202,7 +202,8 @@ class PIDControl(BaseControl):
         target_rotation = (np.vstack([target_x_ax, target_y_ax, target_z_ax])).transpose()
         #### Target rotation #######################################
         target_euler = (Rotation.from_matrix(target_rotation)).as_euler('XYZ', degrees=False)
-        target_euler = np.clip(target_euler, -0.43, 0.43)
+        target_euler[0] = np.clip(target_euler[0], -0.43, 0.43)
+        target_euler[1] = np.clip(target_euler[1], -0.43, 0.43)
         if np.any(np.abs(target_euler) > math.pi):
             print("\n[ERROR] ctrl it", self.control_counter, "in Control._dslPIDPositionControl(), values outside range [-pi,pi]")
         return thrust, target_euler, pos_e

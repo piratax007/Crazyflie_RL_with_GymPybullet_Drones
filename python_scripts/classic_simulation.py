@@ -1,7 +1,7 @@
 import time
 import argparse
 import numpy as np
-
+import pybullet as p
 from gym_pybullet_drones.utils.enums import DroneModel, Physics
 from gym_pybullet_drones.envs.CtrlAviary import CtrlAviary
 from python_scripts.PIDControl import PIDControl
@@ -54,16 +54,16 @@ def run(
         comment=""
         ):
 
-    INIT_XYZS = np.array([[0, 0, 0]])
-    INIT_RPYS = np.array([[0, 0, 0]])
+    # INIT_XYZS = np.array([[0, 0, 0]])
+    # INIT_RPYS = np.array([[0, 0, 0]])
     # INIT_XYZS = np.array([[*_random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]])
     # INIT_RPYS = np.array([[
     #     np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
     #     np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
     #     np.random.uniform(-1.57, 1.57 + 1e-10, 1)[0]
     # ]])
-    # INIT_XYZS = np.array([[-1, 1, 0]])
-    # INIT_RPYS = np.array([[0, 0, 0.78]])
+    INIT_XYZS = np.array([[-1, 1, 0]])
+    INIT_RPYS = np.array([[0, 0, 0.78]])
     target_pos = np.array([0.0, 0.0, 1.0])
     target_rpy = np.array([0.0, 0.0, 0.0])
 
@@ -87,38 +87,40 @@ def run(
                     colab=colab
                     )
 
-    ctrl = [LeeControl(drone_model=drone) for _ in range(num_drones)]
+    ctrl = [PIDControl(drone_model=drone) for _ in range(num_drones)]
+
+    p.resetDebugVisualizerCamera(1, 125, -10, [1, 1, 1])
 
     action = np.zeros((num_drones,4))
     START = time.time()
     for i in range(int(duration_sec * env.CTRL_FREQ)):
         obs, reward, terminated, truncated, info = env.step(action)
 
-        # if i < 20 *  env.CTRL_FREQ:
-        #     target_pos[0] = -1
-        #     target_pos[1] = 1
-        #     target_pos[2] = 1
-        #     target_rpy[2] = -0.52
-        # elif 20 *  env.CTRL_FREQ < i < 40 *  env.CTRL_FREQ:
-        #     target_pos[0] = -2
-        #     target_pos[1] = 0
-        #     target_pos[2] = 1.5
-        #     target_rpy[2] = 0.0
-        # elif 40 *  env.CTRL_FREQ < i < 60 *  env.CTRL_FREQ:
-        #     target_pos[0] = -2
-        #     target_pos[1] = -2
-        #     target_pos[2] = 2.5
-        #     target_rpy[2] = 0.35
-        # elif 60 *  env.CTRL_FREQ < i < 80 *  env.CTRL_FREQ:
-        #     target_pos[0] = -1
-        #     target_pos[1] = -3
-        #     target_pos[2] = 1
-        #     target_rpy[2] = 0.69
-        # elif 80 *  env.CTRL_FREQ < i:
-        #     target_pos[0] = -3
-        #     target_pos[1] = -3.5
-        #     target_pos[2] = 2
-        #     target_rpy[2] = 0
+        if i < 20 *  env.CTRL_FREQ:
+            target_pos[0] = -1
+            target_pos[1] = 1
+            target_pos[2] = 1
+            target_rpy[2] = -0.52
+        elif 20 *  env.CTRL_FREQ < i < 40 *  env.CTRL_FREQ:
+            target_pos[0] = -2
+            target_pos[1] = 0
+            target_pos[2] = 1.5
+            target_rpy[2] = 0.0
+        elif 40 *  env.CTRL_FREQ < i < 60 *  env.CTRL_FREQ:
+            target_pos[0] = -2
+            target_pos[1] = -2
+            target_pos[2] = 2.5
+            target_rpy[2] = 0.35
+        elif 60 *  env.CTRL_FREQ < i < 80 *  env.CTRL_FREQ:
+            target_pos[0] = -1
+            target_pos[1] = -3
+            target_pos[2] = 1
+            target_rpy[2] = 0.78
+        elif 80 *  env.CTRL_FREQ < i:
+            target_pos[0] = -3
+            target_pos[1] = -3.5
+            target_pos[2] = 2
+            target_rpy[2] = 0
 
         for j in range(num_drones):
             action[j, :], _, _ = ctrl[j].computeControlFromState(
