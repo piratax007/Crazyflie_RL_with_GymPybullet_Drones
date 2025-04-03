@@ -5,10 +5,6 @@ from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, Obs
 
 
 class CLStage1Sim2Real(BaseRLAviary):
-    """Single agent RL problem: hover at position."""
-
-    ################################################################################
-
     def __init__(self,
                  drone_model: DroneModel = DroneModel.CF2X,
                  initial_xyzs=np.array([[0, 0, 0]]),
@@ -75,14 +71,6 @@ class CLStage1Sim2Real(BaseRLAviary):
         return differences
 
     def _computeReward(self):
-        """Computes the current reward value.
-
-        Returns
-        -------
-        float
-            The reward.
-
-        """
         state = self._getDroneStateVector(0)
         we_differences = self._get_we_differences(state)
         ret = (0.25 - 0.20 * self._target_error(state) -
@@ -94,14 +82,6 @@ class CLStage1Sim2Real(BaseRLAviary):
     ################################################################################
 
     def _computeTerminated(self):
-        """Computes the current done value.
-
-        Returns
-        -------
-        bool
-            Whether the current episode is done.
-
-        """
         state = self._getDroneStateVector(0)
         if np.linalg.norm(self.TARGET_POS - state[0:3]) < .02 and state[7] ** 2 + state[8] ** 2 < 0.001:
             return True
@@ -111,14 +91,6 @@ class CLStage1Sim2Real(BaseRLAviary):
     ################################################################################
 
     def _computeTruncated(self):
-        """Computes the current truncated value.
-
-        Returns
-        -------
-        bool
-            Whether the current episode timed out.
-
-        """
         state = self._getDroneStateVector(0)
         if (np.linalg.norm(state[0:2] - self.TARGET_POS[0:2]) >
                 np.linalg.norm(self.INIT_XYZS[0][0:2] - self.TARGET_POS[0:2]) + .05 or
@@ -134,16 +106,6 @@ class CLStage1Sim2Real(BaseRLAviary):
     ################################################################################
 
     def _computeInfo(self):
-        """Computes the current info dict(s).
-
-        Unused.
-
-        Returns
-        -------
-        dict[str, int]
-            Dummy value.
-
-        """
         return {"answer": 42}  # Calculated by the Deep Thought supercomputer in 7.5M years
 
     ################################################################################
