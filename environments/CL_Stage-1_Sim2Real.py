@@ -4,7 +4,7 @@ from gym_pybullet_drones.envs.BaseRLAviary import BaseRLAviary
 from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, ObservationType
 
 
-class HoverCrazyflieSim2Real(BaseRLAviary):
+class CLStage1Sim2Real(BaseRLAviary):
     """Single agent RL problem: hover at position."""
 
     ################################################################################
@@ -19,37 +19,9 @@ class HoverCrazyflieSim2Real(BaseRLAviary):
                  ctrl_freq: int = 200,
                  gui=False,
                  record=False,
-                 obs: ObservationType = ObservationType.KIN,
-                 act: ActionType = ActionType.RPM
+                 observation_space: ObservationType = ObservationType.KIN,
+                 action_space: ActionType = ActionType.RPM
                  ):
-        """Initialization of a single agent RL environment.
-
-        Using the generic single agent RL superclass.
-
-        Parameters
-        ----------
-        drone_model : DroneModel, optional
-            The desired drone type (detailed in an .urdf file in folder `assets`).
-        initial_xyzs: ndarray | None, optional
-            (NUM_DRONES, 3)-shaped array containing the initial XYZ position of the drones.
-        initial_rpys: ndarray | None, optional
-            (NUM_DRONES, 3)-shaped array containing the initial orientations of the drones (in radians).
-        physics : Physics, optional
-            The desired implementation of PyBullet physics/custom dynamics.
-        pyb_freq : int, optional
-            The frequency at which PyBullet steps (a multiple of ctrl_freq).
-        ctrl_freq : int, optional
-            The frequency at which the environment steps.
-        gui : bool, optional
-            Whether to use PyBullet's GUI.
-        record : bool, optional
-            Whether to save a video of the simulation.
-        obs : ObservationType, optional
-            The type of observation space (kinematic information or vision)
-        act : ActionType, optional
-            The type of action space (1 or 3D; RPMS, thurst and torques, or waypoint with PID control)
-
-        """
         self.INIT_XYZS = initial_xyzs
         self.TARGET_POS = target_xyzs
         self.EPISODE_LEN_SEC = 5
@@ -64,8 +36,8 @@ class HoverCrazyflieSim2Real(BaseRLAviary):
                          ctrl_freq=ctrl_freq,
                          gui=gui,
                          record=record,
-                         obs=obs,
-                         act=act
+                         obs=observation_space,
+                         act=action_space
                          )
 
     ################################################################################
@@ -82,7 +54,7 @@ class HoverCrazyflieSim2Real(BaseRLAviary):
         return np.linalg.norm(state[0:3] - self.TARGET_POS[0:3]) < 0.025
 
     def _performance(self, state):
-        if self._is_closed(state) and state[7]**2 + state[8]**2 < 0.001:
+        if self._is_closed(state) and state[7] ** 2 + state[8] ** 2 < 0.001:
             return 2
 
         return -(state[7] ** 2 + state[8] ** 2)
@@ -131,7 +103,7 @@ class HoverCrazyflieSim2Real(BaseRLAviary):
 
         """
         state = self._getDroneStateVector(0)
-        if np.linalg.norm(self.TARGET_POS - state[0:3]) < .02 and state[7]**2 + state[8]**2 < 0.001:
+        if np.linalg.norm(self.TARGET_POS - state[0:3]) < .02 and state[7] ** 2 + state[8] ** 2 < 0.001:
             return True
 
         return False
