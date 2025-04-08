@@ -20,7 +20,7 @@ class CLStage1Sim2Real(BaseRLAviary):
                  ):
         self.INIT_XYZS = initial_xyzs
         self.TARGET_POS = target_xyzs
-        self.EPISODE_LEN_SEC = 5
+        self.EPISODE_LENGTH_SECONDS = 5
         self.LOG_ANGULAR_VELOCITY = np.zeros((1, 3))
         super().__init__(drone_model=drone_model,
                          num_drones=1,
@@ -98,7 +98,7 @@ class CLStage1Sim2Real(BaseRLAviary):
                 abs(state[7]) > .25 or abs(state[8]) > .25):
             return True
 
-        if self.step_counter / self.PYB_FREQ > self.EPISODE_LEN_SEC:
+        if self.step_counter / self.PYB_FREQ > self.EPISODE_LENGTH_SECONDS:
             return True
 
         return False

@@ -26,6 +26,7 @@ from environments.stability_reward_out_stage2_39 import StabilityRewardOutStage2
 from environments.target_reward_out_30hz_39 import TargetRewardOut30Hz
 from environments.target_reward_out_200hz_39 import TargetRewardOut200Hz
 from environments.WithoutCurriculumLearning_200Hz import WithoutCurriculumLearning200Hz
+from environments.CL_Stage1_Sim2Real import CLStage1Sim2Real
 from gym_pybullet_drones.utils.Logger import Logger
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 from gym_pybullet_drones.utils.utils import sync, str2bool
@@ -177,7 +178,7 @@ def run_simulation(
     policy = get_policy(model_map[algorithm], policy_path, model)
 
     test_env = test_env(
-        initial_xyzs=np.array([[2.0, -2.0, 1.5]]),
+        initial_xyzs=np.array([[0.0, 0.0, 0.0]]),
         initial_rpys=np.array([[0.0, 0.0, 0.0]]),
         # initial_xyzs=np.array([[-1, 1, 0]]),
         # initial_rpys=np.array([[0.0, 0.0, 0.78]]),
@@ -329,7 +330,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--test_env',
-        default=StabilityRewardOutStage2,
+        default=CLStage1Sim2Real,
         help='The name of the environment to learn, registered with gym_pybullet_drones'
     )
     parser.add_argument(
