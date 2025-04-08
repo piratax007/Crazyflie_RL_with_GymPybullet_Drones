@@ -12,9 +12,8 @@ ml TensorFlow/2.15.1-CUDA-12.1.1
 cd ..
 echo "Training started at $(date)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'StabilityRewardOutStage2' \
- --learning-id 'stability-reward-out_stage-2_39' \
---algorithm 'ppo' --parallel-environments 4 --time-steps 100000000 --continuous-learning True \
---path-to-previous-model results/save-stability-reward-out_39-03.02.2025_16.19.32
+python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage1Sim2Real' \
+ --learning-id 'Sim2Real_Stage1' \
+--algorithm 'ppo' --parallel-environments 4 --time-steps 30000000
 
 echo "Training finished at $(date)"
