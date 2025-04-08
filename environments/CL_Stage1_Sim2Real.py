@@ -27,7 +27,6 @@ class CLStage1Sim2Real(BaseRLAviary):
                          initial_xyzs=initial_xyzs,
                          initial_rpys=initial_rpys,
                          physics=physics,
-                         wind=True,
                          pyb_freq=pyb_freq,
                          ctrl_freq=ctrl_freq,
                          gui=gui,
