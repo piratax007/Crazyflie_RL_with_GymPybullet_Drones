@@ -38,7 +38,7 @@ class EjcCLStage1ScaledReward(BaseRLAviary):
             act=action_space
         )
 
-    def _target_error(self, state: np.ndarray) -> np.floating:
+    def _target_error(self, state: np.ndarray):
         return np.linalg.norm(self.TARGET_POSITION - state[0:3])
 
     def _is_away_from_exploration_area(self, state: np.ndarray) -> bool:

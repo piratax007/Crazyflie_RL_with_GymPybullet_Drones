@@ -38,7 +38,7 @@ class StabilityRewardOut30HzStage2(StabilityRewardOut30Hz):
             action_space=action_space
         )
 
-    def _target_error(self, state: np.ndarray) -> np.floating:
+    def _target_error(self, state: np.ndarray):
         return (np.linalg.norm(self.TARGET_POSITION - state[0:3]) +
                 np.linalg.norm(self.TARGET_ORIENTATION - state[7:10]))
 

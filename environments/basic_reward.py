@@ -38,7 +38,7 @@ class BasicReward(BaseRLAviary):
             act=action_space
         )
 
-    def _target_error(self, state: np.ndarray) -> np.floating:
+    def _target_error(self, state: np.ndarray):
         return np.linalg.norm(self.TARGET_POSITION - state[0:3])
 
     def _computeReward(self) -> float:
