@@ -1,6 +1,6 @@
 import numpy as np
 from gymnasium import spaces
-from gym_pybullet_drones.envs.BaseRLAviary import BaseRLAviary
+from environments.BaseRLAviary import BaseRLAviary
 from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, ObservationType
 
 
@@ -16,7 +16,7 @@ class CLStage1Sim2Real(BaseRLAviary):
                  gui=False,
                  record=False,
                  observation_space: ObservationType = ObservationType.KIN,
-                 action_space: ActionType = ActionType.RPM
+                 action_space: ActionType = ActionType.ONE_D_RPM
                  ):
         self.INIT_XYZS = initial_xyzs
         self.TARGET_POS = target_xyzs
@@ -123,10 +123,10 @@ class CLStage1Sim2Real(BaseRLAviary):
         for i in range(self.NUM_DRONES):
             obs = self._getDroneStateVector(i)
             obs_12[i, :] = np.hstack([
-                np.clip(obs[0:3] + np.random.normal(0.0, 0.001, 3),-1, 1),
-                np.clip(obs[7:10] + np.random.normal(0.0, 0.001, 3),-1, 1),
-                np.clip(obs[10:13] + np.random.normal(0.0, 0.002, 3),-1, 1),
-                np.clip(obs[13:16] + np.random.normal(0.0, 0.002, 3),-1, 1),
+                obs[0:3] + np.random.normal(0.0, 0.001, 3),
+                obs[7:10] + np.random.normal(0.0, 0.001, 3),
+                obs[10:13] + np.random.normal(0.0, 0.002, 3),
+                obs[13:16] + np.random.normal(0.0, 0.002, 3),
             ]).reshape(12, )
         ret = np.array([obs_12[i, :] for i in range(self.NUM_DRONES)]).astype('float32')
         return ret
