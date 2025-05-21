@@ -13,7 +13,7 @@ cd ..
 echo "Training started at $(date)"
 
 python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage1Sim2Real' \
- --learning-id 'Sim2Real_Stage1' \
+ --learning-id 'Sim2Real_Stage1_ONED-RPM' \
 --algorithm 'ppo' --parallel-environments 4 --time-steps 30000000
 
 echo "Training finished at $(date)"
