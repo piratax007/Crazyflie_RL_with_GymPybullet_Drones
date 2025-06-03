@@ -16,7 +16,7 @@ class CLStage1Sim2Real(BaseRLAviary):
                  gui=False,
                  record=False,
                  observation_space: ObservationType = ObservationType.KIN,
-                 action_space: ActionType = ActionType.ONE_D_RPM
+                 action_space: ActionType = ActionType.RPM
                  ):
         self.INIT_XYZS = initial_xyzs
         self.TARGET_POS = target_xyzs
