@@ -26,7 +26,7 @@ from environments.stability_reward_out_stage2_39 import StabilityRewardOutStage2
 from environments.target_reward_out_30hz_39 import TargetRewardOut30Hz
 from environments.target_reward_out_200hz_39 import TargetRewardOut200Hz
 from environments.WithoutCurriculumLearning_200Hz import WithoutCurriculumLearning200Hz
-from environments.CL_Stage1_Sim2Real import CLStage1Sim2Real
+from environments.CL_Stage1_S2R_e2e import CLStage1Sim2Real
 from gym_pybullet_drones.utils.Logger import Logger
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 from gym_pybullet_drones.utils.utils import sync, str2bool
@@ -262,6 +262,7 @@ def run_simulation(
 
         obs, reward, terminated, truncated, info = test_env.step(action)
         actions = test_env._getDroneStateVector(0)[16:20]
+        quaternion = test_env._getDroneStateVector(0)[3:7]
         actions2 = actions.squeeze()
         obs2 = obs.squeeze()
 
@@ -286,7 +287,7 @@ def run_simulation(
             drone=0,
             timestamp=i / test_env.CTRL_FREQ,
             state=np.hstack([obs2[0:3],
-                             np.zeros(4),
+                             quaternion,
                              obs2[3:12],
                              actions2
                              ]),

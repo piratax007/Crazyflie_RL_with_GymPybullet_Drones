@@ -22,7 +22,8 @@ from environments.ejc_cl_stage2_scaled_reward import EjcCLStage2ScaledReward
 from environments.ejc_cl_stage3_scaled_reward import EjcCLStage3ScaledReward
 from environments.WithoutCurriculumLearning_30Hz import WithoutCurriculumLearning30Hz
 from environments.WithoutCurriculumLearning_200Hz import WithoutCurriculumLearning200Hz
-from environments.CL_Stage1_Sim2Real import CLStage1Sim2Real
+from environments.CL_Stage1_S2R_e2e import CLStage1Sim2Real
+from environments.CL_Stage2_S2R_e2e import CLStage2Sim2Real
 from python_scripts.learning_script import run_learning
 from gym_pybullet_drones.utils.utils import str2bool
 
@@ -55,7 +56,8 @@ if __name__ == '__main__':
             'EjcCLStage3ScaledReward',
             'WithoutCurriculumLearning30Hz',
             'WithoutCurriculumLearning200Hz',
-            'CLStage1Sim2Real'
+            'CLStage1Sim2Real',
+            'CLStage2Sim2Real'
         ],
         help='An imported environment'
     )
@@ -150,7 +152,8 @@ if __name__ == '__main__':
         'EjcCLStage3ScaledReward': EjcCLStage3ScaledReward,
         'WithoutCurriculumLearning30Hz': WithoutCurriculumLearning30Hz,
         'WithoutCurriculumLearning200Hz': WithoutCurriculumLearning200Hz,
-        'CLStage1Sim2Real': CLStage1Sim2Real
+        'CLStage1Sim2Real': CLStage1Sim2Real,
+        'CLStage2Sim2Real': CLStage2Sim2Real
     }
 
     environment_class = environment_map.get(args.environment)
