@@ -13,7 +13,7 @@ cd ..
 echo "Training started at $(date)"
 
 python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage2Sim2Real' \
- --learning-id 'Sim2Real_Stage2' \
+ --learning-id 'Sim2Real_Stage2_cylinder_radius_2' \
 --algorithm 'ppo' --parallel-environments 4 --time-steps 30000000 --continuous-learning True \
 --path-to-previous-model results/save-Sim2Real_Stage1-04.08.2025_11.52.20
 

@@ -141,7 +141,7 @@ class CLStage2Sim2Real(CLStage1Sim2Real):
         self._housekeeping()
         self._updateAndStoreKinematicInformation()
         self.INIT_XYZS = np.array(
-            [[*self._random_cylindrical_positions(outer_radius=1.0, cylinder_height=2, mode='inside')]])
+            [[*self._random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]])
         p.resetBasePositionAndOrientation(self.DRONE_IDS[0], self.INIT_XYZS[0],
                                           p.getQuaternionFromEuler(self.INIT_RPYS[0]))
         initial_obs = self._computeObs()
