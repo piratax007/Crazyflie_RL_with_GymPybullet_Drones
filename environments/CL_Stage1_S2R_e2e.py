@@ -42,7 +42,7 @@ class CLStage1Sim2Real(BaseRLAviary):
 
     def _is_away_from_exploration_area(self, state):
         return (np.linalg.norm(state[0:2] - self.TARGET_POS[0:2]) >
-                np.linalg.norm(self.INIT_XYZS[0][0:2] - self.TARGET_POS[0:2]) + 0.1 or
+                np.linalg.norm(self.INIT_XYZS[0][0:2] - self.TARGET_POS[0:2]) + 0.025 or
                 state[2] > self.TARGET_POS[2] + 0.1)
 
     def _is_closed(self, state):
