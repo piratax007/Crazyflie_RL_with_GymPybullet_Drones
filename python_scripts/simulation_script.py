@@ -7,29 +7,11 @@ import pybullet as p
 from scipy.interpolate import splprep, splev
 from scipy.spatial.transform import Rotation as R
 from stable_baselines3 import PPO, SAC, DDPG, TD3
-from environments.ObS12Stage1 import ObS12Stage1
-from environments.ObS12Stage2 import ObS12Stage2
-from environments.ObS12Stage3 import ObS12Stage3
-from environments.basic_reward import BasicReward
-from environments.ejc_cl_stage1 import EjcCLStage1
-from environments.ejc_cl_stage2 import EjcCLStage2
-from environments.ejc_cl_stage3 import EjcCLStage3
-from environments.ejc_cl_stage1_scaled_reward import EjcCLStage1ScaledReward
-from environments.ejc_cl_stage2_scaled_reward import EjcCLStage2ScaledReward
-from environments.ejc_cl_stage3_scaled_reward import EjcCLStage3ScaledReward
-from environments.exploration_reward_out_30hz import ExplorationRewardOut30Hz
-from environments.exploration_reward_out import ExplorationRewardOut
-from environments.stability_reward_out_30hz import StabilityRewardOut30Hz
-from environments.stability_reward_out_30hz_stage_2 import StabilityRewardOut30HzStage2
-from environments.stability_reward_out import StabilityRewardOut
-from environments.stability_reward_out_stage2_39 import StabilityRewardOutStage2
-from environments.target_reward_out_30hz_39 import TargetRewardOut30Hz
-from environments.target_reward_out_200hz_39 import TargetRewardOut200Hz
-from environments.WithoutCurriculumLearning_200Hz import WithoutCurriculumLearning200Hz
-from environments.CL_Stage1_S2R_e2e import CLStage1Sim2Real
 from gym_pybullet_drones.utils.Logger import Logger
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 from gym_pybullet_drones.utils.utils import sync, str2bool
+
+from environments.CL_Stage1_S2R_e2e import CLStage1Sim2Real
 
 
 def in_degrees(angles):

@@ -3,6 +3,7 @@
 .venv/
 environments/__pycache__/
 python_scripts/__pycache__/
+python_scripts/EJC_plots
 /results
 /Alvis_scripts/history
 slurm-*
