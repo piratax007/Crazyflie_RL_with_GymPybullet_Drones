@@ -98,7 +98,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--seed',
-        default=90,
+        default=None,
         type=int,
         help='Seed for reproducibility'
     )
