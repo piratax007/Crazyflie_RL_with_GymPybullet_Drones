@@ -1,29 +1,8 @@
 #!/usr/bin/env python3
 import argparse
-from environments.ejc_cl_stage1 import EjcCLStage1
-from environments.ejc_cl_stage2 import EjcCLStage2
-from environments.ejc_cl_stage3 import EjcCLStage3
-from environments.basic_reward import BasicReward
-from environments.basic_reward_second_stage import BasicRewardSecondStage
-from environments.target_reward_out_30hz_39 import TargetRewardOut30Hz
-from environments.target_reward_out_200hz_39 import TargetRewardOut200Hz
-from environments.exploration_reward_contribution import ExplorationRewardContribution
-from environments.stability_reward_contribution import StabilityRewardContribution
-from environments.exploration_reward_out import ExplorationRewardOut
-from environments.stability_reward_out_stage2_39 import StabilityRewardOutStage2
-from environments.exploration_reward_out_30hz import ExplorationRewardOut30Hz
-from environments.stability_reward_out import StabilityRewardOut
-from environments.stability_reward_out_30hz import StabilityRewardOut30Hz
-from environments.stability_reward_out_30hz_stage_2 import StabilityRewardOut30HzStage2
-from environments.navigation_reward_out import NavigationRewardOut
-from environments.navigation_reward_out_30hz import NavigationRewardOut30Hz
-from environments.ejc_cl_stage1_scaled_reward import EjcCLStage1ScaledReward
-from environments.ejc_cl_stage2_scaled_reward import EjcCLStage2ScaledReward
-from environments.ejc_cl_stage3_scaled_reward import EjcCLStage3ScaledReward
-from environments.WithoutCurriculumLearning_30Hz import WithoutCurriculumLearning30Hz
-from environments.WithoutCurriculumLearning_200Hz import WithoutCurriculumLearning200Hz
 from environments.CL_Stage1_S2R_e2e import CLStage1Sim2Real
 from environments.CL_Stage2_S2R_e2e import CLStage2Sim2Real
+from environments.CL_Stage3_S2R_e2e import CLStage3Sim2Real
 from python_scripts.learning_script import run_learning
 from gym_pybullet_drones.utils.utils import str2bool
 
@@ -34,30 +13,9 @@ if __name__ == '__main__':
         default='EjcCLStage1',
         type=str,
         choices=[
-            'EjcCLStage1',
-            'EjcCLStage2',
-            'EjcCLStage3',
-            'BasicReward',
-            'TargetRewardOut30Hz',
-            'TargetRewardOut200Hz',
-            'ExplorationRewardOut',
-            'StabilityRewardOut',
-            'StabilityRewardOutStage2',
-            'NavigationRewardOut',
-            'ExplorationRewardOut30Hz',
-            'StabilityRewardOut30Hz',
-            'StabilityRewardOut30HzStage2',
-            'NavigationRewardOut30Hz',
-            'BasicRewardSecondStage',
-            'ExplorationRewardContribution',
-            'StabilityRewardContribution',
-            'EjcCLStage1ScaledReward',
-            'EjcCLStage2ScaledReward',
-            'EjcCLStage3ScaledReward',
-            'WithoutCurriculumLearning30Hz',
-            'WithoutCurriculumLearning200Hz',
             'CLStage1Sim2Real',
-            'CLStage2Sim2Real'
+            'CLStage2Sim2Real',
+            'CLStage3Sim2Real'
         ],
         help='An imported environment'
     )
@@ -130,30 +88,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     environment_map = {
-        'EjcCLStage1': EjcCLStage1,
-        'EjcCLStage2': EjcCLStage2,
-        'EjcCLStage3': EjcCLStage3,
-        'BasicReward': BasicReward,
-        'TargetRewardOut30Hz': TargetRewardOut30Hz,
-        'TargetRewardOut200Hz': TargetRewardOut200Hz,
-        'ExplorationRewardOut': ExplorationRewardOut,
-        'StabilityRewardOut': StabilityRewardOut,
-        'StabilityRewardOutStage2': StabilityRewardOutStage2,
-        'NavigationRewardOut': NavigationRewardOut,
-        'BasicRewardSecondStage': BasicRewardSecondStage,
-        'ExplorationRewardOut30Hz': ExplorationRewardOut30Hz,
-        'StabilityRewardOut30Hz': StabilityRewardOut30Hz,
-        'StabilityRewardOut30HzStage2': StabilityRewardOut30HzStage2,
-        'NavigationRewardOut30Hz': NavigationRewardOut30Hz,
-        'ExplorationRewardContribution': ExplorationRewardContribution,
-        'StabilityRewardContribution': StabilityRewardContribution,
-        'EjcCLStage1ScaledReward': EjcCLStage1ScaledReward,
-        'EjcCLStage2ScaledReward': EjcCLStage2ScaledReward,
-        'EjcCLStage3ScaledReward': EjcCLStage3ScaledReward,
-        'WithoutCurriculumLearning30Hz': WithoutCurriculumLearning30Hz,
-        'WithoutCurriculumLearning200Hz': WithoutCurriculumLearning200Hz,
         'CLStage1Sim2Real': CLStage1Sim2Real,
-        'CLStage2Sim2Real': CLStage2Sim2Real
+        'CLStage2Sim2Real': CLStage2Sim2Real,
+        'CLStage3Sim2Real': CLStage3Sim2Real
     }
 
     environment_class = environment_map.get(args.environment)
