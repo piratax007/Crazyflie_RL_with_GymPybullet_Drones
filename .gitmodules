@@ -1,3 +1,6 @@
 [submodule "crazyflie_demos"]
 	path = crazyflie_demos
 	url = https://github.com/piratax007/crazyflie_demos.git
+[submodule "crazyflie-firmware"]
+	path = crazyflie-firmware
+	url = https://github.com/piratax007/crazyflie-firmware.git
