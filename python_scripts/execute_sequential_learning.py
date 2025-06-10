@@ -79,7 +79,7 @@ if __name__ == '__main__':
         help='A boolean indicating whether to stop on reward threshold'
     )
     parser.add_argument(
-        '--stop-on-reward-threshold-threshold',
+        '--reward-threshold',
         default=6000.,
         type=float,
         help='A float indicating whether to stop on reward threshold'
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     stop_episodes_flag = args.stop_on_max_episodes_flag
     stop_episodes = args.stop_episodes
     reward_stop_flag = args.stop_on_reward_threshold_flag
-    reward_stop_threshold = args.stop_on_reward_threshold_threshold
+    reward_stop_threshold = args.reward_threshold
 
     print(f"""
     ################# Learning Started ########################

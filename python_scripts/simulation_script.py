@@ -199,8 +199,8 @@ def run_simulation(
     #     5: add_way_point((-3, -3.5, 2), radius=0.025),
     # }
 
-    # x_target, y_target, z_target, yaw_target = spiral_trajectory(simulation_length, 2)
-    # x_target, y_target, z_target, yaw_target = spiral_trajectory(simulation_length, 2)
+    # x_target, y_target, z_target, yaw_target = helix_trajectory(simulation_length, 2)
+    # x_target, y_target, z_target, yaw_target = helix_trajectory(simulation_length, 2)
 
     for i in range(simulation_length):
         # obs[0][0] += 0.025
