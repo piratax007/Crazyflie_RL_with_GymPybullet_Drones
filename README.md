@@ -3,12 +3,6 @@ This repository contains environments, scripts, and utilities _developed apart f
 for running Reinforcement Learning training for Crazyflie drones using GymPybullet Drones.
 
 ## Structure
-### HPC scripts
-**`Alvis_scripts`** and **`kebnekaise_scripts`** directories contains the run the training on HPC cluster. How 
-those scripts work will be explained later.
-
-> The `Python_scripts` still working on a local installation of GymPybullet Drones [1].
-
 ### assets
 This directory is a copy of the assets in GymPybullet Drones intended to introduce modifications in the definition 
 of the drones without altering the original installation.
@@ -39,7 +33,7 @@ Once you have generated the `nn_compute.c` file, copy that file into the `exampl
 the Crazyflie firmware. You are ready to test your trained policy on a real Crazyflie.
 
 ### easy_plots
-This is a module developed for produce nice published plots of the data generated during the evaluation of a trained 
+This is a module developed to produce nice publishable plots of the data generated during the evaluation of a trained 
 policy in simulation. You can learn how to use easy plots in its README file [2].
 
 ### classic_simulation.py
@@ -50,6 +44,37 @@ Under development!
 This module should be used through the `execute_sequential_learning.py` module, however, if you want to modify the 
 structure of the neural network, the hyperparameters of the RL algorithm or add new callbacks, you should go for it 
 into this module.
+
+### execute_sequential_learning.py
+This module is used to execute learning processes choosing between several RL algorithms (PPO, SAC, DDPG, TD3) 
+available on SB3, callbacks, and training modes (from scratch, continuous). The following are examples of how to use 
+this module.
+
+**Example 1:** Training from scratch with PPO for 30 million time steps (MTS)
+
+```python3 -m python_scripts.execute_sequential_learning --environment 'CLStage1Sim2Real' --learning-id 'learning_test' --algorithm 'ppo' --parallel-environments 4 --time-steps 30000000```
+
+> To avoid repetition, from now the examples will use the default parameters. You can see the default values for all 
+the parameter with `python3 -m python_scripts.execute_sequential_leargnin -h`
+
+**Example 2:** Training from scratch with PPO and stopping the training after the reward achieves a threshold.
+
+```python3 -m python_scripts.execute_sequential_learning --environment 'CLStage1Sim2Real' --learning-id 'training_with_reward_threshold' --stop-on-reward-threshold-flag True --reward-threshold 625```
+
+**Example 3:** Training from scratch with PPO and stopping the training after 150 episodes. Consider that each 
+episode of training is different in length (number of time steps), at the beginning of the training the episodes are 
+shorter.
+
+```python3 -m python_scripts.execute_sequential_learning --environment 'CLStage1Sim2Real' --learning-id 'training_for_150_episodes' --stop-on-max-episodes-flag True --stop-episodes 150```
+
+**Example 4:** Training in continuous stages initializing a new neural network with the weights and bias from a 
+pre-trained neural network. This will transfer the adam stimator at the end of the previous training as well.
+
+```python3 -m python_scripts.execute_sequential_learning --environment 'CLStage2Sim2Real' --learning-id 'second_training_stage' --continuous-learning True --path-to-revious-model '/results/save-training_for_150_episodes-02.17.2025_09.18.11'```
+
+> If you add a new training environment, to be able to use it for training, the new environment must be registered 
+> in the `execute_sequential_learning` module. To register a new environment, import it, add the name of the class 
+> into the `choices` list of the `--environment` argument, and add a new entry in the `environment_map` dictionary.
 
 ### simulation_script.py
 This module provides a command-line interface for running flight simulations of Crazyflie drones under RL trained 
