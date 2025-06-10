@@ -1,5 +1,5 @@
 # Crazyflie_RL_with_GymPybullet_Drones
-This repository contains environments, scripts, and utilities _developed apart from GymPybullet Drones_ but used 
+This repository contains environments, scripts, and utilities _developed apart from GymPybullet Drones [1]_ but used 
 for running Reinforcement Learning training for Crazyflie drones using GymPybullet Drones.
 
 ## Structure
@@ -8,19 +8,20 @@ This directory is a copy of the assets in GymPybullet Drones intended to introdu
 of the drones without altering the original installation.
 
 ### environments
-In this directory should be added any new environment used for training, following the gymnasium environments 
-structure. This directory also contains a copy of the `BaseAviary` and `BaseRLAviary` environment, to be able of 
-adding training features without altering the original installation of GymPybullet Drones.
+In this directory should be added any new environment used for training, following the gymnasium [3] environments 
+structure. This directory also contains a copy of the `BaseAviary` and `BaseRLAviary` environments, using these 
+copies, you can modify in deep the basic training environments without alter the original ones.
 
 ### python_scripts
 #### crazyflie_firmware_nn_compute
 The modules inside this directory are used for export a policy trained using GymPybullet Drones to C code that can 
-be added to the Crazyflie firmware to be deployed on real hardware.
+be added to the Crazyflie firmware [4] to be deployed on real hardware.
 - `c_code_blocks.py` contains the general definitions and the forward propagation loops. If the structure of the 
   policy differs from 12 inputs - 64 nodes (tanh) - 64 nodes (tanh) - 4 outputs, you should edit this file in 
   consequence.
 - `crazyflie_firmware_nn_compute.py` This module is used for exporting to C code the weights and bias of a trained 
-  policy, and generate the `nn_compute.c` file that should be added to the Crazyflie firmware. 
+  policy, and generate the `nn_compute.c` file that should replace the homonymous files in the Crazyflie firmware at 
+  `/examples/app_nn_controller/src`. 
   - **How to:**
     - `python3 -m python_scripts.crazyflie_firmware_nn_compute.crazyflie_firmware_nn_compute 
     path_to_the_policy/best_model.zip -o path_to_the_directory_to_put/nn_compute.c -p true`
@@ -29,8 +30,8 @@ be added to the Crazyflie firmware to be deployed on real hardware.
       specified the `nn_compute.c` file will be saved in the current directory.
     - The `-p` optional argument will previsualice in console the content of the `nn_compute.c` file.
 
-Once you have generated the `nn_compute.c` file, copy that file into the `examples/app_nn_controller` directory on 
-the Crazyflie firmware. You are ready to test your trained policy on a real Crazyflie.
+Once you have generated the `nn_compute.c` file, copy that file into the `examples/app_nn_controller/src` directory on 
+the Crazyflie firmware [4]. You are ready to test your trained policy on a real Crazyflie.
 
 ### easy_plots
 This is a module developed to produce nice publishable plots of the data generated during the evaluation of a trained 
@@ -54,7 +55,7 @@ this module.
 
 ```python3 -m python_scripts.execute_sequential_learning --environment 'CLStage1Sim2Real' --learning-id 'learning_test' --algorithm 'ppo' --parallel-environments 4 --time-steps 30000000```
 
-> To avoid repetition, from now the examples will use the default parameters. You can see the default values for all 
+> To avoid repetition, from now the examples will use the default arguments. You can see the default values for all 
 the parameter with `python3 -m python_scripts.execute_sequential_leargnin -h`
 
 **Example 2:** Training from scratch with PPO and stopping the training after the reward achieves a threshold.
@@ -72,9 +73,13 @@ pre-trained neural network. This will transfer the adam stimator at the end of t
 
 ```python3 -m python_scripts.execute_sequential_learning --environment 'CLStage2Sim2Real' --learning-id 'second_training_stage' --continuous-learning True --path-to-revious-model '/results/save-training_for_150_episodes-02.17.2025_09.18.11'```
 
-> If you add a new training environment, to be able to use it for training, the new environment must be registered 
+> If you add a new training environment, to use it for training, the new environment must be registered 
 > in the `execute_sequential_learning` module. To register a new environment, import it, add the name of the class 
 > into the `choices` list of the `--environment` argument, and add a new entry in the `environment_map` dictionary.
+
+> The training is automatically monitored with tensorboard. You can find the tensor board. To see the tensorboard 
+> logs run:
+> ```tensorboard --logdir path_to_the_results_folder/tb```
 
 ### simulation_script.py
 This module provides a command-line interface for running flight simulations of Crazyflie drones under RL trained 
@@ -86,3 +91,5 @@ policies. It automates the environment setup, policy loading, episode execution,
 ---
 [1]: https://github.com/utiasDSL/gym-pybullet-drones
 [2]: python_scripts/easy_plots/README.md
+[3]: https://gymnasium.farama.org/
+[4]: https://github.com/piratax007/crazyflie-firmware
