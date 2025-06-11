@@ -94,6 +94,11 @@ could be used to print to the console the observations and actions during the si
 about the architecture of the neural network. You can use the `--reset True` argument, as well, if you want to reset 
 the simulation when the drone achieves the termination conditions defined into the environment.
 
+> The functions `helix_trajectory`, `lemniscate_trajectory`, and `smooth_trajectory` inside this script, could be 
+> used to design evaluation trajectories for your trained policies. The function `random_cylindrical_positions` 
+> could be used to assess the robustness of the trained policy to start from randon initial positions. These 
+> functions, along with other useful functions in this script, are well documented in its docstrics.
+
 ##### HPC
 If you want to run simulations on the HPC cluster, you should use a virtual desktop client (ThinLink or browser client).
 
