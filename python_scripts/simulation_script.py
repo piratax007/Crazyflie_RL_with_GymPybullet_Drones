@@ -11,8 +11,7 @@ from gym_pybullet_drones.utils.Logger import Logger
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 from gym_pybullet_drones.utils.utils import sync, str2bool
 
-from environments.CL_Stage1_S2R_e2e import CLStage1Sim2Real
-
+from environments import environment_map
 
 def in_degrees(angles):
     return list(map(lambda angle: angle * 180 / np.pi, angles))
@@ -87,7 +86,7 @@ def helix_trajectory(number_of_points: int = 50, radius: int = 2, angle_range: f
     return x_coordinates, y_coordinates, z_coordinates, yaw_angles
 
 
-def lemniscata_trajectory(number_of_points: int = 50, a: float = 2) -> tuple:
+def lemniscate_trajectory(number_of_points: int = 50, a: float = 2) -> tuple:
     """
     Generates a lemniscate trajectory with specified number of points and scale.
     The function computes the x, y, and z coordinates along a lemniscate curve,
@@ -509,7 +508,8 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--test_env',
-        default=CLStage1Sim2Real,
+        default='CLStage1Sim2Real',
+        type=str,
         help='The name of the environment to learn, registered with gym_pybullet_drones'
     )
     parser.add_argument(
@@ -549,4 +549,23 @@ if __name__ == '__main__':
         help="Prints debug information"
     )
 
-    run_simulation(**vars(parser.parse_args()))
+    args = parser.parse_args()
+
+    environment_class = environment_map.get(args.test_env)
+    if environment_class is None:
+        raise ValueError(f"Unknown environment: {args.test_env}")
+
+    run_simulation(
+        test_env=environment_class,
+        policy_path=args.policy_path,
+        algorithm=args.algorithm,
+        model=args.model,
+        gui=True,
+        record_video=False,
+        simulation_length=args.simulation_length,
+        reset=args.reset,
+        save=args.save,
+        comment=args.comment,
+        plot=args.plot,
+        debug=args.debug,
+    )

@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-from environments.CL_Stage1_S2R_e2e import CLStage1Sim2Real
-from environments.CL_Stage2_S2R_e2e import CLStage2Sim2Real
-from environments.CL_Stage3_S2R_e2e import CLStage3Sim2Real
+from environments import environment_map
 from python_scripts.learning_script import run_learning
 from gym_pybullet_drones.utils.utils import str2bool
 
@@ -12,11 +10,6 @@ if __name__ == '__main__':
         '--environment',
         default='EjcCLStage1',
         type=str,
-        choices=[
-            'CLStage1Sim2Real',
-            'CLStage2Sim2Real',
-            'CLStage3Sim2Real'
-        ],
         help='An imported environment'
     )
     parser.add_argument(
@@ -87,15 +80,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    environment_map = {
-        'CLStage1Sim2Real': CLStage1Sim2Real,
-        'CLStage2Sim2Real': CLStage2Sim2Real,
-        'CLStage3Sim2Real': CLStage3Sim2Real
-    }
-
     environment_class = environment_map.get(args.environment)
     if environment_class is None:
-        raise ValueError(f'Invalid environment: {args.environment}')
+        raise ValueError(f'Unknown environment: {args.environment}')
 
     stop_episodes_flag = args.stop_on_max_episodes_flag
     stop_episodes = args.stop_episodes
