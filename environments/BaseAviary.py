@@ -488,7 +488,7 @@ class BaseAviary(gym.Env):
         #### Load ground plane, drone and obstacles models #########
         self.PLANE_ID = p.loadURDF("plane.urdf", physicsClientId=self.CLIENT)
 
-        self.DRONE_IDS = np.array([p.loadURDF('../assets/'+self.URDF,
+        self.DRONE_IDS = np.array([p.loadURDF('assets/'+self.URDF,
                                               self.INIT_XYZS[i,:],
                                               p.getQuaternionFromEuler(self.INIT_RPYS[i,:]),
                                               flags = p.URDF_USE_INERTIA_FROM_FILE,
