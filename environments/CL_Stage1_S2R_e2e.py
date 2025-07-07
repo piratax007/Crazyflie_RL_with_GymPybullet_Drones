@@ -123,10 +123,10 @@ class CLStage1Sim2Real(BaseRLAviary):
         for i in range(self.NUM_DRONES):
             obs = self._getDroneStateVector(i)
             obs_12[i, :] = np.hstack([
-                obs[0:3] + np.random.normal(0.0, 0.01, 3),
-                obs[7:10] + np.random.normal(0.0, 0.02, 3),
-                obs[10:13] + np.random.normal(0.0, 0.01, 3),
-                obs[13:16] + np.random.normal(0.0, 0.02, 3),
+                obs[0:3] + np.random.normal(0.0, 0.001, 3),
+                obs[7:10] + np.random.normal(0.0, 0.002, 3),
+                obs[10:13] + np.random.normal(0.0, 0.001, 3),
+                obs[13:16] + np.random.normal(0.0, 0.002, 3),
             ]).reshape(12, )
         ret = np.array([obs_12[i, :] for i in range(self.NUM_DRONES)]).astype('float32')
         return ret
