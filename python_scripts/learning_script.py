@@ -115,8 +115,8 @@ def run_learning(environment,
                 'batch_size': 256,
                 'learning_rate': 2e-4,
                 'n_steps': 8192,
-                'n_epochs': 6,
-                'clip_range': 0.12,
+                'n_epochs': 5,
+                'clip_range': 0.1,
                 'ent_coef': 0.001
             }
         ),
