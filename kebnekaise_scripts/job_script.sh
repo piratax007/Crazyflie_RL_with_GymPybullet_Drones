@@ -2,7 +2,7 @@
 #SBATCH -A hpc2n2024-120
 #SBATCH -t 48:00:00
 #SBATCH -n 1
-#SBATCH -c 1
+#SBATCH -c 4
 
 ml purge > /dev/null 2>&1
 ml GCC/12.3.0 OpenMPI/4.1.5
