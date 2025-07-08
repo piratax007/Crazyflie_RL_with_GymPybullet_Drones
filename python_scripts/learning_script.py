@@ -6,6 +6,7 @@ import argparse
 from stable_baselines3 import PPO, SAC, DDPG, TD3
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnMaxEpisodes, StopTrainingOnRewardThreshold, CheckpointCallback
+from stable_baselines3.common.vec_env import SubprocVecEnv
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 
 DEFAULT_OUTPUT_FOLDER = 'results'
@@ -100,10 +101,12 @@ def run_learning(environment,
     path_to_results = results_directory(output_directory, learning_id)
 
     learning_environment = make_vec_env(environment,
-                                        n_envs=parallel_environments
+                                        n_envs=parallel_environments,
+                                        vec_env_cls=SubprocVecEnv
                                         )
     evaluation_environment = make_vec_env(environment,
-                                          n_envs=parallel_environments
+                                          n_envs=parallel_environments,
+                                          vec_env_cls=SubprocVecEnv
                                           )
 
     model_map = {
