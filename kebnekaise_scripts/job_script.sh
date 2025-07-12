@@ -12,7 +12,7 @@ ml TensorFlow/2.15.1-CUDA-12.1.1
 cd ..
 echo "Training started at $(date)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage2Sim2Real' \
+python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage1Sim2Real' \
  --learning-id 'Stage1_S2R_e2e_Crazyflie-mass-33_200-100-frequency_updated-hyperparameters' \
 --algorithm 'ppo' --parallel-environments 4 --time-steps 30000000
 
