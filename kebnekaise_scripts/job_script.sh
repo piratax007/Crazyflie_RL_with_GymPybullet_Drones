@@ -12,8 +12,11 @@ ml TensorFlow/2.15.1-CUDA-12.1.1
 cd ..
 echo "Training started at $(date)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage1Sim2Real' \
- --learning-id 'Stage1_S2R_e2e_Crazyflie-mass-33_200-100-frequency_updated-hyperparameters' \
+echo "CURRENT PATH $(pwd)"
+
+python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage2Sim2Real' \
+ --learning-id 'Stage2_S2R_e2e_Crazyflie-mass-33_200-100-frequency_updated-hyperparameters' \
+ --continuous-learning True --path-to-previous-model 'results/save-Stage1_S2R_e2e_Crazyflie-mass-33_200-100-frequency_updated-hyperparameters-07.12.2025_19.00.08' \
 --algorithm 'ppo' --parallel-environments 4 --time-steps 30000000
 
 echo "Training finished at $(date)"
