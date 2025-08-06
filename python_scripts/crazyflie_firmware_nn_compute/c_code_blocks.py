@@ -2,7 +2,7 @@ headers_nn_compute = """
 #include "nn_compute.h"
 
 #define g 9.82
-#define mass 0.027
+#define mass 0.033
 #define kf 3.16e-10
 #define hoverRPM sqrtf((g * mass) / (4 * kf))
 
