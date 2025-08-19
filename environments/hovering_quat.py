@@ -119,7 +119,7 @@ class HoveringQuat(BaseRLAviary):
     ################################################################################
 
     def _computeObs(self):
-        obs_13 = np.zeros((self.NUM_DRONES, 12))
+        obs_13 = np.zeros((self.NUM_DRONES, 13))
         for i in range(self.NUM_DRONES):
             obs = self._getDroneStateVector(i)
             obs_13[i, :] = np.hstack([
