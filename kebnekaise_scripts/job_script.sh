@@ -14,9 +14,7 @@ echo "Training started at $(date)"
 
 echo "CURRENT PATH $(pwd)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage3Sim2Real' \
- --learning-id 'Stage3_S2R_e2e_Crazyflie-mass-33_200-100-frequency_updated-hyperparameters' \
- --continuous-learning True --path-to-previous-model 'results/save-Stage2_S2R_e2e_Crazyflie-mass-33_200-100-frequency_updated-hyperparameters-08.04.2025_10.14.08' \
---algorithm 'ppo' --parallel-environments 4 --time-steps 30000000
+python3 -m python_scripts.execute_sequential_learning  --environment 'Hovering' \
+ --learning-id 'Hovering_S2R' --algorithm 'ppo' --parallel-environments 4 --time-steps 30000000
 
 echo "Training finished at $(date)"
