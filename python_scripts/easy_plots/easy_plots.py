@@ -78,7 +78,7 @@ def _interior_axes(create: bool, axes: plt.Axes, settings: dict) -> any:
 
     return None
 
-
+# TODO: [A] To be improved the positioning and setup of the legend
 def _get_legend_settings(mode: str) -> dict:
     legend_settings = {
         'NONE': {},
