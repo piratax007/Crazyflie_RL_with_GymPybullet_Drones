@@ -113,22 +113,24 @@ $ python3 -m python_scripts.simulation_script --polity_path results/some_trained
 #### crazyflie_firmware_nn_compute
 The modules inside this directory are used for export a policy trained using GymPybullet Drones to C code that can
 be added to the Crazyflie firmware [4] to be deployed on real hardware.
-- `c_code_blocks.py` contains the general definitions and the forward propagation loops. If the structure of the
-  policy differs from 12 inputs - 64 nodes (tanh) - 64 nodes (tanh) - 4 outputs, you should edit this file in
-  consequence.
+- `c_code_blocks.py` contains the general definitions and the forward propagation through two algorithms 1.) nested 
+  for loops, and 2.) unrolled for. If the structure of the policy differs from 12 inputs - 64 nodes (tanh) - 64 
+  nodes (tanh) - 4 outputs, you must edit this file in consequence.
 - `crazyflie_firmware_nn_compute.py` This module is used for exporting to C code the weights and bias of a trained
   policy, and generate the `nn_compute.c` file that should replace the homonymous files in the Crazyflie firmware at
   `/examples/app_nn_controller/src`.
   - **How to:**
     - `python3 -m python_scripts.crazyflie_firmware_nn_compute.crazyflie_firmware_nn_compute 
-    path_to_the_policy/best_model.zip -o path_to_the_directory_to_put/nn_compute.c -p true`
+    path_to_the_policy/best_model.zip -f 'for-based' -o path_to_the_directory_to_put/nn_compute.c -p true`
     - The `path_to_the_policy` is a mandatory argument pointing to the trained policy `best_model.zip`
+    - The `-f` argument is optional pointing to the algorithm used for the forward propagation. The default value is
+      `for-based`, and the alternative option is `unrolled-based`.
     - The `-o` argument is optional pointing to the directory that will contain the `nn_compute.c` file. If it is not
       specified the `nn_compute.c` file will be saved in the current directory.
     - The `-p` optional argument will previsualice in console the content of the `nn_compute.c` file.
 
 Once you have generated the `nn_compute.c` file, copy that file into the `examples/app_nn_controller/src` directory on
-the Crazyflie firmware [4]. You are ready to test your trained policy on a real Crazyflie.
+the Crazyflie firmware[4]. You are ready to test your trained policy on a real Crazyflie.
 
 ### crazyflie-firmware
 This is a modified version of the Crazyflie firmware that implements an OOT controller which uses a neural network 

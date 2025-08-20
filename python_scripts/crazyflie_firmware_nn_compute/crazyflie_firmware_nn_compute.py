@@ -83,7 +83,8 @@ def code_preview(code: str) -> None:
     console.print(syntax)
 
 
-def generate_c_nn_compute(model_path: str, output_file: str, preview: bool = False):
+def generate_c_nn_compute(model_path: str, forward_pass_method: str, output_file: str, preview: bool = \
+    False):
     c_source = ""
     try:
         model_params = get_model_parameters(model_path)
@@ -92,12 +93,12 @@ def generate_c_nn_compute(model_path: str, output_file: str, preview: bool = Fal
 
     layers_weights_ids, layer_bias_ids = get_policy_parameters_ids(model_params)
 
-    c_source += headers_nn_compute
+    c_source += headers_nn_compute[forward_pass_method]
     c_source += string_policy_structure(get_policy_structure(model_params))
     c_source += output_arrays
     c_source += string_layer_weights(layers_weights_ids, model_params)
     c_source += string_layer_bias(layer_bias_ids, model_params)
-    c_source += forward_pass_function
+    c_source += forward_pass_function[forward_pass_method]
 
     if preview:
         code_preview(c_source)
@@ -113,6 +114,13 @@ def get_execution_arguments() -> argparse.Namespace:
         'model',
         type=str,
         help="The path should point to a zip file containing the trained model"
+    )
+    parser.add_argument(
+        '-f', '--forward-pass-method',
+        type=str,
+        default="for-based",
+        choices=["for-based", "unrolled-for"],
+        help="The method to compute the forward pass (for loop based or unrolled for)."
     )
     parser.add_argument(
         '-o', '--output-file',
@@ -132,4 +140,4 @@ def get_execution_arguments() -> argparse.Namespace:
 if __name__ == '__main__':
     args = get_execution_arguments()
 
-    generate_c_nn_compute(args.model, args.output_file, args.code_preview)
+    generate_c_nn_compute(args.model, args.forward_pass_method, args.output_file, args.code_preview)
