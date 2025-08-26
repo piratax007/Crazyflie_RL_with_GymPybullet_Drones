@@ -1,21 +1,21 @@
 headers_nn_compute = {'for-based':"""
 #include "nn_compute.h"
 
-#define g 9.82
-#define mass 0.033
-#define kf 3.16e-10
+#define g 9.82f
+#define mass 0.033f
+#define kf 3.16e-10f
 #define hoverRPM sqrtf((g * mass) / (4 * kf))
 
 """,
 'unrolled-for':"""
 #include "nn_compute.h"
 
-#define g 9.82
-#define mass 0.033
-#define kf 3.16e-10
+#define g 9.82f
+#define mass 0.033f
+#define kf 3.16e-10f
 
 typedef enum { ACT_LINEAR = 0, ACT_TANH = 1 } nn_activation_t;
-static const float kHoverRPM = (float)sqrt((g * mass) / (4.0f * kf));
+static const float kHoverRPM = sqrtf((g * mass) / (4.0f * kf));
 
 """}
 
@@ -42,7 +42,7 @@ void neuralNetworkComputation(struct control_t_n *control_n, const float *state_
         for (int j = 0; j < structure[1][1]; j++) {
             output_1[i] += output_0[j] * mlp_extractor_policy_net_2_weight[i][j];
         }
-        output_1[i] += mlp_extractor_policy_net_2_bias[1];
+        output_1[i] += mlp_extractor_policy_net_2_bias[i];
         output_1[i] = tanhf(output_1[i]);
     }
     
@@ -90,7 +90,7 @@ void neuralNetworkComputation(struct control_t_n *control_n, const float *state_
         &mlp_extractor_policy_net_0_weight[0][0],
         &mlp_extractor_policy_net_0_bias[0],
         &output_0[0],
-        64, 12, ACT_TANH
+        structure[0][0], structure[0][1], ACT_TANH
     );
 
     dense_fma(
@@ -98,7 +98,7 @@ void neuralNetworkComputation(struct control_t_n *control_n, const float *state_
         &mlp_extractor_policy_net_2_weight[0][0],
         &mlp_extractor_policy_net_2_bias[0],
         &output_1[0],
-        64, 64, ACT_TANH
+        structure[1][0], structure[1][1], ACT_TANH
     );
 
     dense_fma(
@@ -106,7 +106,7 @@ void neuralNetworkComputation(struct control_t_n *control_n, const float *state_
         &action_net_weight[0][0],
         &action_net_bias[0],
         &output_2[0],
-        4, 64, ACT_LINEAR
+        structure[2][0], structure[2][1], ACT_LINEAR
     );
     
     control_n->rpm_0 = kHoverRPM * (1.0f + 0.05f * output_2[0]);

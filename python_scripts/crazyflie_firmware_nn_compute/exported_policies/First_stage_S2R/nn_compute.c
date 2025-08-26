@@ -32,7 +32,7 @@ void neuralNetworkComputation(struct control_t_n *control_n, const float *state_
         for (int j = 0; j < structure[1][1]; j++) {
             output_1[i] += output_0[j] * mlp_extractor_policy_net_2_weight[i][j];
         }
-        output_1[i] += mlp_extractor_policy_net_2_bias[1];
+        output_1[i] += mlp_extractor_policy_net_2_bias[i];
         output_1[i] = tanhf(output_1[i]);
     }
     
