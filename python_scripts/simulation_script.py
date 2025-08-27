@@ -433,14 +433,13 @@ def run_simulation(
     start = time.time()
 
     for i in range(simulation_seconds):
-        action, _states = policy.predict(obs,
+        clipped_actions, _states = policy.predict(obs,
                                          deterministic=True
                                          )
 
-        obs, reward, terminated, truncated, info = test_env.step(action)
-        actions = test_env._getDroneStateVector(0)[16:20]
+        obs, reward, terminated, truncated, info = test_env.step(clipped_actions)
+        clipped_rpm = test_env._getDroneStateVector(0)[16:20].squeeze()
         quaternion = test_env._getDroneStateVector(0)[3:7]
-        actions2 = actions.squeeze()
         obs2 = obs.squeeze()
 
         if debug:
@@ -452,7 +451,8 @@ def run_simulation(
             Linear Velocity: {obs[0][6:9]}
             Angular Velocity: {obs[0][9:12]}
             -----------------------------------------------------------------
-            Actions: type {type(action)} value {action}
+            Raw Actions Clipped: type {type(clipped_actions)} value {clipped_actions}
+            Raw RPM Clipped: {clipped_rpm}
             Terminated: {terminated}
             Truncated: {truncated}
             -----------------------------------------------------------------
@@ -466,7 +466,7 @@ def run_simulation(
             state=np.hstack([obs2[0:3],
                              quaternion,
                              obs2[3:12],
-                             actions2
+                             clipped_rpm
                              ]),
             reward=reward,
             control=np.zeros(12)
