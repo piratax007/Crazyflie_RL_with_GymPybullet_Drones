@@ -177,22 +177,19 @@ class Logger(object):
             with open(csv_dir + "/qw" + str(i) + ".csv", 'wb') as out_file:
                 np.savetxt(out_file, np.transpose(np.vstack([t, self.states[i, 19, :]])), delimiter=",")
             ####
-            with open(csv_dir + "/r" + str(i) + ".csv", 'wb') as out_file:
+            with open(csv_dir + "/rollDeg" + str(i) + ".csv", 'wb') as out_file:
                 np.savetxt(out_file, np.transpose(np.vstack([t, list(map(lambda angle: (angle * 180) / np.pi, self.states[i, 6, :]))])), delimiter=",")
-            with open(csv_dir + "/p" + str(i) + ".csv", 'wb') as out_file:
+            with open(csv_dir + "/pitchDeg" + str(i) + ".csv", 'wb') as out_file:
                 np.savetxt(out_file, np.transpose(np.vstack([t, list(map(lambda angle: (angle * 180) / np.pi, self.states[i, 7, :]))])), delimiter=",")
-            with open(csv_dir + "/ya" + str(i) + ".csv", 'wb') as out_file:
+            with open(csv_dir + "/yawDeg" + str(i) + ".csv", 'wb') as out_file:
                 np.savetxt(out_file, np.transpose(np.vstack([t, list(map(lambda angle: (angle * 180) / np.pi, self.states[i, 8, :]))])), delimiter=",")
             ####
-            with open(csv_dir + "/rr" + str(i) + ".csv", 'wb') as out_file:
-                rdot = np.hstack([0, (self.states[i, 6, 1:] - self.states[i, 6, 0:-1]) * self.LOGGING_FREQ_HZ])
-                np.savetxt(out_file, np.transpose(np.vstack([t, rdot])), delimiter=",")
-            with open(csv_dir + "/pr" + str(i) + ".csv", 'wb') as out_file:
-                pdot = np.hstack([0, (self.states[i, 7, 1:] - self.states[i, 7, 0:-1]) * self.LOGGING_FREQ_HZ])
-                np.savetxt(out_file, np.transpose(np.vstack([t, pdot])), delimiter=",")
-            with open(csv_dir + "/yar" + str(i) + ".csv", 'wb') as out_file:
-                ydot = np.hstack([0, (self.states[i, 8, 1:] - self.states[i, 8, 0:-1]) * self.LOGGING_FREQ_HZ])
-                np.savetxt(out_file, np.transpose(np.vstack([t, ydot])), delimiter=",")
+            with open(csv_dir + "/rollRad" + str(i) + ".csv", 'wb') as out_file:
+                np.savetxt(out_file, np.transpose(np.vstack([t, self.states[i, 6, :]])), delimiter=",")
+            with open(csv_dir + "/pitchRad" + str(i) + ".csv", 'wb') as out_file:
+                np.savetxt(out_file, np.transpose(np.vstack([t, self.states[i, 7, :]])), delimiter=",")
+            with open(csv_dir + "/yawRad" + str(i) + ".csv", 'wb') as out_file:
+                np.savetxt(out_file, np.transpose(np.vstack([t, self.states[i, 8, :]])), delimiter=",")
             ###
             with open(csv_dir + "/vx" + str(i) + ".csv", 'wb') as out_file:
                 np.savetxt(out_file, np.transpose(np.vstack([t, self.states[i, 3, :]])), delimiter=",")
