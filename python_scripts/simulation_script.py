@@ -7,7 +7,7 @@ import pybullet as p
 from scipy.interpolate import splprep, splev
 from scipy.spatial.transform import Rotation as R
 from stable_baselines3 import PPO, SAC, DDPG, TD3
-from gym_pybullet_drones.utils.Logger import Logger
+from python_scripts.Logger import Logger
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 from gym_pybullet_drones.utils.utils import sync, str2bool
 
