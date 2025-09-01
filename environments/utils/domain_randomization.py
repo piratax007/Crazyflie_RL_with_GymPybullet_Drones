@@ -43,7 +43,7 @@ class DomainRandomizationMixin:
                 p.changeDynamics(
                     uid, -1,
                     localInertiaDiagonal = (np.asarray(dynamics_info) * float(scale_inertia)).tolist(),
-                    physicsClientID = self.CLIENT
+                    physicsClientId = self.CLIENT
                 )
 
     def _refresh_arm_dependent_terms(self, old_L: float | None = None):

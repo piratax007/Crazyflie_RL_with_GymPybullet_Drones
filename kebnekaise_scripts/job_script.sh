@@ -14,7 +14,7 @@ echo "Training started at $(date)"
 
 echo "CURRENT PATH $(pwd)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'HoveringQuat' \
- --learning-id 'Hovering-Quaternion_S2R' --algorithm 'ppo' --parallel-environments 4 --time-steps 30000000
+python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage1Sim2RealDomainRandomization' \
+ --learning-id 'Fist-CL-stage_s2r_e2e_dr' --algorithm 'ppo' --parallel-environments 4 --time-steps 30000000
 
 echo "Training finished at $(date)"
