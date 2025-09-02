@@ -1,32 +1,30 @@
 import numpy as np
-from gymnasium import spaces
-
-from environments.utils.domain_randomization import DomainRandomizationMixin
-from environments.BaseRLAviary import BaseRLAviary
+from environments.CL_Stage1_S2R_e2e_dr import CLStage1Sim2RealDomainRandomization
 from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, ObservationType
+import pybullet as p
 
 
-class CLStage1Sim2RealDomainRandomization(DomainRandomizationMixin, BaseRLAviary):
+class CLStage2Sim2RealDomainRandomization(CLStage1Sim2RealDomainRandomization):
     def __init__(self,
                  drone_model: DroneModel = DroneModel.CF2X,
                  initial_xyzs=np.array([[0, 0, 0]]),
                  initial_rpys=np.array([[0, 0, 0]]),
                  target_xyzs=np.array([0, 0, 1]),
+                 target_rpys = np.array([[0, 0, 0]]),
                  physics: Physics = Physics.PYB,
                  pyb_freq: int = 200,
                  ctrl_freq: int = 100,
                  gui=False,
                  record=False,
                  observation_space: ObservationType = ObservationType.KIN,
-                 action_space: ActionType = ActionType.RPM,
-                 *arg, **kwargs
+                 action_space: ActionType = ActionType.RPM
                  ):
         self.INIT_XYZS = initial_xyzs
         self.TARGET_POS = target_xyzs
+        self.TARGET_ORIENTATION = target_rpys
         self.EPISODE_LENGTH_SECONDS = 5
         self.LOG_ANGULAR_VELOCITY = np.zeros((1, 3))
         super().__init__(drone_model=drone_model,
-                         num_drones=1,
                          initial_xyzs=initial_xyzs,
                          initial_rpys=initial_rpys,
                          physics=physics,
@@ -34,20 +32,20 @@ class CLStage1Sim2RealDomainRandomization(DomainRandomizationMixin, BaseRLAviary
                          ctrl_freq=ctrl_freq,
                          gui=gui,
                          record=record,
-                         obs=observation_space,
-                         act=action_space,
-                         *arg, **kwargs
+                         observation_space=observation_space,
+                         action_space=action_space
                          )
 
     ################################################################################
 
     def _target_error(self, state):
-        return np.linalg.norm(self.TARGET_POS - state[0:3])
+        return (np.linalg.norm(self.TARGET_POS - state[0:3]) +
+                np.linalg.norm(self.TARGET_ORIENTATION - state[7:10]))
 
     def _is_away_from_exploration_area(self, state):
         return (np.linalg.norm(state[0:2] - self.TARGET_POS[0:2]) >
                 np.linalg.norm(self.INIT_XYZS[0][0:2] - self.TARGET_POS[0:2]) + 0.025 or
-                state[2] > self.TARGET_POS[2] + 0.1)
+                state[2] > self.TARGET_POS[2] + 0.025)
 
     def _is_closed(self, state):
         return np.linalg.norm(state[0:3] - self.TARGET_POS[0:3]) < 0.025
@@ -106,31 +104,61 @@ class CLStage1Sim2RealDomainRandomization(DomainRandomizationMixin, BaseRLAviary
 
         return False
 
-    ################################################################################
+    @staticmethod
+    def _random_cylindrical_positions(
+            inner_radius: float = 0.0,
+            outer_radius: float = 1.5,
+            cylinder_height: float = 1.5,
+            cylinder_center: tuple = (0, 0, 1),
+            mode: str = "inside",
+            min_distance: float = 0.0,
+            max_distance: float = 0.0
+    ) -> tuple:
+        cx, cy, cz = cylinder_center
 
-    def _computeInfo(self):
-        return {"answer": 42}  # Calculated by the Deep Thought supercomputer in 7.5M years
+        if mode == "inside":
+            r = np.sqrt(np.random.uniform(inner_radius ** 2, outer_radius ** 2))
+        elif mode == "outside":
+            r = np.sqrt(np.random.uniform((outer_radius + min_distance) ** 2, (outer_radius + max_distance) ** 2))
+        else:
+            r = 0
 
-    ################################################################################
+        theta = np.random.uniform(0, 2 * np.pi)
+        z = np.random.uniform(-cylinder_height / 2, cylinder_height / 2 + max_distance)
 
-    def _observationSpace(self):
-        lo = -np.inf
-        hi = np.inf
-        obs_lower_bound = np.array([[lo, lo, 0, lo, lo, lo, lo, lo, lo, lo, lo, lo]])
-        obs_upper_bound = np.array([[hi, hi, hi, hi, hi, hi, hi, hi, hi, hi, hi, hi]])
-        return spaces.Box(low=obs_lower_bound, high=obs_upper_bound, dtype=np.float32)
+        x = cx + r * np.cos(theta)
+        y = cy + r * np.sin(theta)
+        z = cz + z
 
-    ################################################################################
+        return x, y, z
 
-    def _computeObs(self):
-        obs_12 = np.zeros((self.NUM_DRONES, 12))
-        for i in range(self.NUM_DRONES):
-            obs = self._getDroneStateVector(i)
-            obs_12[i, :] = np.hstack([
-                obs[0:3] + np.random.normal(0.0, 0.001, 3),
-                obs[7:10] + np.random.normal(0.0, 0.002, 3),
-                obs[10:13] + np.random.normal(0.0, 0.001, 3),
-                obs[13:16] + np.random.normal(0.0, 0.002, 3),
-            ]).reshape(12, )
-        ret = np.array([obs_12[i, :] for i in range(self.NUM_DRONES)]).astype('float32')
-        return ret
+    def reset(
+            self,
+            seed: int = None,
+            option: dict = None,
+    ):
+        obs, info = super.reset(seed=seed, option=option)
+
+        dr_params = info.get("dr_params", {})
+
+        self.INIT_XYZS = np.array(
+            [[*self._random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]])
+        p.resetBasePositionAndOrientation(
+            self.DRONE_IDS[0],
+            self.INIT_XYZS[0],
+            p.getQuaternionFromEuler(self.INIT_RPYS[0]),
+            physicsClientId=self.CLIENT
+        )
+
+        self._updateAndStoreKinematicInformation()
+        obs2 = self._computeObs()
+        info2 = self._computeInfo()
+
+        if dr_params is not None:
+            info2["dr_params"] = dr_params
+
+        for k, v in info.items():
+            if k not in info2:
+                info2[k] = v
+
+        return obs2, info2
