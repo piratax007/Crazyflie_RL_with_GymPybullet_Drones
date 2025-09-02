@@ -135,11 +135,11 @@ class CLStage2Sim2RealDomainRandomization(CLStage1Sim2RealDomainRandomization):
     def reset(
             self,
             seed: int = None,
-            option: dict = None,
+            options: dict = None,
     ):
-        obs, info = super.reset(seed=seed, option=option)
+        obs, info = super().reset(seed=seed, options=options)
 
-        dr_params = info.get("dr_params", {})
+        dr_params = info.get("dr_params", None)
 
         self.INIT_XYZS = np.array(
             [[*self._random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]])
@@ -151,14 +151,14 @@ class CLStage2Sim2RealDomainRandomization(CLStage1Sim2RealDomainRandomization):
         )
 
         self._updateAndStoreKinematicInformation()
-        obs2 = self._computeObs()
-        info2 = self._computeInfo()
+        obs_new = self._computeObs()
+        info_new = self._computeInfo()
 
         if dr_params is not None:
-            info2["dr_params"] = dr_params
+            info_new["dr_params"] = dr_params
 
         for k, v in info.items():
-            if k not in info2:
-                info2[k] = v
+            if k not in info_new:
+                info_new[k] = v
 
-        return obs2, info2
+        return obs_new, info_new
