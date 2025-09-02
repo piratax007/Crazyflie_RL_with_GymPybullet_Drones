@@ -14,8 +14,8 @@ echo "Training started at $(date)"
 
 echo "CURRENT PATH $(pwd)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage2Sim2Real' \
- --learning-id 'Second-CL-stage_s2r_e2e_dr-only-on-firstStage' --algorithm 'ppo' --parallel-environments 4 \
+python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage2Sim2RealDomainRandomization' \
+ --learning-id 'Second-CL-stage_s2r_e2e_dr' --algorithm 'ppo' --parallel-environments 4 \
  --continuous-learning True --path-to-previous-model 'results/save-Fist-CL-stage_s2r_e2e_dr-09.01.2025_11.41.51' \
  --time-steps 30000000
 
