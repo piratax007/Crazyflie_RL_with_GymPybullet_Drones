@@ -10,3 +10,5 @@ slurm-*
 best_model.zip
 poetry.lock
 pyproject.toml
+.out
+.err
