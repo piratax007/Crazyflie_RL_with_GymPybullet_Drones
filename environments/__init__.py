@@ -7,6 +7,7 @@ from environments.hovering import Hovering
 from environments.hovering_quat import HoveringQuat
 from environments.CL_Stage1_S2R_e2e_dr import CLStage1Sim2RealDomainRandomization
 from environments.CL_Stage2_S2R_e2e_dr import CLStage2Sim2RealDomainRandomization
+from environments.CL_Stage3_S2R_e2e_dr import CLStage3Sim2RealDomainRandomization
 
 environment_map = {
     'CLStage1Sim2Real': CLStage1Sim2Real,
@@ -15,5 +16,6 @@ environment_map = {
     'Hovering': Hovering,
     'HoveringQuat': HoveringQuat,
     'CLStage1Sim2RealDomainRandomization': CLStage1Sim2RealDomainRandomization,
-    'CLStage2Sim2RealDomainRandomization': CLStage2Sim2RealDomainRandomization
+    'CLStage2Sim2RealDomainRandomization': CLStage2Sim2RealDomainRandomization,
+    'CLStage3Sim2RealDomainRandomization': CLStage3Sim2RealDomainRandomization,
 }
