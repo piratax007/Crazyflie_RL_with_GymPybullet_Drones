@@ -2,7 +2,7 @@
 #SBATCH -A hpc2n2024-120
 #SBATCH -t 168:00:00
 #SBATCH -n 1
-#SBATCH -c 4
+#SBATCH -c 8
 
 ml purge > /dev/null 2>&1
 ml GCC/12.3.0 OpenMPI/4.1.5
@@ -15,9 +15,9 @@ echo "Optimization started at $(date)"
 
 echo "CURRENT PATH $(pwd)"
 
-python3 -m optimize_ppo --env-id 'CLStage1Sim2RealDomainRandomization' \
+python3 -m python_scripts.optimize_ppo --env_id 'CLStage1Sim2RealDomainRandomization' \
  --study_name 'Big_Domain_Randomization' --storage sqlite:///optuna_cf.db \
- --total-timesteps 30000000 --eval-freq 10000 --n-trials 200 \
- --tpe-constant-liar
+ --total_timesteps 30000000 --eval_freq 10000 --n_trials 200 \
+ --tpe_constant_liar
 
 echo "Optimization finished at $(date)"

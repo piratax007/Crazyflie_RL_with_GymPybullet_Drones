@@ -209,9 +209,9 @@ def main() -> None:
         pruner=pruner,
     )
 
-    environment_class = environment_map.get(args.environment)
+    environment_class = environment_map.get(args.env_id)
     if environment_class is None:
-        raise ValueError(f'Unknown environment: {args.environment}')
+        raise ValueError(f'Unknown environment: {args.env_id}')
 
     config = StudyConfig(
         env_id=environment_class,
