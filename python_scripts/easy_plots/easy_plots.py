@@ -279,6 +279,16 @@ def single_axes_3d(
     plt.show()
 
 
+def _axes_handler(axes, axes_arrangement: dict, row_index: int, column_index: int) -> plt.Axes:
+    if axes_arrangement['columns'] == 1:
+        return axes[row_index]
+
+    if axes_arrangement['rows'] == 1:
+        return axes[column_index]
+
+    return axes[row_index, column_index]
+
+
 def multiple_axes_2d(
         subplots: dict,
         content_specification: dict,
@@ -299,12 +309,12 @@ def multiple_axes_2d(
             _traces_from_csv(
                 content_specification[traces_key]['files'],
                 content_specification[traces_key]['labels'],
-                axes[row] if subplots['columns'] == 1 else axes[row, col],
+                _axes_handler(axes, subplots, row, col),
                 content_specification[traces_key]['references'],
                 **colors
             )
             _set_axes(
-                axes[row] if subplots['columns'] == 1 else axes[row, col],
+                _axes_handler(axes, subplots, row, col),
                 content_specification[traces_key]['settings']
             )
 
