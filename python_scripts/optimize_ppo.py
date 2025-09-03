@@ -13,6 +13,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env import SubprocVecEnv
+from environments import environment_map
 
 
 @dataclass(frozen=True)
@@ -208,8 +209,12 @@ def main() -> None:
         pruner=pruner,
     )
 
+    environment_class = environment_map.get(args.environment)
+    if environment_class is None:
+        raise ValueError(f'Unknown environment: {args.environment}')
+
     config = StudyConfig(
-        env_id=args.env_id,
+        env_id=environment_class,
         total_timesteps=args.total_timesteps,
         eval_freq=args.eval_freq,
         n_eval_episodes=args.n_eval_episodes,
