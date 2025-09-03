@@ -15,8 +15,8 @@ echo "Optimization started at $(date)"
 
 echo "CURRENT PATH $(pwd)"
 
-python3 -m python_scripts.optimize_ppo --env_id 'CLStage1Sim2RealDomainRandomization' \
- --study_name 'Big_Domain_Randomization' --storage sqlite:///optuna_cf.db \
+python3 -m python_scripts.optimize_ppo --env_id 'CLStage1S2RE2EDRQuat' \
+ --study_name 'Domain_Randomization_Quaternion' --storage sqlite:///optuna_cf.db \
  --total_timesteps 30000000 --eval_freq 10000 --n_trials 200 \
  --tpe_constant_liar
 

@@ -1,13 +1,14 @@
 import numpy as np
 from gymnasium import spaces
+from environments.utils.domain_randomization import DomainRandomizationMixin
 from environments.BaseRLAviary import BaseRLAviary
 from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, ObservationType
 
 
-class HoveringQuat(BaseRLAviary):
+class CLStage1S2RE2EDRQuat(DomainRandomizationMixin, BaseRLAviary):
     def __init__(self,
                  drone_model: DroneModel = DroneModel.CF2X,
-                 initial_xyzs=np.array([[0, 0, 1]]),
+                 initial_xyzs=np.array([[0, 0, 0]]),
                  initial_rpys=np.array([[0, 0, 0]]),
                  target_xyzs=np.array([0, 0, 1]),
                  physics: Physics = Physics.PYB,

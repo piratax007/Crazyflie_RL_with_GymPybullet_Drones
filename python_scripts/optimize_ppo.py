@@ -175,7 +175,7 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Optuna-SB3 PPO search for Crazyflie")
     p.add_argument("-e", "--env_id", type=str, required=True)
     p.add_argument("-s", "--study_name", type=str, default="ppo_hyperparameters")
-    p.add_argument("--storage", type=str, default="sqlite://optuna_cf.db")
+    p.add_argument("--storage", type=str, default="sqlite:///optuna_cf.db")
     p.add_argument("--total_timesteps", type=int, default=20_000_000)
     p.add_argument("--eval_freq", type=int, default=10_000)
     p.add_argument("--n_eval_episodes", type=int, default=10)
