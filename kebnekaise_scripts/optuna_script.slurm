@@ -50,8 +50,8 @@ export PYTHONUNBUFFERED=1
 OPT_MODULE="python_scripts.optimize_ppo"  # entrypoint: python -m python_scripts.optimize_ppo
 
 # Crazyflie env + study
-ENV_ID="CLStage1S2RE2EDRQuat"
-STUDY_NAME="Domain_Randomization_Quaternion"
+ENV_ID="CLStage1Sim2RealDomainRandomization"
+STUDY_NAME="Big_Domain_Randomization"
 
 # Global trial budget across ALL workers
 TOTAL_TRIALS=100
