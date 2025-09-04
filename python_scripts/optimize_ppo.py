@@ -71,13 +71,16 @@ class PruningEvalCallback(EvalCallback):
             trial: Trial,
             n_eval_episodes: int,
             eval_freq: int,
+            save_best_path: str
     ):
         super().__init__(
             eval_env=eval_env,
             n_eval_episodes=n_eval_episodes,
             eval_freq=max(eval_freq, 1),
             deterministic=True,
-            verbose=0
+            verbose=1,
+            best_model_save_path=save_best_path,
+            log_path=save_best_path
         )
         self.trial = trial
         self.eval_index = 0
@@ -112,11 +115,13 @@ def train_and_score(trial: Trial, config: StudyConfig) -> float:
         **hyperparameters
     )
 
+    save_path = os.path.join(working_directory, "best_model")
     eval_callback = PruningEvalCallback(
         eval_env=eval_environment,
         trial=trial,
         n_eval_episodes=config.n_eval_episodes,
-        eval_freq=max(config.eval_freq // config.n_envs, 1)
+        eval_freq=max(config.eval_freq // config.n_envs, 1),
+        save_best_path=save_path
     )
 
     nan_or_fail = False
@@ -128,7 +133,7 @@ def train_and_score(trial: Trial, config: StudyConfig) -> float:
         nan_or_fail = True
     finally:
         if getattr(eval_callback, "best_mean_reward", None) is not None and np.isfinite(eval_callback.best_mean_reward):
-            model.save(os.path.join(working_directory, "best", "best_model"))
+            model.save(os.path.join(working_directory, "best_model", "best_model"))
 
         train_environment.close()
         eval_environment.close()
@@ -181,11 +186,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--n_eval_episodes", type=int, default=10)
     p.add_argument("--n_trials", type=int, default=100)
     p.add_argument("--n_jobs", type=int, default=1)
-    p.add_argument("--n_envs", type=int, default=1)
+    p.add_argument("--n_envs", type=int, default=4)
     p.add_argument("--seed", type=int, default=39)
     p.add_argument("--log_dir", type=str, default="results/optuna_logs")
     p.add_argument("--policy", type=str, default="MlpPolicy")
-    p.add_argument("--n_startup_trials", type=int, default=10)
+    p.add_argument("--n_startup_trials", type=int, default=2)
     p.add_argument("--n_evaluations", type=int, default=2)
     p.add_argument("--tpe_constant_liar", action="store_true")
 
