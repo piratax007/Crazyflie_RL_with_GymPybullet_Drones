@@ -112,12 +112,12 @@ def run_learning(environment,
     model_map = {
         'ppo': (
             PPO, {
-                'batch_size': 256,
-                'learning_rate': 2e-4,
+                'batch_size': 128,
+                'learning_rate': 0.0023384723026663875,
                 'n_steps': 8192,
-                'n_epochs': 5,
-                'clip_range': 0.1,
-                'ent_coef': 0.001
+                'n_epochs': 7,
+                'clip_range': 0.13411982868029332,
+                'ent_coef': 0.00016305445941340477
             }
         ),
         'sac': (SAC, {}),
