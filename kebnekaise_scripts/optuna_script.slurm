@@ -12,6 +12,15 @@
 
 set -euo pipefail
 
+cleanup() {
+  if [ -n "${SNAP_PID:-}" ] && kill -0 "{SNAP_PID}" 2>/dev/null; then
+    kill "${SNAP_PID}" 2>/dev/null || true
+    wait "${SNAP_PID}" 2>/dev/null || true
+  fi
+  jobs -pr | xargs -r kill 2>/dev/null || true
+}
+trap cleanup EXIT INT TERM
+
 ########################################
 # Repo root detection via SLURM_SUBMIT_DIR
 ########################################
@@ -131,6 +140,7 @@ REMAINDER=$(( TOTAL_TRIALS % NTASKS ))
 echo "Workers: ${NTASKS} | Total trials: ${TOTAL_TRIALS} -> per worker: ${TRIALS_EACH} (+1 for first ${REMAINDER})"
 echo "DB path: ${DB_PATH}"
 
+PIDS=""
 RANK=0
 while [ "${RANK}" -lt "${NTASKS}" ]; do
   WORKER_TRIALS="${TRIALS_EACH}"
@@ -147,7 +157,7 @@ while [ "${RANK}" -lt "${NTASKS}" ]; do
   # Stagger starts slightly to reduce SQLite connect bursts
   sleep $((RANK % 3))
 
-  srun --exclusive -N1 -n1 \
+  srun --kill-on-bad-exit=1 --exclusive -N1 -n1 \
     python3 -m "${OPT_MODULE}" \
       --env_id "${ENV_ID}" \
       --study_name "${STUDY_NAME}" \
@@ -165,11 +175,15 @@ while [ "${RANK}" -lt "${NTASKS}" ]; do
       --seed $((SEED_BASE + RANK)) \
       ${EXTRA_FLAG} \
     > "worker_${SLURM_JOB_ID:-job}_${RANK}.out" 2>&1 &
+  PIDS="${PIDS} $!"
 
   RANK=$((RANK + 1))
 done
 
 wait
+for pid in $PIDS; do
+  wait "$pid"
+done
 echo "All workers finished."
 
 # Persist DB if created
