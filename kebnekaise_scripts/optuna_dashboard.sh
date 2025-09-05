@@ -25,9 +25,9 @@ resolve_db_file() {
 }
 
 load_env() {
-  module load GCC/12.3.0 OpenMPI/4.1.5 tensoboard/2.15.1 Optuna/3.5.0
+  module load GCC/12.3.0 OpenMPI/4.1.5 tensorboard/2.15.1 Optuna/3.5.0
   # shellcheck disable=SC1090
-  source "#VENV_ACTIVATE"
+  source "$VENV_ACTIVATE"
 }
 
 run_dashboard() {
