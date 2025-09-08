@@ -14,9 +14,9 @@ echo "Training started at $(date)"
 
 echo "CURRENT PATH $(pwd)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage2S2RE2EDRQuat' \
- --learning-id 'Second-Stage_s2r-e2e-dr-quaterion' --algorithm 'ppo' --parallel-environments 4 \
- --continuous-learning True --path-to-previous-model 'results/save-First-Stage_s2r-e2e-dr-quaternion-09.05.2025_10.53.40' \
+python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage3Sim2RealDomainRandomization' \
+ --learning-id 'Third-Stage_s2r-e2e-dr' --algorithm 'ppo' --parallel-environments 4 \
+ --continuous-learning True --path-to-previous-model 'results/save-Second-Stage_s2r-e2e-dr-09.07.2025_17.15.35' \
  --time-steps 30000000
 
 echo "Training finished at $(date)"
