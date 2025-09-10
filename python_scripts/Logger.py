@@ -524,7 +524,7 @@ class Logger(object):
 
         plt.show()
 
-    def plot_rpms(self):
+    def plot_pwms(self):
         font = {'family': 'serif', 'weight': 'normal', 'size': 25}
         plt.rc('font', **font)
 
@@ -535,25 +535,25 @@ class Logger(object):
         col = 0
 
         row = 0
-        axs[row, col].plot(t, self.states[0, 12], label="drone_" + str(0))
+        axs[row, col].plot(t, (self.states[0, 12] - 4070.3)/0.2685, label="drone_" + str(0))
         axs[row, col].set_xlabel('time')
-        axs[row, col].set_ylabel('RPM_0')
+        axs[row, col].set_ylabel('PWM_0')
 
         row = 1
-        axs[row, col].plot(t, self.states[0, 13], label="drone_" + str(0))
+        axs[row, col].plot(t, (self.states[0, 13] - 4070.3)/0.2685, label="drone_" + str(0))
         axs[row, col].set_xlabel('time')
-        axs[row, col].set_ylabel('RPM_1')
+        axs[row, col].set_ylabel('PWM_1')
 
         col = 1
         row = 0
-        axs[row, col].plot(t, self.states[0, 14], label="drone_" + str(0))
+        axs[row, col].plot(t, (self.states[0, 14] - 4070.3)/0.2685, label="drone_" + str(0))
         axs[row, col].set_xlabel('time')
-        axs[row, col].set_ylabel('RPM_2')
+        axs[row, col].set_ylabel('PWM_2')
 
         row = 1
-        axs[row, col].plot(t, self.states[0, 15], label="drone_" + str(0))
+        axs[row, col].plot(t, (self.states[0, 15] - 4070.3)/0.2685, label="drone_" + str(0))
         axs[row, col].set_xlabel('time')
-        axs[row, col].set_ylabel('RPM_3')
+        axs[row, col].set_ylabel('PWM_3')
 
         plt.show()
 

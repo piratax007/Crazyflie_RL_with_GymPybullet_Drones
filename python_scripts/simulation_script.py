@@ -484,7 +484,7 @@ def run_simulation(
         logger.plot_position_and_orientation()
         # logger.plot_instantaneous_reward()
         # logger.plot()
-        # logger.plot_rpms()
+        logger.plot_pwms()
         # logger.plot_trajectory()
 
     if save:
