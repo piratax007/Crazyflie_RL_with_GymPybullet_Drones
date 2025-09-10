@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH -A hpc2n2024-120
 #SBATCH -J optuna-ppo-cf
-#SBATCH -t 168:00:00
+#SBATCH -t 48:00:00
 #SBATCH -N 1
 #SBATCH --ntasks=10                        # parallel Optuna workers (processes)
 #SBATCH --cpus-per-task=4                 # CPU cores per worker
@@ -38,7 +38,7 @@ cd "${REPO_ROOT}"
 echo "Repo root: ${REPO_ROOT}"
 
 ########################################
-# Environment (edit to your setup)
+# Kebnekaise modules
 ########################################
 ml purge > /dev/null 2>&1
 ml GCC/12.3.0 OpenMPI/4.1.5
@@ -59,8 +59,8 @@ export PYTHONUNBUFFERED=1
 OPT_MODULE="python_scripts.optimize_ppo"  # entrypoint: python -m python_scripts.optimize_ppo
 
 # Crazyflie env + study
-ENV_ID="CLStage1Sim2RealDomainRandomization"
-STUDY_NAME="Big_Domain_Randomization"
+ENV_ID="CLStage1S2RE2EDRNewReward"
+STUDY_NAME="New-Reward"
 
 # Global trial budget across ALL workers
 TOTAL_TRIALS=100
