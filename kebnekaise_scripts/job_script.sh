@@ -14,8 +14,8 @@ echo "Training started at $(date)"
 
 echo "CURRENT PATH $(pwd)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage1S2RE2EDRNewReward' \
- --learning-id 'First-Stage_New-Reward' --algorithm 'ppo' --parallel-environments 4 \
+python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage1Sim2RealDomainRandomization' \
+ --learning-id 'First-Stage_dr_increased-PWM-bounds' --algorithm 'ppo' --parallel-environments 4 \
  --time-steps 30000000
 
 echo "Training finished at $(date)"
