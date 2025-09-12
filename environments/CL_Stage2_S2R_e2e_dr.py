@@ -11,7 +11,7 @@ class CLStage2Sim2RealDomainRandomization(CLStage1Sim2RealDomainRandomization):
                  initial_rpys=np.array([[0, 0, 0]]),
                  target_xyzs=np.array([0, 0, 1]),
                  target_rpys = np.array([[0, 0, 0]]),
-                 physics: Physics = Physics.PYB,
+                 physics: Physics = Physics.PYB_GND,
                  pyb_freq: int = 200,
                  ctrl_freq: int = 100,
                  gui=False,
