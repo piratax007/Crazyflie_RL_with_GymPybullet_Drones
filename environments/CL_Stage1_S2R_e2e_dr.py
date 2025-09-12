@@ -12,7 +12,7 @@ class CLStage1Sim2RealDomainRandomization(DomainRandomizationMixin, BaseRLAviary
                  initial_xyzs=np.array([[0, 0, 0]]),
                  initial_rpys=np.array([[0, 0, 0]]),
                  target_xyzs=np.array([0, 0, 1]),
-                 physics: Physics = Physics.PYB,
+                 physics: Physics = Physics.PYB_GND,
                  pyb_freq: int = 200,
                  ctrl_freq: int = 100,
                  gui=False,

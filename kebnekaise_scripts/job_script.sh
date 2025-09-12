@@ -15,7 +15,7 @@ echo "Training started at $(date)"
 echo "CURRENT PATH $(pwd)"
 
 python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage1Sim2RealDomainRandomization' \
- --learning-id 'First-Stage_dr_increased-PWM-bounds' --algorithm 'ppo' --parallel-environments 4 \
+ --learning-id 'First-Stage_dr_increased-PWM-bounds_physics-GND' --algorithm 'ppo' --parallel-environments 4 \
  --time-steps 30000000
 
 echo "Training finished at $(date)"
