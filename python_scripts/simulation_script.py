@@ -10,6 +10,8 @@ from stable_baselines3 import PPO, SAC, DDPG, TD3
 from python_scripts.Logger import Logger
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 from gym_pybullet_drones.utils.utils import sync, str2bool
+from typing import Deque
+from collections import deque
 
 from environments import environment_map
 
@@ -355,6 +357,19 @@ def add_way_point(position, radius=0.1, color=(1, 0, 0, 0.5)):
     return sphere_id
 
 
+def compute_delay_steps(delay_seconds: float, ctrl_freq_hz: float) -> int:
+    return max(0, int(round(delay_seconds * ctrl_freq_hz)))
+
+
+def make_obs_delay_buffer(initial_obs: np.ndarray, delay_steps: int) -> Deque[np.ndarray]:
+    return deque([initial_obs.copy() for _ in range(delay_steps + 1)], maxlen=delay_steps + 1)
+
+
+def feed_and_get_delayed(buffer: Deque[np.ndarray], latest_obs: np.ndarray) -> np.ndarray:
+    buffer.append(latest_obs.copy())
+    return buffer[0]
+
+
 def run_simulation(
         test_env,
         policy_path,
@@ -367,7 +382,8 @@ def run_simulation(
         save=False,
         plot=False,
         debug=False,
-        comment=""
+        comment="",
+        obs_delay_s: float = 0.0
 ):
     """
     Runs a simulation using the provided environment, policy, and specified parameters.
@@ -391,6 +407,7 @@ def run_simulation(
         plot: Whether to plot logged data graphs after simulation (default: False).
         debug: Whether to enable detailed debug outputs during simulation (default: False).
         comment: Additional comments to include in the saved logs (default: "").
+        obs_delay_s: Seconds to delay the observation vector by (default: 0.0).
 
     Raises:
         KeyError: If the specified algorithm is not available in the model_map dictionary.
@@ -413,8 +430,8 @@ def run_simulation(
     policy = get_policy(model_map[algorithm], policy_path, model)
 
     test_env = test_env(
-        initial_xyzs=np.array([[0.0, 0.0, 0.0]]),
-        initial_rpys=np.array([[0.0, 0.0, 0.0]]),
+        initial_xyzs=np.array([[0.0, 0.0, 1.0]]),
+        initial_rpys=np.array([[-0.2, -0.2, 0.9]]),
         gui=gui,
         observation_space=ObservationType('kin'),
         action_space=ActionType('rpm'),
@@ -428,14 +445,17 @@ def run_simulation(
     )
 
     obs, info = test_env.reset()
+
+    delay_steps = compute_delay_steps(obs_delay_s, test_env.CTRL_FREQ)
+    obs_buffer = make_obs_delay_buffer(obs, delay_steps)
+
     simulation_seconds = simulation_length * test_env.CTRL_FREQ
 
     start = time.time()
 
     for i in range(simulation_seconds):
-        clipped_actions, _states = policy.predict(obs,
-                                         deterministic=True
-                                         )
+        delayed_obs = feed_and_get_delayed(obs_buffer, obs)
+        clipped_actions, _states = policy.predict(delayed_obs, deterministic=True)
 
         obs, reward, terminated, truncated, info = test_env.step(clipped_actions)
         clipped_rpm = test_env._getDroneStateVector(0)[16:20].squeeze()
@@ -548,6 +568,12 @@ if __name__ == '__main__':
         type=str2bool,
         help="Prints debug information"
     )
+    parser.add_argument(
+        '--obs-delay-s',
+        default=0.0,
+        type=float,
+        help="Observation delay (seconds) before the policy receives the observation"
+    )
 
     args = parser.parse_args()
 
@@ -568,4 +594,5 @@ if __name__ == '__main__':
         comment=args.comment,
         plot=args.plot,
         debug=args.debug,
+        obs_delay_s=args.obs_delay_s
     )
