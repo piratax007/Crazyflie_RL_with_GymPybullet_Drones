@@ -4,7 +4,7 @@ headers_nn_compute = {'for-based':"""
 #define g 9.82f
 #define mass 0.033f
 #define kf 3.16e-10f
-#define hoverRPM sqrtf((g * mass) / (4 * kf))
+static const float hoverRPM = sqrtf((g * mass) / (4.0f * kf));
 
 """,
 'unrolled-for':"""
