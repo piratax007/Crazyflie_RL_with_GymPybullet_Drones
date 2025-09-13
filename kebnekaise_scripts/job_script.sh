@@ -14,9 +14,9 @@ echo "Training started at $(date)"
 
 echo "CURRENT PATH $(pwd)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage2Sim2Real' \
- --learning-id 'Second-Stage_dr-only-first-stage_increased-PWM-bounds_physics-GND' --algorithm 'ppo' --parallel-environments 4 \
- --continuous-learning True --path-to-previous-model 'results/save-First-Stage_dr_increased-PWM-bounds_physics-GND-09.11.2025_13.58.00' \
+python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage3Sim2Real' \
+ --learning-id 'Third-Stage_dr-only-first-stage_increased-PWM-bounds_physics-GND' --algorithm 'ppo' --parallel-environments 4 \
+ --continuous-learning True --path-to-previous-model 'results/save-Second-Stage_dr-only-first-stage_increased-PWM-bounds_physics-GND-09.12.2025_10.40.29' \
  --time-steps 30000000
 
 echo "Training finished at $(date)"
