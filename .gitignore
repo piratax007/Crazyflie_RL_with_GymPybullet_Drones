@@ -3,12 +3,13 @@
 .venv/
 environments/__pycache__/
 python_scripts/__pycache__/
-python_scripts/EJC_plots
+environments/utils/__pycache__/
+/kebnekaise_scripts/history/
 /results
 /Alvis_scripts/history
 slurm-*
 best_model.zip
 poetry.lock
 pyproject.toml
-.out
-.err
+*.out
+*.err
