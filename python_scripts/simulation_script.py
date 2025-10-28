@@ -10,8 +10,9 @@ from stable_baselines3 import PPO, SAC, DDPG, TD3
 from python_scripts.Logger import Logger
 from gym_pybullet_drones.utils.enums import ObservationType, ActionType
 from gym_pybullet_drones.utils.utils import sync, str2bool
-from typing import Deque
+from typing import Deque, Callable
 from collections import deque
+from numpy.typing import NDArray
 
 from environments import environment_map
 
@@ -370,6 +371,57 @@ def feed_and_get_delayed(buffer: Deque[np.ndarray], latest_obs: np.ndarray) -> n
     return buffer[0]
 
 
+def unit_from_bearing(direction_deg: float) -> np.ndarray:
+    rad = np.deg2rad(direction_deg)
+    return np.array([np.cos(rad), np.sin(rad), 0.0], dtype=float)
+
+
+def wind_force_from_speed(
+        speed_mps: float,
+        air_density: float,
+        area_m2: float,
+        drag_cd: float,
+        direction_deg: float
+) -> np.ndarray:
+    magnitude = 0.5 * air_density * area_m2 * (speed_mps ** 2) * drag_cd
+    return magnitude * unit_from_bearing(direction_deg)
+
+
+def ou_next(
+        value: float,
+        dt: float,
+        mean: float,
+        theta: float,
+        sigma: float,
+        rng: np.random.Generator
+) -> float:
+    return value + theta * (mean - value) * dt + sigma * np.sqrt(dt) * rng.normal()
+
+
+def make_wind_updater(
+        mean_speed_mps: float,
+        mean_dir_deg: float,
+        theta: float,
+        sigma_speed: float,
+        sigma_dir: float,
+        air_density: float,
+        area_m2: float,
+        drag_cd: float,
+        dt: float,
+        seed: int | None = None
+) -> Callable[[], NDArray[np.float64]]:
+    rng = np.random.default_rng(seed)
+    speed = max(0.0, mean_speed_mps)
+    direction = mean_dir_deg % 360.0
+
+    def update() -> np.ndarray:
+        nonlocal speed, direction
+        speed = max(0.0, ou_next(speed, dt, mean_speed_mps, theta, sigma_speed, rng))
+        direction = (ou_next(direction, dt, mean_dir_deg, theta, sigma_dir, rng)) % 360.0
+        return wind_force_from_speed(speed, air_density, area_m2, drag_cd, direction)
+
+    return update
+
 def run_simulation(
         test_env,
         policy_path,
@@ -383,7 +435,8 @@ def run_simulation(
         plot=False,
         debug=False,
         comment="",
-        obs_delay_s: float = 0.0
+        obs_delay_s: float = 0.0,
+        wind: dict | None = None,
 ):
     """
     Runs a simulation using the provided environment, policy, and specified parameters.
@@ -430,8 +483,8 @@ def run_simulation(
     policy = get_policy(model_map[algorithm], policy_path, model)
 
     test_env = test_env(
-        initial_xyzs=np.array([[0.0, 0.0, 1.0]]),
-        initial_rpys=np.array([[-0.2, -0.2, 0.9]]),
+        initial_xyzs=np.array([[0.0, 0.0, 0.0]]),
+        initial_rpys=np.array([[0.0, 0.0, 0.0]]),
         gui=gui,
         observation_space=ObservationType('kin'),
         action_space=ActionType('rpm'),
@@ -453,9 +506,38 @@ def run_simulation(
 
     start = time.time()
 
+    wind_update: Callable[[], np.ndarray] | None = None
+    if wind and wind.get('on', False):
+        wind_update = make_wind_updater(
+            mean_speed_mps=wind['mean_speed'],
+            mean_dir_deg=wind['mean_direction'],
+            theta=wind['theta'],
+            sigma_speed=wind['sigma_speed'],
+            sigma_dir=wind['sigma_direction'],
+            air_density=wind['air_density'],
+            area_m2=wind['area_m2'],
+            drag_cd=wind['drag_coefficient'],
+            dt=test_env.CTRL_TIMESTEP,
+            seed=wind.get('seed', None)
+        )
+
+    _ = {
+        0: add_way_point((0, 0, 1), radius=0.025, color=(0, 0, 0, 0.75))
+    }
+
     for i in range(simulation_seconds):
         delayed_obs = feed_and_get_delayed(obs_buffer, obs)
         clipped_actions, _states = policy.predict(delayed_obs, deterministic=True)
+
+        if wind_update is not None:
+            force = wind_update()
+            p.applyExternalForce(
+                objectUniqueId=test_env.DRONE_IDS[0],
+                linkIndex=-1,
+                forceObj=force.tolist(),
+                posObj=[0, 0, 0],
+                flags=p.WORLD_FRAME
+            )
 
         obs, reward, terminated, truncated, info = test_env.step(clipped_actions)
         clipped_rpm = test_env._getDroneStateVector(0)[16:20].squeeze()
@@ -504,7 +586,7 @@ def run_simulation(
         logger.plot_position_and_orientation()
         # logger.plot_instantaneous_reward()
         # logger.plot()
-        logger.plot_pwms()
+        # logger.plot_pwms()
         # logger.plot_trajectory()
 
     if save:
@@ -513,67 +595,27 @@ def run_simulation(
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run a simulation given a trained policy")
-    parser.add_argument(
-        '--policy_path',
-        help='The path to a zip file containing the trained policy'
-    )
-    parser.add_argument(
-        '--model',
-        help='The zip file containing the trained policy'
-    )
-    parser.add_argument(
-        '--algorithm',
-        default='ppo',
-        help='The algorithm used for training'
-    )
-    parser.add_argument(
-        '--test_env',
-        default='CLStage1Sim2Real',
-        type=str,
-        help='The name of the environment to learn, registered with gym_pybullet_drones'
-    )
-    parser.add_argument(
-        '--simulation-length',
-        default=20,
-        type=int,
-        help='The length of the simulation in seconds'
-    )
-    parser.add_argument(
-        '--reset',
-        default=False,
-        type=str2bool,
-        help="If you want to reset the environment, every time that the drone achieve the target position"
-    )
-    parser.add_argument(
-        '--save',
-        default=False,
-        type=str2bool,
-        help='Allow to save the trained data using csv and npy files'
-    )
-    parser.add_argument(
-        '--comment',
-        default="",
-        type=str,
-        help="A comment to describe de simulation saved data"
-    )
-    parser.add_argument(
-        '--plot',
-        default=False,
-        type=str2bool,
-        help="If are shown demo plots"
-    )
-    parser.add_argument(
-        '--debug',
-        default=False,
-        type=str2bool,
-        help="Prints debug information"
-    )
-    parser.add_argument(
-        '--obs-delay-s',
-        default=0.0,
-        type=float,
-        help="Observation delay (seconds) before the policy receives the observation"
-    )
+    parser.add_argument('--policy_path', help='The path to a zip file containing the trained policy')
+    parser.add_argument('--model', help='The zip file containing the trained policy')
+    parser.add_argument('--algorithm', default='ppo', help='The algorithm used for training')
+    parser.add_argument('--test_env', default='CLStage1Sim2Real', type=str,help='The name of the environment to learn, registered with gym_pybullet_drones')
+    parser.add_argument('--simulation-length', default=20, type=int, help='The length of the simulation in seconds')
+    parser.add_argument('--reset', default=False, type=str2bool, help="If you want to reset the environment, every time that the drone achieve the target position")
+    parser.add_argument('--save', default=False, type=str2bool, help='Allow to save the trained data using csv and npy files')
+    parser.add_argument('--comment', default="", type=str, help="A comment to describe de simulation saved data")
+    parser.add_argument('--plot', default=False, type=str2bool, help="If are shown demo plots")
+    parser.add_argument('--debug', default=False, type=str2bool, help="Prints debug information")
+    parser.add_argument('--obs-delay-s', default=0.0, type=float, help="Observation delay (seconds) before the policy receives the observation")
+    parser.add_argument('--wind-on', default=False, type=str2bool, help="Enable dynamic wind")
+    parser.add_argument('--wind-mean-speed', default=0.1, type=float, help="Wind mean speed (m/s)")
+    parser.add_argument('--wind-mean-dir', default=90.0, type=float, help="Wind mean direction (deg) (0=+x/E, 90=+y/N)")
+    parser.add_argument('--wind-theta', default=0.01, type=float, help="OU mean-reversion rate (1/s)")
+    parser.add_argument('--wind-sigma-speed', default=0.0, type=float, help="OU noise for speed (m*s^0.5/s)")
+    parser.add_argument('--wind-sigma-dir', default=8.0, type=float, help="OU noise for direction (deg/s^0.5)")
+    parser.add_argument('--wind-drag-coefficient', default=1.0, type=float, help="Drag coefficient")
+    parser.add_argument('--wind_area_m2', default=0.05, type=float, help="Reference area (m^2)")
+    parser.add_argument('--air-density', default=1.225, type=float, help="Air density (kg/m^3)")
+    parser.add_argument('--wind-seed', default=None, type=int, help="Random seed for wind noise generator")
 
     args = parser.parse_args()
 
@@ -594,5 +636,17 @@ if __name__ == '__main__':
         comment=args.comment,
         plot=args.plot,
         debug=args.debug,
-        obs_delay_s=args.obs_delay_s
+        obs_delay_s=args.obs_delay_s,
+        wind=dict(
+            on=args.wind_on,
+            mean_speed=args.wind_mean_speed,
+            mean_direction=args.wind_mean_dir,
+            theta=args.wind_theta,
+            sigma_speed=args.wind_sigma_speed,
+            sigma_direction=args.wind_sigma_dir,
+            drag_coefficient=args.wind_drag_coefficient,
+            area_m2=args.wind_area_m2,
+            air_density=args.air_density,
+            seed=args.wind_seed,
+        )
     )
