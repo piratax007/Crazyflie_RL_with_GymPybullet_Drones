@@ -36,38 +36,30 @@ class CLStage3Sim2RealDomainRandomization(CLStage2Sim2RealDomainRandomization):
                          action_space=action_space
                          )
 
-    def reset(
-            self,
-            seed: int = None,
-            options: dict = None,
-    ):
-        obs, info = super().reset(seed=seed, options=options)
-
-        dr_params = info.get("dr_params", None)
-
-        self.INIT_XYZS = np.array(
-            [[*self._random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]])
+    def reset(self,
+              seed: int = None,
+              options: dict = None):
+        p.resetSimulation(physicsClientId=self.CLIENT)
+        self._housekeeping()
+        self._updateAndStoreKinematicInformation()
+        self.INIT_XYZS = np.array([[*self._random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]])
         self.INIT_RPYS = np.array([[
             np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
             np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
             np.random.uniform(-3.14, 3.14 + 1e-10, 1)[0]
         ]])
-        p.resetBasePositionAndOrientation(
-            self.DRONE_IDS[0],
-            self.INIT_XYZS[0],
-            p.getQuaternionFromEuler(self.INIT_RPYS[0]),
-            physicsClientId=self.CLIENT
-        )
-
-        self._updateAndStoreKinematicInformation()
-        obs_new = self._computeObs()
-        info_new = self._computeInfo()
-
-        if dr_params is not None:
-            info_new["dr_params"] = dr_params
-
-        for k, v in info.items():
-            if k not in info_new:
-                info_new[k] = v
-
-        return obs_new, info_new
+        initial_linear_velocity = [
+            np.random.uniform(-1, 1 + 1e-10, 1)[0],
+            np.random.uniform(-1, 1 + 1e-10, 1)[0],
+            np.random.uniform(-1, 1 + 1e-10, 1)[0]
+        ]
+        initial_angular_velocity = [
+            np.random.uniform(-1, 1 + 1e-10, 1)[0],
+            np.random.uniform(-1, 1 + 1e-10, 1)[0],
+            np.random.uniform(-1, 1 + 1e-10, 1)[0]
+        ]
+        p.resetBasePositionAndOrientation(self.DRONE_IDS[0], self.INIT_XYZS[0], p.getQuaternionFromEuler(self.INIT_RPYS[0]))
+        p.resetBaseVelocity(self.DRONE_IDS[0], initial_linear_velocity, initial_angular_velocity)
+        initial_obs = self._computeObs()
+        initial_info = self._computeInfo()
+        return initial_obs, initial_info
