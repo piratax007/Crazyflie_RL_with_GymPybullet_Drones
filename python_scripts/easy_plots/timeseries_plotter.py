@@ -1,158 +1,150 @@
 #!/usr/bin/env python3
-from turtle import Screen
-from typing import Sequence
-
-import pandas as pd
 import argparse
 import os
-from gym_pybullet_drones.utils.utils import str2bool
-from typing import List, Tuple
-
-from pkg_resources import yield_lines
-from textual.widgets import ListItem, Label, Header, ListView, Static, Footer, DataTable
-from textual.app import ComposeResult, App
-from textual import on
-
-from pandas import read_csv
+from typing import List, Sequence, Iterable, Tuple, Callable, Dict
+import pandas as pd
+from textual.app import App
+from textual.widgets import Header, Footer, ListView, ListItem, Label, DataTable, Static
+from textual.screen import Screen
 
 
 def get_file(file_path: str) -> str:
     if os.path.isfile(file_path):
         return file_path
 
-    raise Exception(f"[ERROR]: no file under the specified path", {file_path})
+    raise FileNotFoundError(f"[ERROR]: no file under the specified path: {file_path}")
 
 
 def load_csv_from(file_path: str, header: int=None) -> pd.DataFrame:
     return pd.read_csv(get_file(file_path), header=header)
 
 
-def write_dataframe_to_csv(df: pd.DataFrame, out_path: str, float_format: str= '%.6f') -> None:
-    df.to_csv(out_path, header=False, index=False, float_format=float_format)
+def build_menu_items(options: Iterable[Tuple[str, str]]) -> List[ListItem]:
+    return [ListItem(Label(label, id=key)) for key, label in options]
 
 
-def timeseries_plotter(df: pd.DataFrame) -> None:
-    MENU_OPTIONS: List[Tuple[str, str]] = [
-        ("show_columns", "show available data")
-    ]
+def add_content_to_table(
+        table: DataTable,
+        headers: List[str],
+        rows: List[Sequence[str]],
+        title: str | None = None
+) -> None:
+    table.clear(columns=True)
+    table.add_columns(*map(str, headers))
+    _ = list(map(lambda row: table.add_row(*map(str, row)), rows))
 
-    def build_menu_items(options: List[Tuple[str, str]]) -> List[ListItem]:
-        return [ListItem(Label(label, id=key)) for key, label in options]
+    if title is not None:
+        table.title = title
 
-    def add_table_content(table: DataTable, data: List[str]) -> None:
-        table.clear(columns=True)
-        table.add_columns("Index", "Column")
-        map(lambda i, c: table.add_row(str(i), str(c)), *enumerate(data))
 
-    class MenuScreen(Screen):
-        def compose(self) -> ComposeResult:
-            yield Header(show_clock=False)
-            self.menu = ListView(*build_menu_items(MENU_OPTIONS))
-            yield self.menu
-            yield Static("Use ↑/↓ and Enter. Press q to quit.")
-            yield Footer()
+def get_column_names(df: pd.DataFrame) -> List[str]:
+    return list(map(str, df.columns.tolist()))
 
-        def on_list_view_selected(self, event: ListView.Selected) -> None:
-            key = event.item.children[0].id
-            if key == "show_columns":
-                self.app.push_screen(ColumnsScreen())
 
-    def dataframe_columns(dataframe: pd.DataFrame) -> List[str]:
-        return list(map(str, dataframe.columns.tolist()))
-
-    class ColumnsScreen(Screen):
+def table_screen_fabricator(
+        title: str,
+        headers_fn: Callable[[pd.DataFrame], List[str]],
+        rows_fn: Callable[[pd.DataFrame], List[Sequence[str]]],
+) -> type[Screen]:
+    class TableScreen(Screen):
         BINDINGS = [("escape", "pop_screen", "Back to menu"), ("b", "pop_screen", "Back to menu")]
 
-        def action_pop_screen(self) -> None:
+        def action_pop_screen(self):
             self.app.pop_screen()
 
-        def compose(self) -> ComposeResult:
+        def compose(self):
             yield Header(show_clock=False)
             table = DataTable(zebra_stripes=True)
             table.cursor_type = "row"
-            cols = dataframe_columns(df)
-            add_table_content(table, cols)
-            table.tile = "CSV Columns Headers"
+            headers = headers_fn(self.app.df) # type: ignore[attr-defined]
+            rows = rows_fn(self.app.df) # type: ignore[attr-defined]
+            add_content_to_table(table, headers, rows, title=title)
             yield table
             yield Static("Press Esc or b to return to menu.")
             yield Footer()
 
-    class MenuApp(App):
-        CSS = "ListView { height: 1fr; } DataTable { height: 1fr; }"
-        def on_mount(self) -> None:
-            self.push_screen(MenuScreen())
-
-    MenuApp().run()
+    return TableScreen
 
 
-def file_columns(file_path: str, header: int=None) -> List[str]:
-    df = load_csv_from(file_path, header=header)
-    return list(df.columns)
+_MENU_OPTIONS: List[Tuple[str, str]] = [
+    ("show_columns", "show available data"),
+    ("show_data", "show data")
+]
 
 
-def starting_at_zero(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy(deep=True)
-    df[0] = pd.to_numeric(df[0])
-    df[0] = df[0] - df[0].iloc[0]
-    return df
+class MenuScreen(Screen):
+    def compose(self):
+        yield Header(show_clock=False)
+        self.menu = ListView(*build_menu_items(_MENU_OPTIONS))
+        yield self.menu
+        yield Static("Use ↑/↓ and Enter.")
+        yield Footer()
+
+    def on_list_view_selected(self, event):
+        key = event.item.children[0].id
+        if key == "show_columns":
+            self.app.push_screen(screens["columns"]())
+        elif key == "show_data":
+            self.app.push_screen(screens["data"]())
 
 
-def time_stamp_in_seconds(file_path: str) -> pd.DataFrame:
-    df = load_csv_from(file_path)
-    df = starting_at_zero(df)
-    return df
+def enumerate_column_headers(names: List[str]) -> List[Tuple[str, str]]:
+    return [(str(index), str(name)) for index, name in enumerate(names)]
 
 
-def adjust_offset(df: pd.DataFrame, column: int=1, offset: float=3.705) -> pd.DataFrame:
-    out = df.copy(deep=True)
-    out[column] = pd.to_numeric(out[column], errors='coerce') - offset
-    return out
+def dataframe_to_rows(df: pd.DataFrame) -> List[List[str]]:
+    return [list(map(str, row)) for row in df.itertuples(index=False, name=None)]
 
 
-def cut_first_seconds(df: pd.DataFrame, seconds: float, timestamp_column: int = 0) -> pd.DataFrame:
-    if timestamp_column not in df.columns:
-        raise KeyError(f"[ERROR]: no column {timestamp_column} in the dataframe")
+screens: Dict[str, type[Screen]] = {
+    "menu": MenuScreen,
+    "columns": table_screen_fabricator(
+        title = "CSV Column Headers",
+        headers_fn = lambda df: ["Index", "Column"],
+        rows_fn = lambda df: enumerate_column_headers(get_column_names(df))
+    ),
+    "data": table_screen_fabricator(
+        title = "CSV Data",
+        headers_fn = get_column_names,
+        rows_fn = dataframe_to_rows
+    )
+}
 
-    out = df.copy(deep=True)
-    out[timestamp_column] = pd.to_numeric(out[timestamp_column], errors='coerce')
-    out = out[out[timestamp_column] >= seconds].reset_index(drop=True)
-    return starting_at_zero(out)
+class TimeseriesPlotter(App):
+    CSS = "ListView { height: 1fr; } DataTable { height: 1fr; }"
+    BINDINGS = [("q", "quit", "Quit")]
+
+    def __init__(self, df: pd.DataFrame) -> None:
+        super().__init__()
+        self.df = df
+
+    def action_quit(self):
+        self.exit()
+
+    def on_mount(self):
+        self.push_screen(screens["menu"]())
 
 
-def process_file(
-        file_path: str,
-        out_path: str=None,
-        adjust_offset_flag: bool=False,
-        cut_seconds: float = 0.0
-) -> str:
-    df = time_stamp_in_seconds(file_path)
-
-    if cut_seconds > 0:
-        df = cut_first_seconds(df, cut_seconds)
-
-    if adjust_offset_flag:
-        df = adjust_offset(df)
-
-    if out_path is None:
-        out_path = file_path
-    write_dataframe_to_csv(df, out_path)
-
-    return out_path
+def timeseries_plotter_runner(df: pd.DataFrame) -> None:
+    TimeseriesPlotter(df).run()
 
 
 def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description='CSV handler and time series plotter from PlotJugger CSV files')
-
-    parser.add_argument('--file_path', required=True, help='The path to the CSV file generated by PlotJugger')
-    parser.add_argument('--header', default=0, type=int, help='The index of the row with the column names')
-
+    parser = argparse.ArgumentParser(description="CSV menu app for rosbags")
+    parser.add_argument("--file_path", required=True, help="Path to the CSV file")
+    parser.add_argument(
+        "--header",
+        default=0,
+        type=lambda x: None if x in ("None", "none", "") else int(x),
+        help="Header row index for pandas (default: 0). Use None if there is no header.",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = _parse_args()
-    df = read_csv(args.file_path, header=args.header)
-    timeseries_plotter(df)
+    df = load_csv_from(args.file_path, header=args.header)
+    timeseries_plotter_runner(df)
 
 
 if __name__ == "__main__":
