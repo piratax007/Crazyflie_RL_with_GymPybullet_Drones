@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
-from typing import List, Sequence, Iterable, Tuple, Callable, Dict
+from typing import Optional, List, Sequence, Iterable, Tuple, Callable, Dict
 import pandas as pd
 from textual.app import App
 from textual.widgets import Header, Footer, ListView, ListItem, Label, DataTable, Static
@@ -15,12 +15,8 @@ def get_file(file_path: str) -> str:
     raise FileNotFoundError(f"[ERROR]: no file under the specified path: {file_path}")
 
 
-def load_csv_from(file_path: str, header: int=None) -> pd.DataFrame:
+def load_csv_from(file_path: str, header: Optional[int]=None) -> pd.DataFrame:
     return pd.read_csv(get_file(file_path), header=header)
-
-
-def build_menu_items(options: Iterable[Tuple[str, str]]) -> List[ListItem]:
-    return [ListItem(Label(label, id=key)) for key, label in options]
 
 
 def add_content_to_table(
@@ -72,6 +68,10 @@ _MENU_OPTIONS: List[Tuple[str, str]] = [
 ]
 
 
+def build_menu_items(options: Iterable[Tuple[str, str]]) -> List[ListItem]:
+    return [ListItem(Label(label), id=key) for key, label in options]
+
+
 class MenuScreen(Screen):
     def compose(self):
         yield Header(show_clock=False)
@@ -81,7 +81,7 @@ class MenuScreen(Screen):
         yield Footer()
 
     def on_list_view_selected(self, event):
-        key = event.item.children[0].id
+        key = event.item.id
         if key == "show_columns":
             self.app.push_screen(screens["columns"]())
         elif key == "show_data":
@@ -109,6 +109,7 @@ screens: Dict[str, type[Screen]] = {
         rows_fn = dataframe_to_rows
     )
 }
+
 
 class TimeseriesPlotter(App):
     CSS = "ListView { height: 1fr; } DataTable { height: 1fr; }"
