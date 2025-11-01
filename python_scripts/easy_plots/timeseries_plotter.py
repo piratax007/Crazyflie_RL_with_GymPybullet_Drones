@@ -4,7 +4,11 @@ import os
 from typing import Optional, List, Sequence, Iterable, Tuple, Callable, Dict
 import pandas as pd
 from textual.app import App
-from textual.widgets import Header, Footer, ListView, ListItem, Label, DataTable, Static
+from textual.widgets import (
+    Header, Footer, ListView,
+    ListItem, Label, DataTable,
+    Static, Input, Button
+)
 from textual.screen import Screen
 
 
@@ -16,7 +20,88 @@ def get_file(file_path: str) -> str:
 
 
 def load_csv_from(file_path: str, header: Optional[int]=None) -> pd.DataFrame:
-    return pd.read_csv(get_file(file_path), header=header)
+    try:
+        return pd.read_csv(get_file(file_path), header=header)
+    except Exception as e:
+        raise RuntimeError(f"[ERROR]: Failed to load CSV {e}") from e
+
+
+def get_column_names(df: pd.DataFrame) -> List[str]:
+    return list(map(str, df.columns.tolist()))
+
+
+def enumerate_column_headers(names: List[str]) -> List[Tuple[str, str]]:
+    return [(str(index), str(name)) for index, name in enumerate(names)]
+
+
+def dataframe_to_rows(df: pd.DataFrame) -> List[List[str]]:
+    return [list(map(str, row)) for row in df.itertuples(index=False, name=None)]
+
+
+def parse_index_spec(spec: str) -> List[int]:
+    tokens = [t.strip() for t in spec.split(',') if t.strip()]
+    def token_to_indices(t: str) -> List[int]:
+        if '-' in t:
+            start, end = map(int, t.split('-', 1))
+            step = 1 if end >= start else -1
+            return list(range(start, end + step, step))
+        return [int(t)]
+    return sorted({i for t in tokens for i in token_to_indices(t)})
+
+
+def ensure_parend_dir(path: str) -> None:
+    directory = os.path.dirname(path)
+    if directory and not os.path.exists(directory):
+        os.makedirs(directory, exist_ok=True)
+
+
+def export_columns_to_csv(df: pd.DataFrame, indices: List[int], save_path: str) -> str:
+    if not indices:
+        raise ValueError("No column indices provided")
+    selected = df.iloc[:, indices]
+    ensure_parend_dir(save_path)
+    selected.to_csv(save_path, index=False)
+    return save_path
+
+
+class ExportColumnsScreen(Screen):
+    BINDINGS = [("escape", "pop_screen", "Back to menu"), ("b", "pop_screen", "Back to menu")]
+
+    def __init__(
+            self,
+            name: str | None = None,
+            id_: str | None = None,
+            classes: str | None = None,
+    ):
+        super().__init__(name, id_, classes)
+        self.status = Static("Enter a file path and column indices (e.g., 0,2-4,7)")
+        self.path_input = Input(placeholder="/path/to/output.csv", id="path")
+        self.indices_input = Input(placeholder="0,2-4,7", id="indices")
+        self.save_button = Button(label="Save", name="save")
+
+    def action_pop_screen(self):
+        self.app.pop_screen()
+
+    def compose(self):
+        yield Header(show_clock=False)
+        yield self.status
+        yield self.path_input
+        yield self.indices_input
+        yield self.save_button
+        yield Footer()
+
+    def on_button_pressed(self, event):
+        if event.button.name == "save":
+            self._do_save()
+
+    def _do_save(self) -> None:
+        try:
+            path = self.path_input.value.strip()
+            indices = parse_index_spec(self.indices_input.value)
+            saved = export_columns_to_csv(self.app.df, indices, path)
+            self.status.update(f"Successfully saved to {saved}")
+        except Exception as e:
+            self.status.update(f"[Error]: {e}")
 
 
 def add_content_to_table(
@@ -31,10 +116,6 @@ def add_content_to_table(
 
     if title is not None:
         table.title = title
-
-
-def get_column_names(df: pd.DataFrame) -> List[str]:
-    return list(map(str, df.columns.tolist()))
 
 
 def table_screen_fabricator(
@@ -62,53 +143,50 @@ def table_screen_fabricator(
     return TableScreen
 
 
-_MENU_OPTIONS: List[Tuple[str, str]] = [
-    ("show_columns", "show available data"),
-    ("show_data", "show data")
-]
-
-
-def build_menu_items(options: Iterable[Tuple[str, str]]) -> List[ListItem]:
-    return [ListItem(Label(label), id=key) for key, label in options]
-
-
 class MenuScreen(Screen):
+    def __init__(
+            self,
+            name: str | None = None,
+            id_: str | None = None,
+            classes: str | None = None,
+    ):
+        super().__init__(name, id_, classes)
+        self.menu = None
+        self.options: List[Tuple[str, str]] = [
+            ("columns", "show available data"),
+            ("data", "show data"),
+            ("export_columns", "export selected columns to CSV")
+        ]
+        self.screens: Dict[str, type[Screen]] = {
+            "columns": table_screen_fabricator(
+                title = "CSV Column Headers",
+                headers_fn = lambda df: ["Index", "Column"],
+                rows_fn = lambda df: enumerate_column_headers(get_column_names(df))
+            ),
+            "data": table_screen_fabricator(
+                title = "CSV Data",
+                headers_fn = get_column_names,
+                rows_fn = dataframe_to_rows
+            ),
+            "export_columns": ExportColumnsScreen
+        }
+
+    def on_mount(self):
+        self.set_focus(self.menu)
+
+    def build_menu_items(self) -> List[ListItem]:
+        return [ListItem(Label(label), id=key) for key, label in self.options]
+
     def compose(self):
         yield Header(show_clock=False)
-        self.menu = ListView(*build_menu_items(_MENU_OPTIONS))
+        self.menu = ListView(*self.build_menu_items())
         yield self.menu
         yield Static("Use ↑/↓ and Enter.")
         yield Footer()
 
     def on_list_view_selected(self, event):
         key = event.item.id
-        if key == "show_columns":
-            self.app.push_screen(screens["columns"]())
-        elif key == "show_data":
-            self.app.push_screen(screens["data"]())
-
-
-def enumerate_column_headers(names: List[str]) -> List[Tuple[str, str]]:
-    return [(str(index), str(name)) for index, name in enumerate(names)]
-
-
-def dataframe_to_rows(df: pd.DataFrame) -> List[List[str]]:
-    return [list(map(str, row)) for row in df.itertuples(index=False, name=None)]
-
-
-screens: Dict[str, type[Screen]] = {
-    "menu": MenuScreen,
-    "columns": table_screen_fabricator(
-        title = "CSV Column Headers",
-        headers_fn = lambda df: ["Index", "Column"],
-        rows_fn = lambda df: enumerate_column_headers(get_column_names(df))
-    ),
-    "data": table_screen_fabricator(
-        title = "CSV Data",
-        headers_fn = get_column_names,
-        rows_fn = dataframe_to_rows
-    )
-}
+        self.app.push_screen(self.screens[key]())
 
 
 class TimeseriesPlotter(App):
@@ -123,7 +201,7 @@ class TimeseriesPlotter(App):
         self.exit()
 
     def on_mount(self):
-        self.push_screen(screens["menu"]())
+        self.push_screen(MenuScreen())
 
 
 def timeseries_plotter_runner(df: pd.DataFrame) -> None:
@@ -150,3 +228,17 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# ToDo: A menu entry for given a path and a set of index, export the columns with that index from the original CSV to
+#  a new CSV file that should be saved into the given path. If the give path does not exist, create it. The name of
+#  the new file should be given by the user as part of the path to save the new file.
+# ToDo: A sub-menu "Preprocess the data" with the following options:
+#     - ToDo: A file explorer to select the CSV file to be processed
+#     - ToDo: Remove NaN values
+#     - ToDo: Correct the time stamps
+#       - ToDo: Correct the time stamps (e.g. from nanoseconds to seconds)
+#       - ToDo: Remove the offset (starting from 0)
+#     - ToDo: Remove offset from the data given an offset
+#     - ToDo: Cut the first N seconds of the data (time stamps and data)
+#     - ToDo: A checkbox to delete the headers row
