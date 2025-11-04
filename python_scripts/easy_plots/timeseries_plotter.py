@@ -3,13 +3,14 @@ import argparse
 import os
 from typing import Optional, List, Sequence, Iterable, Tuple, Callable, Dict
 import pandas as pd
-from textual.app import App
+from textual.app import App, ComposeResult
 from textual.widgets import (
     Header, Footer, ListView,
     ListItem, Label, DataTable,
     Static, Input, Button
 )
 from textual.screen import Screen
+import hashlib
 
 
 def get_file(file_path: str) -> str:
@@ -49,7 +50,7 @@ def parse_index_spec(spec: str) -> List[int]:
     return sorted({i for t in tokens for i in token_to_indices(t)})
 
 
-def ensure_parend_dir(path: str) -> None:
+def ensure_parent_dir(path: str) -> None:
     directory = os.path.dirname(path)
     if directory and not os.path.exists(directory):
         os.makedirs(directory, exist_ok=True)
@@ -59,7 +60,7 @@ def export_columns_to_csv(df: pd.DataFrame, indices: List[int], save_path: str) 
     if not indices:
         raise ValueError("No column indices provided")
     selected = df.iloc[:, indices]
-    ensure_parend_dir(save_path)
+    ensure_parent_dir(save_path)
     selected.to_csv(save_path, index=False)
     return save_path
 
@@ -143,7 +144,17 @@ def table_screen_fabricator(
     return TableScreen
 
 
-class MenuScreen(Screen):
+def build_menu_items(options: List[Tuple[str, str]]) -> List[ListItem]:
+    return [ListItem(Label(label), id=key) for key, label in options]
+
+
+def common_menu_screen_content():
+    yield Header(show_clock=False)
+    yield Static("Use ↑/↓ and Enter.")
+    yield Footer()
+
+
+class MainMenuScreen(Screen):
     def __init__(
             self,
             name: str | None = None,
@@ -151,12 +162,13 @@ class MenuScreen(Screen):
             classes: str | None = None,
     ):
         super().__init__(name, id_, classes)
-        self.menu = None
         self.options: List[Tuple[str, str]] = [
             ("columns", "show available data"),
             ("data", "show data"),
-            ("export_columns", "export selected columns to CSV")
+            ("export_columns", "export selected columns to CSV"),
+            ("preprocess", "preprocess data")
         ]
+        self.menu = ListView(*build_menu_items(self.options))
         self.screens: Dict[str, type[Screen]] = {
             "columns": table_screen_fabricator(
                 title = "CSV Column Headers",
@@ -168,21 +180,151 @@ class MenuScreen(Screen):
                 headers_fn = get_column_names,
                 rows_fn = dataframe_to_rows
             ),
-            "export_columns": ExportColumnsScreen
+            "export_columns": ExportColumnsScreen,
+            "preprocess": PreprocessDataMenuScreen
         }
+
+    def compose(self) -> ComposeResult:
+        yield self.menu
+        yield from common_menu_screen_content()
 
     def on_mount(self):
         self.set_focus(self.menu)
 
-    def build_menu_items(self) -> List[ListItem]:
-        return [ListItem(Label(label), id=key) for key, label in self.options]
+    def on_list_view_selected(self, event):
+        key = event.item.id
+        screen_cls = self.screens.get(key)
+        if screen_cls is not None:
+            self.app.push_screen(self.screens[key]())
+
+
+class FileExplorerScreen(Screen):
+    BINDINGS = [("escape", "pop_screen", "Back to menu"), ("b", "pop_screen", "Back to menu")]
+
+    def __init__(self, start_path: Optional[str] = None):
+        super().__init__()
+        self.current_working_directory = os.path.abspath(start_path or os.getcwd())
+        self.path_label = Static("")
+        self.csv_file_list: Optional[ListView] = None
+        self.status = Static("Navigate with Enter. Choose a .csv file to load.")
+        self.path_by_id: Dict[str, str] = {}
+
+    def action_pop_screen(self):
+        self.app.pop_screen()
 
     def compose(self):
         yield Header(show_clock=False)
-        self.menu = ListView(*self.build_menu_items())
-        yield self.menu
-        yield Static("Use ↑/↓ and Enter.")
+        self.path_label.update(self.current_working_directory)
+        yield self.path_label
+        self.csv_file_list = ListView()
+        yield self.csv_file_list
+        yield self.status
         yield Footer()
+
+    @staticmethod
+    def _get_entries(path: str) -> List[Tuple[str, str]]:
+        entries = []
+        parent = os.path.dirname(path)
+        entries.append(("[..]", parent))
+
+        try:
+            with os.scandir(path) as it0:
+                dirs = sorted([e.name for e in it0 if e.is_dir() and not e.name.startswith(".")])
+            with os.scandir(path) as it1:
+                files = sorted([e.name for e in it1 if e.is_file() and e.name.lower().endswith('.csv')])
+        except PermissionError:
+            dirs, files = [], []
+
+        entries.extend([(f"[d] {d}", os.path.join(path, d)) for d in dirs])
+        entries.extend([(f"[f] {f}", os.path.join(path, f)) for f in files])
+        return entries
+
+    def on_list_view_selected(self, event):
+        key = event.item.id
+        target = self.path_by_id.get(key)
+
+        if not target:
+            self.status.update(f"[Error]: Unknown selection {key}")
+            return
+
+        if os.path.isdir(target):
+            self.current_working_directory = os.path.abspath(target)
+            self._refresh_csv_file_list()
+            return
+
+        try:
+            self.app.df = load_csv_from(target, header=self.app.header) # type: ignore[attr-defined]
+            self.app.flash_message = f"Successfully loaded {target}"
+            self.app.pop_screen()
+        except Exception as e:
+            self.status.update(f"[Error]: {e}")
+
+    def _generate_unique_key(self, full_path: str) -> str:
+        digest = hashlib.sha1(os.path.abspath(full_path).encode()).hexdigest()[:16]
+        base_key = f"f{digest}"
+
+        final_key = base_key
+        suffix = 0
+        while final_key in self.path_by_id:
+            suffix += 1
+            final_key = f"{base_key}_{suffix}"
+        return final_key
+
+    def _update_file_list(self, entries: list[tuple[str, str]]) -> None:
+        assert self.csv_file_list is not None
+        self.csv_file_list.clear()
+        self.path_by_id.clear()
+
+        for label, full_path in entries:
+            unique_key = self._generate_unique_key(full_path)
+            self.path_by_id[unique_key] = full_path
+            self.csv_file_list.append(ListItem(Label(label), id=unique_key))
+
+        self.path_label.update(self.current_working_directory)
+
+    def _refresh_csv_file_list(self) -> None:
+        entries = self._get_entries(self.current_working_directory)
+        self._update_file_list(entries)
+
+    def on_mount(self):
+        self._refresh_csv_file_list()
+        self.set_focus(self.csv_file_list)
+
+
+class PreprocessDataMenuScreen(Screen):
+    def __init__(self):
+        super().__init__()
+        self.options: List[Tuple[str, str]] = [
+            ("select_csv", "select CSV file")
+        ]
+        self.menu = ListView(*build_menu_items(self.options))
+        self.status = Static("")
+        self.screens: Dict[str, type[Screen]] = {
+            "select_csv": FileExplorerScreen,
+        }
+
+    BINDINGS = [("escape", "pop_screen", "Back to menu"), ("b", "pop_screen", "Back to menu")]
+
+    def action_pop_screen(self):
+        self.app.pop_screen()
+
+    def compose(self):
+        yield self.menu
+        yield self.status
+        yield from common_menu_screen_content()
+
+    def _consume_app_flash_message(self) -> None:
+        msg = getattr(self.app, "flash_message", None)
+        if msg:
+            self.status.update(msg)
+            self.app.flash_message = None
+
+    def on_mount(self):
+        self._consume_app_flash_message()
+        self.set_focus(self.menu)
+
+    def _on_screen_resume(self):
+        self._consume_app_flash_message()
 
     def on_list_view_selected(self, event):
         key = event.item.id
@@ -196,12 +338,14 @@ class TimeseriesPlotter(App):
     def __init__(self, df: pd.DataFrame) -> None:
         super().__init__()
         self.df = df
+        self.header: Optional[int] = None
+        self.flash_message: Optional[str] = None
 
     def action_quit(self):
         self.exit()
 
     def on_mount(self):
-        self.push_screen(MenuScreen())
+        self.push_screen(MainMenuScreen())
 
 
 def timeseries_plotter_runner(df: pd.DataFrame) -> None:
@@ -230,11 +374,11 @@ if __name__ == "__main__":
     main()
 
 
-# ToDo: A menu entry for given a path and a set of index, export the columns with that index from the original CSV to
-#  a new CSV file that should be saved into the given path. If the give path does not exist, create it. The name of
-#  the new file should be given by the user as part of the path to save the new file.
+# Done: A menu entry for given a path and a set of indices, export the columns with that indices from the original
+# CSV to a new CSV file that should be saved into the given path. If the give path does not exist, create it.
+# The name of the new file should be given by the user as part of the path to save the new file.
 # ToDo: A sub-menu "Preprocess the data" with the following options:
-#     - ToDo: A file explorer to select the CSV file to be processed
+#     - Done: A file explorer to select the CSV file to be processed
 #     - ToDo: Remove NaN values
 #     - ToDo: Correct the time stamps
 #       - ToDo: Correct the time stamps (e.g. from nanoseconds to seconds)
