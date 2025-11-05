@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
-from typing import Optional, List, Sequence, Iterable, Tuple, Callable, Dict
+from typing import Optional, List, Sequence, Tuple, Callable, Dict
 import pandas as pd
 from textual.app import App, ComposeResult
 from textual.widgets import (
@@ -99,7 +99,7 @@ class ExportColumnsScreen(Screen):
         try:
             path = self.path_input.value.strip()
             indices = parse_index_spec(self.indices_input.value)
-            saved = export_columns_to_csv(self.app.df, indices, path)
+            saved = export_columns_to_csv(self.app.df, indices, path) # type: ignore[attr-defined]
             self.status.update(f"Successfully saved to {saved}")
         except Exception as e:
             self.status.update(f"[Error]: {e}")
@@ -291,16 +291,68 @@ class FileExplorerScreen(Screen):
         self.set_focus(self.csv_file_list)
 
 
+class RemoveNaNScreen(Screen):
+    BINDINGS = [("escape", "pop_screen", "Back to menu"), ("b", "pop_screen", "Back to menu")]
+
+    def __init__(self):
+        super().__init__()
+        self.summary = Static("")
+        self.remove_button = Button(label="Remove NaN rows", name="remove")
+        self.note = Static("This will drop any row that contains at least one NaN value.")
+
+    def action_pop_screen(self):
+        self.app.pop_screen()
+
+    def compose(self):
+        yield Header(show_clock=False)
+        yield self.summary
+        yield self.note
+        yield self.remove_button
+        yield Footer()
+
+    def _count_rows_with_nans(self) -> int:
+        return int(self.app.df.isna().any(axis=1).sum()) # type: ignore[attr-defined]
+
+    def _counting_rows(self) -> Tuple[int, int, int]:
+        df = self.app.df # type: ignore[attr-defined]
+        count_rows = len(df)
+        number_of_rows_with_nans = self._count_rows_with_nans() # type: ignore[attr-defined]
+        number_of_rows_without_nans = count_rows - number_of_rows_with_nans
+        return count_rows, number_of_rows_with_nans, number_of_rows_without_nans
+
+    def _update_summary(self) -> None:
+        t, nans, non_nans = self._counting_rows()
+        self.summary.update(
+            f"Rows: total={t}, with NaNs={nans}, without NaNs={non_nans}"
+        )
+
+    def on_mount(self):
+        self._update_summary()
+
+    def _drop_rows_with_nans(self) -> pd.DataFrame:
+        df = self.app.df # type: ignore[attr-defined]
+        return df.dropna(axis=0, how="any").reset_index(drop=True)
+
+    def on_button_pressed(self, event):
+        if event.button.name == "remove":
+            t, nans, non_nans = self._counting_rows()
+            self.app.df = self._drop_rows_with_nans() # type: ignore[attr-defined]
+            self.app.flash_message = f"Removed {nans} rows with NaN values (from {t} total rows to {non_nans} rows without NaNs).)"
+            self.app.pop_screen()
+
+
 class PreprocessDataMenuScreen(Screen):
     def __init__(self):
         super().__init__()
         self.options: List[Tuple[str, str]] = [
-            ("select_csv", "select CSV file")
+            ("select_csv", "select CSV file"),
+            ("remove_nans", "remove rows containing NaN values")
         ]
         self.menu = ListView(*build_menu_items(self.options))
         self.status = Static("")
         self.screens: Dict[str, type[Screen]] = {
             "select_csv": FileExplorerScreen,
+            "remove_nans": RemoveNaNScreen
         }
 
     BINDINGS = [("escape", "pop_screen", "Back to menu"), ("b", "pop_screen", "Back to menu")]
@@ -374,15 +426,16 @@ if __name__ == "__main__":
     main()
 
 
-# Done: A menu entry for given a path and a set of indices, export the columns with that indices from the original
+# 1. Done: A menu entry for given a path and a set of indices, export the columns with that indices from the original
 # CSV to a new CSV file that should be saved into the given path. If the give path does not exist, create it.
 # The name of the new file should be given by the user as part of the path to save the new file.
-# ToDo: A sub-menu "Preprocess the data" with the following options:
-#     - Done: A file explorer to select the CSV file to be processed
-#     - ToDo: Remove NaN values
-#     - ToDo: Correct the time stamps
-#       - ToDo: Correct the time stamps (e.g. from nanoseconds to seconds)
-#       - ToDo: Remove the offset (starting from 0)
-#     - ToDo: Remove offset from the data given an offset
-#     - ToDo: Cut the first N seconds of the data (time stamps and data)
-#     - ToDo: A checkbox to delete the headers row
+# 2. ToDo: A sub-menu "Preprocess the data" with the following options:
+#     - 2.1 Done: A file explorer to select the CSV file to be processed
+#     - 2.2 Done: Remove NaN values by removing the whole row containing NaN values
+#     - 2.3 ToDo: Correct the time stamps
+#       - 2.3.1 ToDo: Correct the time stamps (e.g. from nanoseconds to seconds)
+#       - 2.3.2 ToDo: Remove the offset (starting from 0)
+#     - 2.4 ToDo: Remove offset from the data given an offset
+#     - 2.5 ToDo: Cut the first N seconds of the data (time stamps and data)
+#     - 2.6 ToDo: A checkbox to delete the headers row
+#     - 2.7 ToDo: A "save" button to save the processed data to a new CSV file
