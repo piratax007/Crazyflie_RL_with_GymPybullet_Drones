@@ -51,7 +51,7 @@ def read_from_csv(files: list):
     steps = None
 
     for file in files:
-        data = pd.read_csv(file)
+        data = pd.load_csv_from(file)
         if steps is None:
             steps = data['Step']
         all_values.append(data['Value'])
