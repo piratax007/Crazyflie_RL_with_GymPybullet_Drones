@@ -4,12 +4,13 @@ from environments.BaseRLAviary import BaseRLAviary
 from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, ObservationType
 
 
-class CLStage1Sim2Real(BaseRLAviary):
+class SafeRLSimulationStage1(BaseRLAviary):
     def __init__(self,
                  drone_model: DroneModel = DroneModel.CF2X,
                  initial_xyzs=np.array([[0, 0, 0]]),
                  initial_rpys=np.array([[0, 0, 0]]),
                  target_xyzs=np.array([0, 0, 1]),
+                 target_rpys=np.array([[0, 0, 0]]),
                  physics: Physics = Physics.PYB_GND,
                  pyb_freq: int = 200,
                  ctrl_freq: int = 100,
@@ -20,8 +21,10 @@ class CLStage1Sim2Real(BaseRLAviary):
                  ):
         self.INIT_XYZS = initial_xyzs
         self.TARGET_POS = target_xyzs
+        self.TARGET_ORIENTATION = target_rpys
         self.EPISODE_LENGTH_SECONDS = 5
         self.LOG_ANGULAR_VELOCITY = np.zeros((1, 3))
+        self.LOG_Z_DISTANCE = np.zeros((1, 1))
         super().__init__(drone_model=drone_model,
                          num_drones=1,
                          initial_xyzs=initial_xyzs,
@@ -37,44 +40,46 @@ class CLStage1Sim2Real(BaseRLAviary):
 
     ################################################################################
 
-    def _target_error(self, state):
-        return np.linalg.norm(self.TARGET_POS - state[0:3])
+    def _target_reward(self, state):
+        print(f"############## TARGET ORIENTATION {self.TARGET_ORIENTATION} ##############")
+        return np.linalg.norm(self.TARGET_POS - state[0:3]) + 1.5*np.linalg.norm(self.TARGET_ORIENTATION[0] - state[
+            7:10])
 
-    def _is_away_from_exploration_area(self, state):
-        return (np.linalg.norm(state[0:2] - self.TARGET_POS[0:2]) >
-                np.linalg.norm(self.INIT_XYZS[0][0:2] - self.TARGET_POS[0:2]) + 0.025 or
-                state[2] > self.TARGET_POS[2] + 0.1)
+    @staticmethod
+    def _update_last(storage: np.ndarray, data):
+        if np.shape(storage)[0] == 2:
+            storage = np.delete(storage, 0, axis=0)
 
-    def _is_closed(self, state):
-        return np.linalg.norm(state[0:3] - self.TARGET_POS[0:3]) < 0.025
+        return np.vstack((storage, data))
 
-    def _performance(self, state):
-        if self._is_closed(state) and state[7] ** 2 + state[8] ** 2 < 0.001:
-            return 2
+    def _exploration_reward(self, state):
+        self.LOG_Z_DISTANCE = self._update_last(self.LOG_Z_DISTANCE, np.linalg.norm(state[0:3] - self.TARGET_POS))
+        ret = self.LOG_Z_DISTANCE[1][0] > self.LOG_Z_DISTANCE[0][0] + 0.025
+        print(f"############## DISTANCE IN t GREATER THAN DISTANCE IN t-1: {ret} ##############")
+        return ret
+
+    def _stability_reward(self, state):
+        if state[7] ** 2 + state[8] ** 2 < 0.001:
+            return 2 * np.exp(-np.linalg.norm(self.TARGET_POS - state[0:3]))
 
         return -(state[7] ** 2 + state[8] ** 2)
 
-    def _get_previous_current_we(self, current_state):
-        if np.shape(self.LOG_ANGULAR_VELOCITY)[0] > 2:
-            self.LOG_ANGULAR_VELOCITY = np.delete(self.LOG_ANGULAR_VELOCITY, 0, axis=0)
-
-        return np.vstack((self.LOG_ANGULAR_VELOCITY, current_state[13:16]))
-
     def _get_we_differences(self, state):
-        log = self._get_previous_current_we(state)
+        angular_velocities = state[13:16]
+        self.LOG_ANGULAR_VELOCITY = self._update_last(self.LOG_ANGULAR_VELOCITY, angular_velocities)
         differences = {
-            'roll': log[0][0] - log[1][0],
-            'pitch': log[0][1] - log[1][1],
-            'yaw': log[0][2] - log[1][2],
+            'roll': self.LOG_ANGULAR_VELOCITY[0][0] - self.LOG_ANGULAR_VELOCITY[1][0],
+            'pitch': self.LOG_ANGULAR_VELOCITY[0][1] - self.LOG_ANGULAR_VELOCITY[1][1],
+            'yaw': self.LOG_ANGULAR_VELOCITY[0][2] - self.LOG_ANGULAR_VELOCITY[1][2],
         }
         return differences
 
     def _computeReward(self):
         state = self._getDroneStateVector(0)
         we_differences = self._get_we_differences(state)
-        ret = (0.25 - 0.20 * self._target_error(state) -
-               1 * (1 if self._is_away_from_exploration_area(state) else -0.2) +
-               0.20 * self._performance(state) -
+        ret = (0.25 - 0.20 * self._target_reward(state) -
+               1 * (1 if self._exploration_reward(state) else -0.2) +
+               0.20 * self._stability_reward(state) -
                0.18 * (we_differences['roll'] ** 2 + we_differences['pitch'] ** 2 + we_differences['yaw'] ** 2))
         return ret
 
@@ -82,7 +87,7 @@ class CLStage1Sim2Real(BaseRLAviary):
 
     def _computeTerminated(self):
         state = self._getDroneStateVector(0)
-        if np.linalg.norm(self.TARGET_POS - state[0:3]) < .02 and state[7] ** 2 + state[8] ** 2 < 0.001:
+        if np.linalg.norm(self.TARGET_POS - state[0:3]) < .01 and state[7] ** 2 + state[8] ** 2 < 0.001:
             return True
 
         return False
@@ -90,13 +95,6 @@ class CLStage1Sim2Real(BaseRLAviary):
     ################################################################################
 
     def _computeTruncated(self):
-        state = self._getDroneStateVector(0)
-        if (np.linalg.norm(state[0:2] - self.TARGET_POS[0:2]) >
-                np.linalg.norm(self.INIT_XYZS[0][0:2] - self.TARGET_POS[0:2]) + .05 or
-                state[2] > self.TARGET_POS[2] + .05 or
-                abs(state[7]) > .25 or abs(state[8]) > .25):
-            return True
-
         if self.step_counter / self.PYB_FREQ > self.EPISODE_LENGTH_SECONDS:
             return True
 
