@@ -224,7 +224,7 @@ class BaseRLAviary(BaseAviary):
                                                         )
                 rpm[k,:] = temp
             elif self.ACT_TYPE == ActionType.ONE_D_RPM:
-                rpm[k,:] = np.repeat(self.HOVER_RPM * (1+0.05*target), 4)
+                rpm[k,:] = np.repeat(self.HOVER_RPM * (1+0.2*target), 4)
             elif self.ACT_TYPE == ActionType.ONE_D_PID:
                 state = self._getDroneStateVector(k)
                 res, _, _ = self.ctrl[k].computeControl(control_timestep=self.CTRL_TIMESTEP,
