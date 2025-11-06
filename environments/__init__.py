@@ -13,9 +13,9 @@ from environments.CL_Stage1_S2R_e2e_dr_new_reward import CLStage1S2RE2EDRNewRewa
 from environments.CL_Stage2_S2R_e2e_dr_new_reward import CLStage2S2RE2EDRNewReward
 
 environment_map = {
-    'CLStage1Sim2Real': SafeRLSimulationStage1,
-    'CLStage2Sim2Real': SafeRLSimulationStage2,
-    'CLStage3Sim2Real': SafeRLSimulationStage3,
+    'SafeRLSimulationStage1': SafeRLSimulationStage1,
+    'SafeRLSimulationStage2': SafeRLSimulationStage2,
+    'SafeRLSimulationStage3': SafeRLSimulationStage3,
     'CLStage1Sim2RealDomainRandomization': CLStage1Sim2RealDomainRandomization,
     'CLStage2Sim2RealDomainRandomization': CLStage2Sim2RealDomainRandomization,
     'CLStage3Sim2RealDomainRandomization': CLStage3Sim2RealDomainRandomization,
