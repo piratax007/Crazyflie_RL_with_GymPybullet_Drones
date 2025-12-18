@@ -13,7 +13,7 @@ from environments.CL_Stage1_S2R_e2e_dr_new_reward import CLStage1S2RE2EDRNewRewa
 from environments.CL_Stage2_S2R_e2e_dr_new_reward import CLStage2S2RE2EDRNewReward
 
 environment_map = {
-    'CLStage1Sim2Real': SafeRLSimulationStage1,
+    'CLStage1Sim2Real': JournalStage1Euler,
     'CLStage2Sim2Real': JournalStage2Euler,
     'CLStage3Sim2Real': JournalStage3Euler,
     'CLStage1Sim2RealDomainRandomization': CLStage1Sim2RealDomainRandomization,
