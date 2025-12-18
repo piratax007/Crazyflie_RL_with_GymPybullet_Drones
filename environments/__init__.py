@@ -1,8 +1,8 @@
 from environments.BaseAviary import BaseAviary
 from environments.BaseRLAviary import BaseRLAviary
-from environments.safe_rl_simulation_stage1 import SafeRLSimulationStage1
-from environments.safe_rl_simulation_stage2 import SafeRLSimulationStage2
-from environments.safe_rl_simulation_stage3 import SafeRLSimulationStage3
+from environments.journal_stage1_Euler import JournalStage1Euler
+from environments.journal_stage2_Euler import JournalStage2Euler
+from environments.journal_stage3_Euler import JournalStage3Euler
 from environments.CL_Stage1_S2R_e2e_dr import CLStage1Sim2RealDomainRandomization
 from environments.CL_Stage2_S2R_e2e_dr import CLStage2Sim2RealDomainRandomization
 from environments.CL_Stage3_S2R_e2e_dr import CLStage3Sim2RealDomainRandomization
@@ -13,9 +13,9 @@ from environments.CL_Stage1_S2R_e2e_dr_new_reward import CLStage1S2RE2EDRNewRewa
 from environments.CL_Stage2_S2R_e2e_dr_new_reward import CLStage2S2RE2EDRNewReward
 
 environment_map = {
-    'SafeRLSimulationStage1': SafeRLSimulationStage1,
-    'SafeRLSimulationStage2': SafeRLSimulationStage2,
-    'SafeRLSimulationStage3': SafeRLSimulationStage3,
+    'CLStage1Sim2Real': SafeRLSimulationStage1,
+    'CLStage2Sim2Real': JournalStage2Euler,
+    'CLStage3Sim2Real': JournalStage3Euler,
     'CLStage1Sim2RealDomainRandomization': CLStage1Sim2RealDomainRandomization,
     'CLStage2Sim2RealDomainRandomization': CLStage2Sim2RealDomainRandomization,
     'CLStage3Sim2RealDomainRandomization': CLStage3Sim2RealDomainRandomization,
