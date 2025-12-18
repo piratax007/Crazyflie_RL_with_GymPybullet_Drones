@@ -4,7 +4,7 @@ from environments.BaseRLAviary import BaseRLAviary
 from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, ObservationType
 
 
-class SafeRLSimulationStage1(BaseRLAviary):
+class JournalStage1Euler(BaseRLAviary):
     def __init__(self,
                  drone_model: DroneModel = DroneModel.CF2X,
                  initial_xyzs=np.array([[0, 0, 0]]),
