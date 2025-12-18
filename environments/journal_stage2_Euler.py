@@ -77,8 +77,8 @@ class JournalStage2Euler(JournalStage1Euler):
         self.INIT_XYZS = np.array(
             [[*self._random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]])
         self.INIT_RPYS = np.array([[
-            np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
-            np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
+            0,
+            0,
             np.random.uniform(-3.14, 3.14 + 1e-10, 1)[0]
         ]])
         p.resetBasePositionAndOrientation(self.DRONE_IDS[0], self.INIT_XYZS[0],
