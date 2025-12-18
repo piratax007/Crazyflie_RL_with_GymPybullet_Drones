@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH -A hpc2n2024-120
+#SBATCH -A hpc2n2025-242
 #SBATCH -t 48:00:00
 #SBATCH -n 1
 #SBATCH -c 4
@@ -14,8 +14,8 @@ echo "Training started at $(date)"
 
 echo "CURRENT PATH $(pwd)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'CLStage1Sim2Real' \
- --learning-id 'First-Stage-Without-DR' --algorithm 'ppo' --parallel-environments 4 \
+python3 -m python_scripts.execute_sequential_learning  --environment 'JournalStage1Euler' \
+ --learning-id 'JournalStage1Euler_noHPO' --algorithm 'ppo' --parallel-environments 4 \
  --time-steps 30000000
 
 echo "Training finished at $(date)"
