@@ -83,8 +83,8 @@ def _get_legend_settings(mode: str) -> dict:
     legend_settings = {
         'NONE': {},
         '2D': {
-            'bbox_to_anchor': (0, 0.85, 1, 0.75),
-            'loc': "lower left",
+            'bbox_to_anchor': (0, 1.0, 1, 0.75),
+            'loc': "lower right",
             'borderaxespad': 0,
             'ncol': 4
         },
