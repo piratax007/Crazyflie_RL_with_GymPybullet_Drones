@@ -55,7 +55,6 @@ class SafeRLSimulationStage1(BaseRLAviary):
     def _exploration_reward(self, state):
         self.LOG_Z_DISTANCE = self._update_last(self.LOG_Z_DISTANCE, np.linalg.norm(state[0:3] - self.TARGET_POS))
         ret = self.LOG_Z_DISTANCE[1][0] > self.LOG_Z_DISTANCE[0][0] + 0.025
-        print(f"############## DISTANCE IN t GREATER THAN DISTANCE IN t-1: {ret} ##############")
         return ret
 
     def _stability_reward(self, state):
