@@ -41,7 +41,6 @@ class SafeRLSimulationStage1(BaseRLAviary):
     ################################################################################
 
     def _target_reward(self, state):
-        print(f"############## TARGET ORIENTATION {self.TARGET_ORIENTATION} ##############")
         return np.linalg.norm(self.TARGET_POS - state[0:3]) + 1.5*np.linalg.norm(self.TARGET_ORIENTATION[0] - state[
             7:10])
 
