@@ -59,7 +59,7 @@ export PYTHONUNBUFFERED=1
 OPT_MODULE="python_scripts.optimize_ppo"  # entrypoint: python -m python_scripts.optimize_ppo
 
 # Crazyflie env + study
-ENV_ID="JournalStage2Euler"
+ENV_ID="JournalStage3Euler"
 STUDY_NAME="Journal_WCL_Euler"
 
 # Global trial budget across ALL workers
