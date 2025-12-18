@@ -502,6 +502,7 @@ class BaseAviary(gym.Env):
         if self.GUI and self.USER_DEBUG:
             for i in range(self.NUM_DRONES):
                 self._showDroneLocalAxes(i)
+        self._showDroneLocalAxes(0)
         #### Disable collisions between drones' and the ground plane
         #### E.g., to start a drone at [0,0,0] #####################
         # for i in range(self.NUM_DRONES):
