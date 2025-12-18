@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-#SBATCH -A hpc2n2024-120
+#SBATCH -A hpc2n2025-242
 #SBATCH -J optuna-ppo-cf
-#SBATCH -t 96:00:00
+#SBATCH -t 48:00:00
 #SBATCH -N 1
 #SBATCH --ntasks=10                        # parallel Optuna workers (processes)
 #SBATCH --cpus-per-task=4                 # CPU cores per worker
@@ -59,8 +59,8 @@ export PYTHONUNBUFFERED=1
 OPT_MODULE="python_scripts.optimize_ppo"  # entrypoint: python -m python_scripts.optimize_ppo
 
 # Crazyflie env + study
-ENV_ID="CLStage1Sim2RealDomainRandomization"
-STUDY_NAME="S2R_E2E_Big-DR_Large-PWM-Bounds_GND"
+ENV_ID="JournalStage2Euler"
+STUDY_NAME="Journal_WCL_Euler"
 
 # Global trial budget across ALL workers
 TOTAL_TRIALS=100
@@ -96,8 +96,8 @@ mkdir -p "$(dirname "$DEST_DB")"
   done ) >/dev/null 2>&1 &
 
 # Optuna sampler/pruner knobs
-N_STARTUP_TRIALS=3
-N_EVALUATIONS=2
+N_STARTUP_TRIALS=5
+N_EVALUATIONS=4
 USE_CONSTANT_LIAR=1   # 1 -> add --tpe_constant_liar
 
 # Export for Python pre-init
