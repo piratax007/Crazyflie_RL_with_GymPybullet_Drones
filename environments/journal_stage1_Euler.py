@@ -41,8 +41,7 @@ class JournalStage1Euler(BaseRLAviary):
     ################################################################################
 
     def _target_reward(self, state):
-        return np.linalg.norm(self.TARGET_POS - state[0:3]) + 0.5*np.linalg.norm(self.TARGET_ORIENTATION[0] - state[
-            7:10])
+        return np.linalg.norm(self.TARGET_POS - state[0:3]) + np.linalg.norm(self.TARGET_ORIENTATION[0] - state[7:10])
 
     @staticmethod
     def _update_last(storage: np.ndarray, data):
