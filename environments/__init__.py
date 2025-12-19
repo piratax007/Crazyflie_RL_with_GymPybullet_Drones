@@ -15,7 +15,7 @@ from environments.CL_Stage2_S2R_e2e_dr_new_reward import CLStage2S2RE2EDRNewRewa
 
 environment_map = {
     'JournalStage1Euler': JournalStage1Euler,
-    'JournalStage2EulerNoiseFree': JournalStage2EulerNoiseFree,
+    'JournalStage1EulerNoiseFree': JournalStage1EulerNoiseFree,
     'JournalStage2Euler': JournalStage2Euler,
     'JournalStage3Euler': JournalStage3Euler,
     'CLStage1Sim2RealDomainRandomization': CLStage1Sim2RealDomainRandomization,
