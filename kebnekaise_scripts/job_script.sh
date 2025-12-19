@@ -14,8 +14,8 @@ echo "Training started at $(date)"
 
 echo "CURRENT PATH $(pwd)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'JournalStage1Euler' \
- --learning-id 'Journal_Stage1_AttitudeRewardWeight1_Euler_noHPO_Noise' --algorithm 'ppo' --parallel-environments 4 \
+python3 -m python_scripts.execute_sequential_learning  --environment 'JournalStage1EulerNoiseFree' \
+ --learning-id 'Journal_Stage1_Euler_noHPO_NoiseFree' --algorithm 'ppo' --parallel-environments 4 \
  --time-steps 16000000
 
 echo "Training finished at $(date)"
