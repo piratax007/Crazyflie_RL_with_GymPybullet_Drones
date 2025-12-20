@@ -522,7 +522,7 @@ def run_simulation(
         )
 
     _ = {
-        0: add_way_point((0, 0, 1), radius=0.025, color=(0, 0, 0, 0.75))
+        0: add_way_point((0, 0, 1), radius=0.025, color=(1, 0, 0, 0.5))
     }
 
     for i in range(simulation_seconds):
