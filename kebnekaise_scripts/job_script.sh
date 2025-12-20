@@ -14,8 +14,9 @@ echo "Training started at $(date)"
 
 echo "CURRENT PATH $(pwd)"
 
-python3 -m python_scripts.execute_sequential_learning  --environment 'JournalStage1EulerNoiseFree' \
- --learning-id 'Journal_Stage1_Euler_noHPO_NoiseFree' --algorithm 'ppo' --parallel-environments 4 \
- --time-steps 16000000
+python3 -m python_scripts.execute_sequential_learning  --environment 'JournalStage2Euler' \
+ --learning-id 'Journal_Stage2_Euler_noHPO_Noise_TargetAttitudeError15_CylinderR1H1' \
+ --continuous-learning True --path-to-previous-model 'results/save-JournalStage1Euler_noHPO-12.18.2025_17.08.53' \
+ --algorithm 'ppo' --parallel-environments 4 --time-steps 16000000
 
 echo "Training finished at $(date)"

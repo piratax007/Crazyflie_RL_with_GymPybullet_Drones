@@ -75,7 +75,7 @@ class JournalStage2Euler(JournalStage1Euler):
         self._housekeeping()
         self._updateAndStoreKinematicInformation()
         self.INIT_XYZS = np.array(
-            [[*self._random_cylindrical_positions(outer_radius=2.0, cylinder_height=2, mode='inside')]])
+            [[*self._random_cylindrical_positions(outer_radius=1.0, cylinder_height=1, mode='inside')]])
         self.INIT_RPYS = np.array([[
             0,
             0,
