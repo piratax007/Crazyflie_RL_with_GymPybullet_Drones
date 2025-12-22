@@ -1,5 +1,8 @@
 from environments.BaseAviary import BaseAviary
 from environments.BaseRLAviary import BaseRLAviary
+from environments.ejc_cl_stage1 import EjcCLStage1
+from environments.ejc_cl_stage2 import EjcCLStage2
+from environments.ejc_cl_stage3 import EjcCLStage3
 from environments.journal_stage1_Euler import JournalStage1Euler
 from environments.journal_stage1_Euler_NoiseFree import JournalStage1EulerNoiseFree
 from environments.journal_stage2_Euler import JournalStage2Euler
@@ -14,6 +17,9 @@ from environments.CL_Stage1_S2R_e2e_dr_new_reward import CLStage1S2RE2EDRNewRewa
 from environments.CL_Stage2_S2R_e2e_dr_new_reward import CLStage2S2RE2EDRNewReward
 
 environment_map = {
+    'EjcCLStage1': EjcCLStage1,
+    'EjcCLStage2': EjcCLStage2,
+    'EjcCLStage3': EjcCLStage3,
     'JournalStage1Euler': JournalStage1Euler,
     'JournalStage1EulerNoiseFree': JournalStage1EulerNoiseFree,
     'JournalStage2Euler': JournalStage2Euler,
