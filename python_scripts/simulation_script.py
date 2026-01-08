@@ -147,21 +147,27 @@ def lemniscate_trajectory(number_of_points: int = 50, a: float = 2) -> tuple:
     return x_coordinates, y_coordinates, z_coordinates, yaw_angles
 
 
-def smooth_trajectory(points: list, num_points: int = 100):
+def smooth_trajectory(points: list, num_points: int = 100, target_center: tuple = None,
+                     yaw_mode: str = "tangent"):
     """
     Generates a smooth trajectory through a series of 3D points and calculates the corresponding roll,
     pitch, and yaw angles for each point.
 
     The function takes a list of 3D points, interpolates a smooth trajectory through the points
-    using a spline, and computes the tangent vectors at each interpolated point to determine
-    the corresponding roll, pitch, and yaw angles. The result is returned as tuples of x, y, z
-    coordinates, and yaw angles.
+    using a spline, and computes the yaw angles at each interpolated point based on the specified mode.
 
     Arguments:
         points (list): A list of 3D points represented as [x, y, z] coordinates through which the
                        trajectory is interpolated.
         num_points (int): The number of interpolated points generated along the trajectory. Defaults
                           to 100.
+        target_center (tuple, optional): A 3D point [x, y, z] used as reference for yaw calculations.
+                                        Required when yaw_mode is "towards_center" or "radial".
+                                        Defaults to None.
+        yaw_mode (str): Mode for calculating yaw angles:
+                       - "tangent": Yaw follows the trajectory tangent (default)
+                       - "towards_center": Yaw points towards target_center
+                       - "radial": Yaw matches the radial angle from target_center (for circular arcs)
 
     Returns:
         tuple: A tuple containing four elements:
@@ -192,6 +198,15 @@ def smooth_trajectory(points: list, num_points: int = 100):
     2. After the list of points, and before the simulation loop, call the smooth_trajectory function:
     ```
     ...
+    # For circular inspection (yaw matches angular position):
+    x_target, y_target, z_target, yaw_target = smooth_trajectory(
+        points, simulation_seconds, target_center=(0, 0, 1), yaw_mode="radial")
+
+    # For inspection task (yaw points towards center):
+    x_target, y_target, z_target, yaw_target = smooth_trajectory(
+        points, simulation_seconds, target_center=(0, 0, 1), yaw_mode="towards_center")
+
+    # For regular trajectory (yaw follows path):
     x_target, y_target, z_target, yaw_target = smooth_trajectory(points, simulation_seconds)
 
     for i in range(simulation_seconds):
@@ -213,33 +228,59 @@ def smooth_trajectory(points: list, num_points: int = 100):
     x_fine, y_fine, z_fine = splev(u_fine, tck)
     smooth_points = np.vstack((x_fine, y_fine, z_fine)).T
 
-    tangents = np.diff(smooth_points, axis=0)
-    tangents /= np.linalg.norm(tangents, axis=1)[:, None]
-    tangents = np.vstack((tangents, tangents[-1]))
+    yaw_angles = []
 
-    roll_pitch_yaw = []
+    if yaw_mode == "towards_center" and target_center is not None:
+        # Calculate yaw angles pointing towards the target center
+        cx, cy, cz = target_center
+        for point in smooth_points:
+            # Vector from current point to center
+            dx = cx - point[0]
+            dy = cy - point[1]
+            # Calculate yaw angle (atan2 gives angle in x-y plane)
+            yaw = np.arctan2(dy, dx)
+            yaw_angles.append(yaw)
+    elif yaw_mode == "radial" and target_center is not None:
+        # Calculate yaw angles matching the radial angle from center
+        cx, cy, cz = target_center
+        for point in smooth_points:
+            # Vector from center to current point
+            dx = point[0] - cx
+            dy = point[1] - cy
+            # Calculate yaw angle (atan2 gives angle in x-y plane)
+            yaw = np.arctan2(dy, dx)
+            yaw_angles.append(yaw)
+    else:
+        # Original behavior: yaw follows trajectory tangent
+        tangents = np.diff(smooth_points, axis=0)
+        tangents /= np.linalg.norm(tangents, axis=1)[:, None]
+        tangents = np.vstack((tangents, tangents[-1]))
 
-    for i in range(len(smooth_points)):
-        t = tangents[i]
-        y_axis = t
-        z_axis = np.array([0, 0, 1])
-        if np.allclose(y_axis, z_axis):
-            z_axis = np.array([0, 1, 0])
-        x_axis = np.cross(y_axis, z_axis)
-        x_axis /= np.linalg.norm(x_axis)
-        z_axis = np.cross(x_axis, y_axis)
-        z_axis /= np.linalg.norm(z_axis)
+        roll_pitch_yaw = []
 
-        rotation_matrix = np.array([x_axis, y_axis, z_axis]).T
-        r = R.from_matrix(rotation_matrix)
-        roll, pitch, yaw = r.as_euler('xyz', degrees=False)
+        for i in range(len(smooth_points)):
+            t = tangents[i]
+            y_axis = t
+            z_axis = np.array([0, 0, 1])
+            if np.allclose(y_axis, z_axis):
+                z_axis = np.array([0, 1, 0])
+            x_axis = np.cross(y_axis, z_axis)
+            x_axis /= np.linalg.norm(x_axis)
+            z_axis = np.cross(x_axis, y_axis)
+            z_axis /= np.linalg.norm(z_axis)
 
-        roll_pitch_yaw.append((roll, pitch, yaw))
+            rotation_matrix = np.array([x_axis, y_axis, z_axis]).T
+            r = R.from_matrix(rotation_matrix)
+            roll, pitch, yaw = r.as_euler('xyz', degrees=False)
+
+            roll_pitch_yaw.append((roll, pitch, yaw))
+
+        yaw_angles = [yaw for _, _, yaw in roll_pitch_yaw]
 
     x_tuple = tuple(smooth_points[:, 0])
     y_tuple = tuple(smooth_points[:, 1])
     z_tuple = tuple(smooth_points[:, 2])
-    yaw_tuple = tuple([yaw for _, _, yaw in roll_pitch_yaw])
+    yaw_tuple = tuple(yaw_angles)
 
     return x_tuple, y_tuple, z_tuple, yaw_tuple
 
@@ -310,11 +351,11 @@ def random_cylindrical_positions(
     return x, y, z
 
 
-def add_way_point(position, radius=0.1, color=(1, 0, 0, 0.5)):
+def add_way_point(position, radius=0.1, color=(1, 0, 0, 0.5), arrow=None):
     """
     Adds a waypoint in the form of a sphere to the simulation. This function
     creates a sphere visual shape with specified parameters and places it at
-    the given position.
+    the given position. Optionally, an arrow can be added to indicate direction.
 
     Parameters:
         position (Sequence[float]): A 3D position [x, y, z] where the sphere will
@@ -323,9 +364,13 @@ def add_way_point(position, radius=0.1, color=(1, 0, 0, 0.5)):
             Defaults to 0.1.
         color (Sequence[float], optional): RGBA color of the sphere. Defaults to
             (1, 0, 0, 0.5).
+        arrow (dict, optional): Dictionary with keys "show_arrow" (bool) and "angle" (float).
+            If show_arrow is True, draws an arrow with length 2*radius pointing in the
+            direction given by angle (in radians) in the x-y plane. Defaults to None.
 
     Returns:
-        int: The ID of the created sphere in the simulation.
+        int or tuple: The ID of the created sphere, or a tuple (sphere_id, arrow_line_id)
+            if an arrow was added.
 
     Raises:
         Exception: If the simulation environment is not set up properly.
@@ -336,7 +381,7 @@ def add_way_point(position, radius=0.1, color=(1, 0, 0, 0.5)):
         ...
         _ = {
             0: add_way_point((-1, 1, 0), radius=0.025),
-            1: add_way_point((-1, 1, 1), radius=0.025),
+            1: add_way_point((-1, 1, 1), radius=0.025, arrow={"show_arrow": True, "angle": 0.58}),
             2: add_way_point((-2, 0, 1.5), radius=0.025)
         }
 
@@ -355,7 +400,302 @@ def add_way_point(position, radius=0.1, color=(1, 0, 0, 0.5)):
         baseVisualShapeIndex=sphere_visual,
         basePosition=position,
     )
+
+    if arrow and arrow.get("show_arrow", False):
+        angle = arrow.get("angle", 0.0)
+        arrow_length = 5 * radius
+
+        # Calculate arrow endpoint in x-y plane
+        end_x = position[0] + arrow_length * np.cos(angle)
+        end_y = position[1] + arrow_length * np.sin(angle)
+        end_z = position[2]
+
+        # Draw arrow as a line
+        arrow_line_id = p.addUserDebugLine(
+            lineFromXYZ=position,
+            lineToXYZ=[end_x, end_y, end_z],
+            lineColorRGB=[0.1, 0.3, 0.9],
+            lineWidth=2,
+            lifeTime=0
+        )
+
+        return sphere_id, arrow_line_id
+
     return sphere_id
+
+
+def add_cylindrical_obstacle(x, y, radius, height, color=(0.5, 0.5, 0.5, 1.0)):
+    """
+    Adds a rigid cylindrical obstacle to the simulation environment. The cylinder
+    has both visual and collision shapes, allowing drones to physically collide
+    with it.
+
+    Parameters:
+        x (float): X-coordinate of the cylinder's center position.
+        y (float): Y-coordinate of the cylinder's center position.
+        radius (float): Radius of the cylinder in meters.
+        height (float): Height of the cylinder in meters.
+        color (Sequence[float], optional): RGBA color of the cylinder.
+            Defaults to (0.5, 0.5, 0.5, 1.0) (gray).
+
+    Returns:
+        int: The ID of the created cylinder in the simulation.
+
+    Raises:
+        Exception: If PyBullet simulation is not initialized.
+
+    How to:
+        Before the simulation loop, call the add_cylindrical_obstacle function
+        for each obstacle:
+        ```
+        ...
+        obstacles = [
+            add_cylindrical_obstacle(x=1.0, y=0.0, radius=0.2, height=2.0),
+            add_cylindrical_obstacle(x=-1.0, y=1.0, radius=0.15, height=1.5),
+            add_cylindrical_obstacle(x=0.0, y=-1.0, radius=0.25, height=1.8)
+        ]
+
+        for i in range(simulation_seconds):
+            ...
+        ```
+    """
+    # Create collision shape for physical interactions
+    collision_shape = p.createCollisionShape(
+        shapeType=p.GEOM_CYLINDER,
+        radius=radius,
+        height=height
+    )
+
+    # Create visual shape for rendering
+    visual_shape = p.createVisualShape(
+        shapeType=p.GEOM_CYLINDER,
+        radius=radius,
+        length=height,
+        rgbaColor=color
+    )
+
+    # Create the multi-body with both collision and visual shapes
+    # Position z is set to height/2 so the cylinder sits on the ground (z=0)
+    cylinder_id = p.createMultiBody(
+        baseMass=0,  # Mass of 0 makes it static/immovable
+        baseCollisionShapeIndex=collision_shape,
+        baseVisualShapeIndex=visual_shape,
+        basePosition=[x, y, height / 2]
+    )
+
+    return cylinder_id
+
+
+def add_rectangular_wall(position, width, height, thickness=0.1, orientation_deg=0.0,
+                        color=(0.5, 0.5, 0.5, 1.0)):
+    """
+    Adds a rectangular wall obstacle to the simulation environment. The wall is
+    a rigid box with collision and visual properties, allowing physical interactions.
+
+    Parameters:
+        position (Sequence[float]): A 3D position [x, y, z] for the center of the wall.
+        width (float): Width of the wall in meters (along its length).
+        height (float): Height of the wall in meters (vertical dimension).
+        thickness (float, optional): Thickness of the wall in meters. Defaults to 0.1.
+        orientation_deg (float, optional): Rotation angle around the Z-axis in degrees.
+            0 degrees aligns the wall with the X-axis. Defaults to 0.0.
+        color (Sequence[float], optional): RGBA color of the wall.
+            Defaults to (0.5, 0.5, 0.5, 1.0) (gray).
+
+    Returns:
+        int: The ID of the created wall in the simulation.
+
+    Raises:
+        Exception: If PyBullet simulation is not initialized.
+
+    How to:
+        Before the simulation loop, call the add_rectangular_wall function:
+        ```
+        ...
+        # Create a wall at position (2, 0, 1) with width 3m, height 2m
+        wall_id = add_rectangular_wall(
+            position=(2, 0, 1),
+            width=3.0,
+            height=2.0,
+            thickness=0.15,
+            orientation_deg=45.0,
+            color=(0.7, 0.3, 0.3, 1.0)
+        )
+
+        for i in range(simulation_seconds):
+            ...
+        ```
+    """
+    # Create collision shape for physical interactions
+    collision_shape = p.createCollisionShape(
+        shapeType=p.GEOM_BOX,
+        halfExtents=[width / 2, thickness / 2, height / 2]
+    )
+
+    # Create visual shape for rendering
+    visual_shape = p.createVisualShape(
+        shapeType=p.GEOM_BOX,
+        halfExtents=[width / 2, thickness / 2, height / 2],
+        rgbaColor=color
+    )
+
+    # Calculate orientation quaternion
+    orientation_rad = np.deg2rad(orientation_deg)
+    orientation_quat = p.getQuaternionFromEuler([0, 0, orientation_rad])
+
+    # Create the multi-body with both collision and visual shapes
+    wall_id = p.createMultiBody(
+        baseMass=0,  # Mass of 0 makes it static/immovable
+        baseCollisionShapeIndex=collision_shape,
+        baseVisualShapeIndex=visual_shape,
+        basePosition=position,
+        baseOrientation=orientation_quat
+    )
+
+    return wall_id
+
+
+def add_circular_wall(center, radius, height, start_angle_deg, end_angle_deg,
+                     thickness=0.1, num_segments=20, color=(0.5, 0.5, 0.5, 1.0)):
+    """
+    Adds a circular wall segment to the simulation environment. The wall follows
+    an arc defined by a center point, radius, and angular range.
+
+    Parameters:
+        center (Sequence[float]): A 3D position [x, y, z] for the center of the arc.
+        radius (float): Radius of the circular arc in meters.
+        height (float): Height of the wall in meters.
+        start_angle_deg (float): Starting angle of the arc in degrees (0 = +X axis).
+        end_angle_deg (float): Ending angle of the arc in degrees.
+        thickness (float, optional): Thickness of the wall in meters. Defaults to 0.1.
+        num_segments (int, optional): Number of box segments to approximate the arc.
+            Defaults to 20.
+        color (Sequence[float], optional): RGBA color of the wall.
+            Defaults to (0.5, 0.5, 0.5, 1.0) (gray).
+
+    Returns:
+        list: List of IDs for all the box segments that form the wall.
+
+    Raises:
+        Exception: If PyBullet simulation is not initialized.
+
+    How to:
+        Before the simulation loop, call the add_circular_wall function:
+        ```
+        ...
+        wall_ids = add_circular_wall(
+            center=(0, 0, 1),
+            radius=3.5,
+            height=2.0,
+            start_angle_deg=-15,
+            end_angle_deg=15
+        )
+
+        for i in range(simulation_seconds):
+            ...
+        ```
+    """
+    cx, cy, cz = center
+    start_angle_rad = np.deg2rad(start_angle_deg)
+    end_angle_rad = np.deg2rad(end_angle_deg)
+
+    # Calculate angles for each segment
+    angles = np.linspace(start_angle_rad, end_angle_rad, num_segments + 1)
+
+    wall_ids = []
+
+    for i in range(num_segments):
+        # Calculate midpoint angle for this segment
+        mid_angle = (angles[i] + angles[i + 1]) / 2
+
+        # Calculate segment length (arc length)
+        arc_length = radius * (angles[i + 1] - angles[i])
+
+        # Position at the midpoint of the arc
+        x = cx + radius * np.cos(mid_angle)
+        y = cy + radius * np.sin(mid_angle)
+        z = cz
+
+        # Create collision shape
+        collision_shape = p.createCollisionShape(
+            shapeType=p.GEOM_BOX,
+            halfExtents=[arc_length / 2, thickness / 2, height / 2]
+        )
+
+        # Create visual shape
+        visual_shape = p.createVisualShape(
+            shapeType=p.GEOM_BOX,
+            halfExtents=[arc_length / 2, thickness / 2, height / 2],
+            rgbaColor=color
+        )
+
+        # Calculate orientation (perpendicular to radius)
+        orientation_angle = mid_angle
+        orientation_quat = p.getQuaternionFromEuler([0, 0, orientation_angle])
+
+        # Create the box segment
+        box_id = p.createMultiBody(
+            baseMass=0,
+            baseCollisionShapeIndex=collision_shape,
+            baseVisualShapeIndex=visual_shape,
+            basePosition=[x, y, z],
+            baseOrientation=orientation_quat
+        )
+
+        wall_ids.append(box_id)
+
+    return wall_ids
+
+
+def track_trajectory(position, prev_position=None, color=(0, 1, 0, 0.25), line_width=0.5):
+    """
+    Tracks and visualizes the drone's trajectory by drawing a line from the previous
+    position to the current position.
+
+    Parameters:
+        position (Sequence[float]): Current 3D position [x, y, z] of the drone.
+        prev_position (Sequence[float], optional): Previous 3D position [x, y, z].
+            If None, no line is drawn (use for initialization). Defaults to None.
+        color (Sequence[float], optional): RGB color of the trajectory line.
+            Defaults to (0, 1, 0) (green).
+        line_width (float, optional): Width of the trajectory line. Defaults to 2.
+
+    Returns:
+        int or None: The ID of the created debug line, or None if prev_position is None.
+
+    How to:
+        Before the simulation loop, initialize the trajectory tracker:
+        ```
+        ...
+        prev_pos = None
+
+        for i in range(simulation_seconds):
+            ...
+        ```
+        Inside the simulation loop, after getting the current position:
+        ```
+        ...
+        for i in range(simulation_seconds):
+            current_pos = test_env.pos[0]  # Get current position of first drone
+
+            # Draw trajectory line
+            track_trajectory(current_pos, prev_pos, color=(0, 1, 0), line_width=2)
+
+            # Update previous position
+            prev_pos = current_pos.copy()
+            ...
+        ```
+    """
+    if prev_position is not None:
+        line_id = p.addUserDebugLine(
+            lineFromXYZ=prev_position,
+            lineToXYZ=position,
+            lineColorRGB=color,
+            lineWidth=line_width,
+            lifeTime=0  # 0 means the line persists indefinitely
+        )
+        return line_id
+    return None
 
 
 def compute_delay_steps(delay_seconds: float, ctrl_freq_hz: float) -> int:
@@ -422,6 +762,7 @@ def make_wind_updater(
 
     return update
 
+
 def run_simulation(
         test_env,
         policy_path,
@@ -461,6 +802,7 @@ def run_simulation(
         debug: Whether to enable detailed debug outputs during simulation (default: False).
         comment: Additional comments to include in the saved logs (default: "").
         obs_delay_s: Seconds to delay the observation vector by (default: 0.0).
+        wind: Dictionary containing wind parameters for simulation (default: None).
 
     Raises:
         KeyError: If the specified algorithm is not available in the model_map dictionary.
@@ -506,6 +848,7 @@ def run_simulation(
 
     start = time.time()
 
+    prev_pos = None
     wind_update: Callable[[], np.ndarray] | None = None
     if wind and wind.get('on', False):
         wind_update = make_wind_updater(
@@ -521,11 +864,54 @@ def run_simulation(
             seed=wind.get('seed', None)
         )
 
+    p.resetDebugVisualizerCamera(
+        cameraDistance=1,
+        cameraYaw=-90,
+        cameraPitch=-88,
+        cameraTargetPosition=[1.5, 0.0, 2.0]
+    )
+
+    _ = add_cylindrical_obstacle(1.0, 0.0, 0.05, 2)
+    _ = add_cylindrical_obstacle(1.5, 1.0, 0.05, 2)
+    _ = add_cylindrical_obstacle(2.5, 0.5, 0.05, 2)
+    _ = add_cylindrical_obstacle(2.0, -0.5, 0.05, 2)
+
     _ = {
-        0: add_way_point((0, 0, 1), radius=0.025, color=(1, 0, 0, 0.5))
+        1: add_way_point((0.0, 0.0, 1.0), radius=0.025, color=(255, 0, 0, 0.75), arrow={"show_arrow": True, "angle": 0.0}),
+        2: add_way_point((0.7, 0.0, 1.0), radius=0.025, color=(255, 0, 0, 0.75), arrow={"show_arrow": True, "angle": 0.0}),
+        3: add_way_point((1.3, 0.9, 0.75), radius=0.025, color=(255, 0, 0, 0.75), arrow={"show_arrow": True, "angle": 0.34}),
+        4: add_way_point((2.1, 0.6, 1.5), radius=0.025, color=(255, 0, 0, 0.75), arrow={"show_arrow": True, "angle": -0.34}),
+        5: add_way_point((1.7, -0.4, 0.5), radius=0.025, color=(255, 0, 0, 0.75), arrow={"show_arrow": True, "angle": -0.26}),
     }
 
+
     for i in range(simulation_seconds):
+        obs[0][0] += 0.05
+        obs[0][1] -= 0.04
+
+        if 1000 < i < 2000:
+            obs[0][0] -= 0.7
+            obs[0][1] -= 0.0
+        elif 2000 < i < 3000:
+            obs[0][0] -= 1.3
+            obs[0][1] -= 0.9
+            obs[0][2] += 0.25
+            obs[0][5] -= 0.34
+        elif 3000 < i < 4000:
+            obs[0][0] -= 2.1
+            obs[0][1] -= 0.6
+            obs[0][2] -= 0.5
+            obs[0][5] += 0.34
+        elif 4000 < i < 5000:
+            obs[0][0] -= 1.7
+            obs[0][1] += 0.4
+            obs[0][2] += 0.5
+            obs[0][5] += 0.26
+
+        # current_pos = test_env.pos[0]
+        # track_trajectory(current_pos, prev_pos, color=(0.1, 0.1, 0.25), line_width=2)
+        # prev_pos = current_pos.copy()
+
         delayed_obs = feed_and_get_delayed(obs_buffer, obs)
         clipped_actions, _states = policy.predict(delayed_obs, deterministic=True)
 
@@ -540,6 +926,7 @@ def run_simulation(
             )
 
         obs, reward, terminated, truncated, info = test_env.step(clipped_actions)
+
         clipped_rpm = test_env._getDroneStateVector(0)[16:20].squeeze()
         quaternion = test_env._getDroneStateVector(0)[3:7]
         obs2 = obs.squeeze()
@@ -605,6 +992,7 @@ if __name__ == '__main__':
     parser.add_argument('--comment', default="", type=str, help="A comment to describe de simulation saved data")
     parser.add_argument('--plot', default=False, type=str2bool, help="If are shown demo plots")
     parser.add_argument('--debug', default=False, type=str2bool, help="Prints debug information")
+    parser.add_argument('--record-video', default=False, type=str2bool, help="Record simulation video")
     parser.add_argument('--obs-delay-s', default=0.0, type=float, help="Observation delay (seconds) before the policy receives the observation")
     parser.add_argument('--wind-on', default=False, type=str2bool, help="Enable dynamic wind")
     parser.add_argument('--wind-mean-speed', default=0.1, type=float, help="Wind mean speed (m/s)")
@@ -629,7 +1017,7 @@ if __name__ == '__main__':
         algorithm=args.algorithm,
         model=args.model,
         gui=True,
-        record_video=False,
+        record_video=args.record_video,
         simulation_length=args.simulation_length,
         reset=args.reset,
         save=args.save,

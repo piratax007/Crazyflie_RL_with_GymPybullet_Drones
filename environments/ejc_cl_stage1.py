@@ -1,7 +1,7 @@
 import gymnasium.spaces.box
 import numpy as np
 from gymnasium import spaces
-from gym_pybullet_drones.envs.BaseRLAviary import BaseRLAviary
+from environments.BaseRLAviary import BaseRLAviary
 from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, ObservationType
 
 
@@ -14,8 +14,8 @@ class EjcCLStage1(BaseRLAviary):
             target_xyzs = np.array([0, 0, 1]),
             target_rpys=np.array([[0, 0, 0]]),
             physics: Physics = Physics.PYB_GND,
-            pybullet_frequency: int = 400,
-            ctrl_freq: int = 200,
+            pybullet_frequency: int = 200,
+            ctrl_freq: int = 100,
             gui = False,
             record = False,
             observation_space: ObservationType = ObservationType.KIN,
