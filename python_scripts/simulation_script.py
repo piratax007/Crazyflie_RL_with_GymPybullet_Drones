@@ -825,8 +825,8 @@ def run_simulation(
     policy = get_policy(model_map[algorithm], policy_path, model)
 
     test_env = test_env(
-        initial_xyzs=np.array([[0.0, 0.0, 0.0]]),
-        initial_rpys=np.array([[0.0, 0.0, 0.0]]),
+        initial_xyzs=np.array([[0.7, 0.56, 0.5]]),
+        initial_rpys=np.array([[0.0, 0.0, 0.43]]),
         gui=gui,
         observation_space=ObservationType('kin'),
         action_space=ActionType('rpm'),
@@ -865,55 +865,88 @@ def run_simulation(
         )
 
     p.resetDebugVisualizerCamera(
-        cameraDistance=1,
+        cameraDistance=0.75,
         cameraYaw=-90,
-        cameraPitch=-88,
-        cameraTargetPosition=[1.5, 0.0, 2.0]
+        cameraPitch=-15,
+        cameraTargetPosition=[0.5, 0.0, 1.5]
     )
 
-    _ = add_cylindrical_obstacle(1.0, 0.0, 0.05, 2)
-    _ = add_cylindrical_obstacle(1.5, 1.0, 0.05, 2)
-    _ = add_cylindrical_obstacle(2.5, 0.5, 0.05, 2)
-    _ = add_cylindrical_obstacle(2.0, -0.5, 0.05, 2)
+    add_circular_wall([0, 0, 1], 1.1, 2, 25, -25, 0.5, 20, [0.69, 0.91, 1.0, 1.0])
 
-    _ = {
-        1: add_way_point((0.0, 0.0, 1.0), radius=0.025, color=(255, 0, 0, 0.75), arrow={"show_arrow": True, "angle": 0.0}),
-        2: add_way_point((0.7, 0.0, 1.0), radius=0.025, color=(255, 0, 0, 0.75), arrow={"show_arrow": True, "angle": 0.0}),
-        3: add_way_point((1.3, 0.9, 0.75), radius=0.025, color=(255, 0, 0, 0.75), arrow={"show_arrow": True, "angle": 0.34}),
-        4: add_way_point((2.1, 0.6, 1.5), radius=0.025, color=(255, 0, 0, 0.75), arrow={"show_arrow": True, "angle": -0.34}),
-        5: add_way_point((1.7, -0.4, 0.5), radius=0.025, color=(255, 0, 0, 0.75), arrow={"show_arrow": True, "angle": -0.26}),
-    }
+    x0, y0, _, yaw0 = smooth_trajectory(
+        [
+            [0.7, 0.56, 0.5],
+            [0.81, 0.38, 0.5],
+            [0.87, 0.19, 0.5],
+            [0.9, 0, 0.5],
+            [0.87, -0.19, 0.5],
+            [0.81, -0.38, 0.5],
+            [0.7, -0.56, 0.5]
+        ],
+        1000, target_center=(0, 0, 0.5), yaw_mode="radial"
+    )
+
+    x1, y1, _, yaw1 = smooth_trajectory(
+        [
+            [0.7, -0.56, 0.0],
+            [0.81, -0.38, 0.0],
+            [0.87, -0.19, 0.0],
+            [0.9, 0, 0.0],
+            [0.87, 0.19, 0.0],
+            [0.81, 0.38, 0.0],
+            [0.7, 0.56, 0.0]
+        ],
+        1000, target_center=(0, 0, 1), yaw_mode="radial"
+    )
+
+    x2, y2, _, yaw2 = smooth_trajectory(
+        [
+            [0.7, 0.56, 1.5],
+            [0.81, 0.38, 1.5],
+            [0.87, 0.19, 1.5],
+            [0.9, 0, 1.5],
+            [0.87, -0.19, 1.5],
+            [0.81, -0.38, 1.5],
+            [0.7, -0.56, 1.5]
+        ],
+        1000, target_center=(0, 0, 1.5), yaw_mode="radial"
+    )
 
 
     for i in range(simulation_seconds):
         obs[0][0] += 0.05
         obs[0][1] -= 0.04
 
-        if 1000 < i < 2000:
-            obs[0][0] -= 0.7
-            obs[0][1] -= 0.0
-        elif 2000 < i < 3000:
-            obs[0][0] -= 1.3
-            obs[0][1] -= 0.9
-            obs[0][2] += 0.25
-            obs[0][5] -= 0.34
-        elif 3000 < i < 4000:
-            obs[0][0] -= 2.1
-            obs[0][1] -= 0.6
-            obs[0][2] -= 0.5
-            obs[0][5] += 0.34
-        elif 4000 < i < 5000:
-            obs[0][0] -= 1.7
-            obs[0][1] += 0.4
+        if i < 1000:
+            obs[0][0] -= x0[i]
+            obs[0][1] -= y0[i]
             obs[0][2] += 0.5
-            obs[0][5] += 0.26
+            obs[0][5] -= yaw0[i]
+        elif 1000 < i < 1500:
+            obs[0][0] -= x0[-1]
+            obs[0][1] -= y0[-1]
+            obs[0][5] -= yaw0[-1]
+        elif 1500 < i < 2500:
+            obs[0][0] -= x1[i-1500]
+            obs[0][1] -= y1[i-1500]
+            obs[0][5] -= yaw1[i-1500]
+        elif 2500 < i < 3000:
+            obs[0][0] -= x1[-1]
+            obs[0][1] -= y1[-1]
+            obs[0][2] -= 0.5
+            obs[0][5] -= yaw1[-1]
+        elif 3000 < i < 4000:
+            obs[0][0] -= x2[i-3000]
+            obs[0][1] -= y2[i-3000]
+            obs[0][2] -= 0.5
+            obs[0][5] -= yaw2[i-3000]
 
         # current_pos = test_env.pos[0]
         # track_trajectory(current_pos, prev_pos, color=(0.1, 0.1, 0.25), line_width=2)
         # prev_pos = current_pos.copy()
 
         delayed_obs = feed_and_get_delayed(obs_buffer, obs)
-        clipped_actions, _states = policy.predict(delayed_obs, deterministic=True)
+        clipped_actions, _states = policy.predict(obs, deterministic=True)
 
         if wind_update is not None:
             force = wind_update()
