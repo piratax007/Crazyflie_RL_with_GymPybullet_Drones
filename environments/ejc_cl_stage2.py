@@ -12,7 +12,7 @@ class EjcCLStage2(EjcCLStage1):
             initial_rpys = np.array([[0, 0, 0]]),
             target_xyzs = np.array([0, 0, 1]),
             target_rpys = np.array([0, 0, 0]),
-            physics: Physics = Physics.PYB_GND,
+            physics: Physics = Physics.PYB,
             pybullet_frequency: int = 400,
             ctrl_freq: int = 200,
             gui = False,

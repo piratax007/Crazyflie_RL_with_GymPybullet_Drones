@@ -12,7 +12,7 @@ class EjcCLStage3(EjcCLStage2):
             initial_rpys = np.array([[0, 0, 0]]),
             target_xyzs = np.array([0, 0, 1]),
             target_rpys = np.array([0, 0, 0]),
-            physics: Physics = Physics.PYB_GND,
+            physics: Physics = Physics.PYB,
             pybullet_frequency: int = 400,
             ctrl_freq: int = 200,
             gui = False,
@@ -81,8 +81,19 @@ class EjcCLStage3(EjcCLStage2):
             np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
             np.random.uniform(-3.14, 3.14 + 1e-10, 1)[0]
         ]])
+        initial_linear_velocity = [
+            np.random.uniform(-1, 1 + 1e-10, 1)[0],
+            np.random.uniform(-1, 1 + 1e-10, 1)[0],
+            np.random.uniform(-1, 1 + 1e-10, 1)[0]
+        ]
+        initial_angular_velocity = [
+            np.random.uniform(-1, 1 + 1e-10, 1)[0],
+            np.random.uniform(-1, 1 + 1e-10, 1)[0],
+            np.random.uniform(-1, 1 + 1e-10, 1)[0]
+        ]
         p.resetBasePositionAndOrientation(self.DRONE_IDS[0], self.INIT_XYZS[0],
                                           p.getQuaternionFromEuler(self.INIT_RPYS[0]))
+        p.resetBaseVelocity(self.DRONE_IDS[0], initial_linear_velocity, initial_angular_velocity)
         initial_obs = self._computeObs()
         initial_info = self._computeInfo()
         return initial_obs, initial_info

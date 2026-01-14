@@ -13,9 +13,9 @@ class EjcCLStage1(BaseRLAviary):
             initial_rpys = np.array([[0, 0, 0]]),
             target_xyzs = np.array([0, 0, 1]),
             target_rpys=np.array([[0, 0, 0]]),
-            physics: Physics = Physics.PYB_GND,
-            pybullet_frequency: int = 200,
-            ctrl_freq: int = 100,
+            physics: Physics = Physics.PYB,
+            pybullet_frequency: int = 400,
+            ctrl_freq: int = 200,
             gui = False,
             record = False,
             observation_space: ObservationType = ObservationType.KIN,
@@ -43,7 +43,7 @@ class EjcCLStage1(BaseRLAviary):
     def _target_error(self, state):
         return (
                 np.linalg.norm(self.TARGET_POSITION - state[0:3]) +
-                1.5*np.linalg.norm(self.TARGET_ORIENTATION[0] - state[7:10])
+                np.linalg.norm(self.TARGET_ORIENTATION[0] - state[7:10])
         )
 
     def _is_away_from_exploration_area(self, state):
@@ -79,7 +79,7 @@ class EjcCLStage1(BaseRLAviary):
         state = self._getDroneStateVector(0)
         we_differences = self._get_we_differences(state)
         ret = (25 - 20 * self._target_error(state) -
-               100 * (1 if self._is_away_from_exploration_area(state) else -0.2) +
+               100*(1 if self._is_away_from_exploration_area(state) else -0.2) +
                20 * self._performance(state) -
                18 * (we_differences['roll'] ** 2 + we_differences['pitch'] ** 2 + we_differences['yaw'] ** 2))
         return ret
