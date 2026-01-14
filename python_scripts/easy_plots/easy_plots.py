@@ -86,7 +86,7 @@ def _get_legend_settings(mode: str) -> dict:
             'bbox_to_anchor': (0, 1.0, 1, 0.75),
             'loc': "lower right",
             'borderaxespad': 0,
-            'ncol': 4
+            'ncol': 2
         },
         '3D': {
             'bbox_to_anchor': (0, 1, 1, 0.25),
@@ -399,3 +399,42 @@ def animation_3d(
 
     anim = animation.FuncAnimation(figure, update, frames=len(x), interval=3, repeat=False)
     anim.save(video_name + '.mp4', 'ffmpeg', fps=60, dpi=300)
+
+
+def compose_sources(parent_directory: str, common_name: str) -> list:
+    sources = []
+
+    if not os.path.isdir(parent_directory):
+        assert False, "Parent directory doesn't exist"
+
+    for source in os.listdir(parent_directory):
+        if common_name in source:
+            sources.append(parent_directory + source + '/')
+
+    sources.sort()
+
+    return sources
+
+
+def moving_average(data, window_size):
+    return np.convolve(data, np.ones(window_size), 'valid') / window_size
+
+
+def read_from_csv(files: list):
+    all_values = []
+    steps = None
+
+    for file in files:
+        data = pd.read_csv(file)
+        if steps is None:
+            steps = data['Step']
+        all_values.append(data['Value'])
+
+    return steps, pd.DataFrame(all_values)
+
+
+def calculate_statistics(rewards: pd.DataFrame):
+    mean_rewards = rewards.mean(axis=0)
+    std_rewards = rewards.std(axis=0)
+
+    return mean_rewards, std_rewards
