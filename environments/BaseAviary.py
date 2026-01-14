@@ -467,6 +467,9 @@ class BaseAviary(gym.Env):
         self.X_AX = -1*np.ones(self.NUM_DRONES)
         self.Y_AX = -1*np.ones(self.NUM_DRONES)
         self.Z_AX = -1*np.ones(self.NUM_DRONES)
+        self.X_AX_CONE = -1*np.ones((self.NUM_DRONES, 8))  # 8 lines per cone
+        self.Y_AX_CONE = -1*np.ones((self.NUM_DRONES, 8))
+        self.Z_AX_CONE = -1*np.ones((self.NUM_DRONES, 8))
         self.GUI_INPUT_TEXT = -1*np.ones(self.NUM_DRONES)
         self.USE_GUI_RPM=False
         self.last_input_switch = 0
@@ -968,6 +971,10 @@ class BaseAviary(gym.Env):
         """
         if self.GUI:
             AXIS_LENGTH = 2*self.L
+            CONE_LENGTH = 0.5*self.L
+            CONE_RADIUS = 0.08*self.L
+
+            # X axis (red)
             self.X_AX[nth_drone] = p.addUserDebugLine(lineFromXYZ=[0, 0, 0],
                                                       lineToXYZ=[AXIS_LENGTH, 0, 0],
                                                       lineColorRGB=[1, 0, 0],
@@ -976,6 +983,22 @@ class BaseAviary(gym.Env):
                                                       replaceItemUniqueId=int(self.X_AX[nth_drone]),
                                                       physicsClientId=self.CLIENT
                                                       )
+            # Draw cone for X axis using lines
+            cone_tip_x = np.array([AXIS_LENGTH + CONE_LENGTH, 0, 0])
+            cone_base_x = np.array([AXIS_LENGTH, 0, 0])
+            # Create 8 lines around the cone
+            for i in range(8):
+                angle = 2 * np.pi * i / 8
+                base_point = cone_base_x + np.array([0, CONE_RADIUS * np.cos(angle), CONE_RADIUS * np.sin(angle)])
+                self.X_AX_CONE[nth_drone, i] = p.addUserDebugLine(lineFromXYZ=base_point,
+                                                                  lineToXYZ=cone_tip_x,
+                                                                  lineColorRGB=[1, 0, 0],
+                                                                  parentObjectUniqueId=self.DRONE_IDS[nth_drone],
+                                                                  parentLinkIndex=-1,
+                                                                  replaceItemUniqueId=int(self.X_AX_CONE[nth_drone, i]),
+                                                                  physicsClientId=self.CLIENT)
+
+            # Y axis (green)
             self.Y_AX[nth_drone] = p.addUserDebugLine(lineFromXYZ=[0, 0, 0],
                                                       lineToXYZ=[0, AXIS_LENGTH, 0],
                                                       lineColorRGB=[0, 1, 0],
@@ -984,6 +1007,21 @@ class BaseAviary(gym.Env):
                                                       replaceItemUniqueId=int(self.Y_AX[nth_drone]),
                                                       physicsClientId=self.CLIENT
                                                       )
+            # Draw cone for Y axis using lines
+            cone_tip_y = np.array([0, AXIS_LENGTH + CONE_LENGTH, 0])
+            cone_base_y = np.array([0, AXIS_LENGTH, 0])
+            for i in range(8):
+                angle = 2 * np.pi * i / 8
+                base_point = cone_base_y + np.array([CONE_RADIUS * np.cos(angle), 0, CONE_RADIUS * np.sin(angle)])
+                self.Y_AX_CONE[nth_drone, i] = p.addUserDebugLine(lineFromXYZ=base_point,
+                                                                  lineToXYZ=cone_tip_y,
+                                                                  lineColorRGB=[0, 1, 0],
+                                                                  parentObjectUniqueId=self.DRONE_IDS[nth_drone],
+                                                                  parentLinkIndex=-1,
+                                                                  replaceItemUniqueId=int(self.Y_AX_CONE[nth_drone, i]),
+                                                                  physicsClientId=self.CLIENT)
+
+            # Z axis (blue)
             self.Z_AX[nth_drone] = p.addUserDebugLine(lineFromXYZ=[0, 0, 0],
                                                       lineToXYZ=[0, 0, AXIS_LENGTH],
                                                       lineColorRGB=[0, 0, 1],
@@ -992,6 +1030,19 @@ class BaseAviary(gym.Env):
                                                       replaceItemUniqueId=int(self.Z_AX[nth_drone]),
                                                       physicsClientId=self.CLIENT
                                                       )
+            # Draw cone for Z axis using lines
+            cone_tip_z = np.array([0, 0, AXIS_LENGTH + CONE_LENGTH])
+            cone_base_z = np.array([0, 0, AXIS_LENGTH])
+            for i in range(8):
+                angle = 2 * np.pi * i / 8
+                base_point = cone_base_z + np.array([CONE_RADIUS * np.cos(angle), CONE_RADIUS * np.sin(angle), 0])
+                self.Z_AX_CONE[nth_drone, i] = p.addUserDebugLine(lineFromXYZ=base_point,
+                                                                  lineToXYZ=cone_tip_z,
+                                                                  lineColorRGB=[0, 0, 1],
+                                                                  parentObjectUniqueId=self.DRONE_IDS[nth_drone],
+                                                                  parentLinkIndex=-1,
+                                                                  replaceItemUniqueId=int(self.Z_AX_CONE[nth_drone, i]),
+                                                                  physicsClientId=self.CLIENT)
     
     ################################################################################
 
