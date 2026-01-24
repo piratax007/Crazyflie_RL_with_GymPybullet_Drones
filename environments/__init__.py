@@ -15,6 +15,7 @@ from environments.CL_Stage2_S2R_e2e_dr_quad import CLStage2S2RE2EDRQuat
 from environments.CL_Stage3_S2R_e2e_dr_quad import CLStage3S2RE2EDRQuat
 from environments.CL_Stage1_S2R_e2e_dr_new_reward import CLStage1S2RE2EDRNewReward
 from environments.CL_Stage2_S2R_e2e_dr_new_reward import CLStage2S2RE2EDRNewReward
+from environments.MED_26_q import MED26Quaterion
 
 environment_map = {
     'EjcCLStage1': EjcCLStage1,
@@ -32,4 +33,5 @@ environment_map = {
     'CLStage3S2RE2EDRQuat': CLStage3S2RE2EDRQuat,
     'CLStage1S2RE2EDRNewReward': CLStage1S2RE2EDRNewReward,
     'CLStage2S2RE2EDRNewReward': CLStage2S2RE2EDRNewReward,
+    'MED26Quaterion': MED26Quaterion,
 }
