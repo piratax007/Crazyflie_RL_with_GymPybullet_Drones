@@ -8,7 +8,7 @@ import pybullet as p
 class MED26Quaterion(BaseRLAviary):
     def __init__(self,
                  drone_model: DroneModel = DroneModel.CF2X,
-                 initial_xyzs=np.array([[0, 0, 0]]),
+                 initial_xyzs=np.array([[0, 0, 0.1]]),
                  initial_rpys=np.array([[0, 0, 0]]),
                  target_xyzs=np.array([0, 0, 1]),
                  target_q_xyzw=np.array([0.0, 0.0, 0.0, 1.0]),
@@ -43,24 +43,27 @@ class MED26Quaterion(BaseRLAviary):
     ################################################################################
 
     @staticmethod
-    def _exponential_penalization(b: float, current, target) -> float:
-        return np.exp(b * np.linalg.norm(current - target)) - 1
+    def _exponential_reward(b: float, current, target) -> float:
+        return np.exp(-b * np.linalg.norm(current - target)**2)
 
-    def _xy_error(self, xy_current, xy_target):
-        return self._exponential_penalization(1, xy_current, xy_target)
+    def _xy_error_reward(self, xy_current, xy_target):
+        return self._exponential_reward(0.2, xy_current, xy_target)
 
-    def _z_error(self, z_current, z_target):
-        return self._exponential_penalization(2, z_current, z_target)
+    def _z_error_reward(self, z_current, z_target):
+        return self._exponential_reward(1, z_current, z_target)
 
-    def _linear_velocity_error(self, v_current, v_target):
-        return self._exponential_penalization(1, v_current, v_target)
+    def _linear_velocity_error_reward(self, v_current, v_target):
+        return self._exponential_reward(0.2, v_current, v_target)
+
+    @staticmethod
+    def _orientation_error_reward(theta: float) -> float:
+        return -np.exp(theta**2)
 
     def quat_geodesic_angle_from_qerr_xyzw(self, q: np.ndarray) -> float:
         q_err = self._quat_error_xyzw(self.TARGET_QUATERNION, q, ensure_pos_w=True)
-        q_err_noisy = self._noisy_quaternion(q_err, (0.0, 0.002, 4))
-        q_err_noisy = q_err_noisy / np.linalg.norm(q_err_noisy)
-        v = q_err_noisy[:3]
-        w = q_err_noisy[3]
+        q_err = q_err / np.linalg.norm(q_err)
+        v = q_err[:3]
+        w = q_err[3]
         w = float(np.clip(w, 0.0, 1.0))
         return float(2.0 * np.arctan2(np.linalg.norm(v), w))
 
@@ -82,11 +85,11 @@ class MED26Quaterion(BaseRLAviary):
         theta = self.quat_geodesic_angle_from_qerr_xyzw(q)
         v = state[10:13]
         smooth_penalty = self._delta_action_penalty(0, 0.1)
-        ret = (1.0
-               - 0.20 * self._xy_error(xy, self.TARGET_POS[:2])
-               - 0.25 * self._z_error(z, self.TARGET_POS[2])
-               - 0.3 * theta**2
-               - 0.1 * self._linear_velocity_error(v, np.array([0, 0, 0]))
+        ret = (0.25
+               + 0.15 * self._xy_error_reward(xy, self.TARGET_POS[:2])
+               + 0.2 * self._z_error_reward(z, self.TARGET_POS[2])
+               + 0.1 * self._linear_velocity_error_reward(v, np.array([0, 0, 0]))
+               + 0.3 * self._orientation_error_reward(theta)
                - smooth_penalty
                )
         return ret
@@ -95,7 +98,7 @@ class MED26Quaterion(BaseRLAviary):
 
     def _computeTerminated(self):
         state = self._getDroneStateVector(0)
-        if self._exponential_penalization(1, state[0:3], self.TARGET_POS) < 0.001:
+        if self._exponential_reward(1, state[0:3], self.TARGET_POS) < 0.05:
             return True
 
         return False
@@ -103,7 +106,11 @@ class MED26Quaterion(BaseRLAviary):
     ################################################################################
 
     def _computeTruncated(self):
+        state = self._getDroneStateVector(0)
         if self.step_counter / self.PYB_FREQ > self.EPISODE_LENGTH_SECONDS:
+            return True
+
+        if state[2] < 0.1:
             return True
 
         return False

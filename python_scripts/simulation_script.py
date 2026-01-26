@@ -69,8 +69,8 @@ def run_simulation(
     policy = get_policy(model_map[algorithm], policy_path, model)
 
     test_env = test_env(
-        initial_xyzs=np.array([[0.7, 0.56, 0.5]]),
-        initial_rpys=np.array([[0.0, 0.0, 0.43]]),
+        initial_xyzs=np.array([[0.0, 0.0, 0.1]]),
+        initial_rpys=np.array([[0.0, 0.0, 0.0]]),
         gui=gui,
         observation_space=ObservationType('kin'),
         action_space=ActionType('rpm'),
