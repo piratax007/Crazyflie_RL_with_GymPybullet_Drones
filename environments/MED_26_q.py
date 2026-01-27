@@ -216,8 +216,8 @@ class MED26Quaterion(BaseRLAviary):
             obs_17[i, :] = np.hstack([
                 self._compute_noisy_error(obs[0:3], self.TARGET_POS, (0.0, 0.001, 3)),
                 self._noisy_quaternion(q_err, (0.0, 0.002, 4)),
-                obs[10, 13] + np.random.normal(0.0, 0.001, 3),
-                obs[13, 16] + np.random.normal(0.0, 0.001, 3),
+                obs[10:13] + np.random.normal(0.0, 0.001, 3),
+                obs[13:16] + np.random.normal(0.0, 0.002, 3),
                 np.asarray(self.action_buffer[-1][i, :], dtype=np.float32)
                 ]).reshape(17, )
         ret = np.array([obs_17[i, :] for i in range(self.NUM_DRONES)]).astype('float32')
