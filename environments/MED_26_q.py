@@ -79,15 +79,12 @@ class MED26Quaterion(BaseRLAviary):
 
     def _computeReward(self):
         state = self._getDroneStateVector(0)
-        xy = state[0:2]
-        z = state[2]
         q = state[3:7]
         theta = self.quat_geodesic_angle_from_qerr_xyzw(q)
         v = state[10:13]
         smooth_penalty = self._delta_action_penalty(0, 0.001)
         ret = (0.25
-               + 0.15 * self._xy_error_reward(xy, self.TARGET_POS[:2])
-               + 0.2 * self._z_error_reward(z, self.TARGET_POS[2])
+               + 0.35 * self._xy_error_reward(state[0:3], self.TARGET_POS)
                + 0.1 * self._linear_velocity_error_reward(v, np.array([0, 0, 0]))
                + 0.3 * self._orientation_error_reward(theta)
                - smooth_penalty
@@ -242,7 +239,7 @@ class MED26Quaterion(BaseRLAviary):
         self.INIT_RPYS = np.array([[
             np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
             np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
-            np.random.uniform(-np.pi, np.pi + 1e-10, 1)[0]
+            np.random.uniform(-3.14, 3.14 + 1e-10, 1)[0]
         ]])
         p.resetBasePositionAndOrientation(self.DRONE_IDS[0], self.INIT_XYZS[0, :],
                                           p.getQuaternionFromEuler(self.INIT_RPYS[0]))
