@@ -57,7 +57,7 @@ class MED26Quaterion(BaseRLAviary):
 
     @staticmethod
     def _orientation_error_reward(theta: float) -> float:
-        return -np.exp(theta**2)
+        return np.exp(-theta**2)
 
     def quat_geodesic_angle_from_qerr_xyzw(self, q: np.ndarray) -> float:
         q_err = self._quat_error_xyzw(self.TARGET_QUATERNION, q, ensure_pos_w=True)
@@ -84,7 +84,7 @@ class MED26Quaterion(BaseRLAviary):
         q = state[3:7]
         theta = self.quat_geodesic_angle_from_qerr_xyzw(q)
         v = state[10:13]
-        smooth_penalty = self._delta_action_penalty(0, 0.1)
+        smooth_penalty = self._delta_action_penalty(0, 0.001)
         ret = (0.25
                + 0.15 * self._xy_error_reward(xy, self.TARGET_POS[:2])
                + 0.2 * self._z_error_reward(z, self.TARGET_POS[2])
@@ -98,7 +98,34 @@ class MED26Quaterion(BaseRLAviary):
 
     def _computeTerminated(self):
         state = self._getDroneStateVector(0)
-        if self._exponential_reward(1, state[0:3], self.TARGET_POS) < 0.05:
+
+        current_position = state[0:3]
+        position_error = np.linalg.norm(current_position - self.TARGET_POS)
+        current_quaternion = state[3:7]
+        current_velocity = state[10:13]
+        velocity_norm = np.linalg.norm(current_velocity)
+        current_omega = state[13:16]
+        omega_norm = np.linalg.norm(current_omega)
+
+        theta = self.quat_geodesic_angle_from_qerr_xyzw(current_quaternion)
+
+        failure = (
+        (state[2] < 0.1) or
+        (position_error > 3.0) or
+        (theta > np.pi) or
+        (velocity_norm > 8.0) or
+        (omega_norm > 10.0)
+        )
+
+        if failure:
+            return True
+
+        success = (
+        (position_error < 0.25) and
+        (theta < 0.01)
+        )
+
+        if success:
             return True
 
         return False
@@ -106,11 +133,7 @@ class MED26Quaterion(BaseRLAviary):
     ################################################################################
 
     def _computeTruncated(self):
-        state = self._getDroneStateVector(0)
         if self.step_counter / self.PYB_FREQ > self.EPISODE_LENGTH_SECONDS:
-            return True
-
-        if state[2] < 0.1:
             return True
 
         return False
@@ -193,8 +216,8 @@ class MED26Quaterion(BaseRLAviary):
             obs_17[i, :] = np.hstack([
                 self._compute_noisy_error(obs[0:3], self.TARGET_POS, (0.0, 0.001, 3)),
                 self._noisy_quaternion(q_err, (0.0, 0.002, 4)),
-                self._compute_noisy_error(obs[10:13], np.array([0, 0, 0]), (0.0, 0.001, 3)),
-                self._compute_noisy_error(obs[13:16], np.array([0, 0, 0]), (0.0, 0.002, 3)),
+                obs[10, 13] + np.random.normal(0.0, 0.001, 3),
+                obs[13, 16] + np.random.normal(0.0, 0.001, 3),
                 np.asarray(self.action_buffer[-1][i, :], dtype=np.float32)
                 ]).reshape(17, )
         ret = np.array([obs_17[i, :] for i in range(self.NUM_DRONES)]).astype('float32')
@@ -212,7 +235,7 @@ class MED26Quaterion(BaseRLAviary):
                     [
                         np.random.uniform(-1, 1 + 1e-10, 1)[0],
                         np.random.uniform(-1, 1 + 1e-10, 1)[0],
-                        np.random.uniform(0, 2 + 1e-10, 1)[0]
+                        np.random.uniform(0.1, 2 + 1e-10, 1)[0]
                     ]
                 ]
             )
