@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 from gymnasium import spaces
 from environments.BaseRLAviary import BaseRLAviary
@@ -210,9 +212,14 @@ class MED26Quaterion(BaseRLAviary):
 
     def _computeObs(self):
         obs_17 = np.zeros((self.NUM_DRONES, 17))
+        target_yaw_choices = np.arange(-180, 180, 45)
+        target_quaternion_choices = tuple(
+            np.array([0.0, 0.0, np.sin(np.deg2rad(a)/2.0), np.cos(np.deg2rad(a)/2.0)], dtype=np.float32)
+            for a in target_yaw_choices
+        )
         for i in range(self.NUM_DRONES):
             obs = self._getDroneStateVector(i)
-            q_err = self._quat_error_xyzw(self.TARGET_QUATERNION, obs[3:7], ensure_pos_w=True)
+            q_err = self._quat_error_xyzw(random.choice(target_quaternion_choices), obs[3:7], ensure_pos_w=True)
             obs_17[i, :] = np.hstack([
                 self._compute_noisy_error(obs[0:3], self.TARGET_POS, (0.0, 0.001, 3)),
                 self._noisy_quaternion(q_err, (0.0, 0.002, 4)),
