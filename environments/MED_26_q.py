@@ -212,14 +212,9 @@ class MED26Quaterion(BaseRLAviary):
 
     def _computeObs(self):
         obs_17 = np.zeros((self.NUM_DRONES, 17))
-        target_yaw_choices = np.arange(-180, 180, 45)
-        target_quaternion_choices = tuple(
-            np.array([0.0, 0.0, np.sin(np.deg2rad(a)/2.0), np.cos(np.deg2rad(a)/2.0)], dtype=np.float32)
-            for a in target_yaw_choices
-        )
         for i in range(self.NUM_DRONES):
             obs = self._getDroneStateVector(i)
-            q_err = self._quat_error_xyzw(random.choice(target_quaternion_choices), obs[3:7], ensure_pos_w=True)
+            q_err = self._quat_error_xyzw(self.TARGET_QUATERNION, obs[3:7], ensure_pos_w=True)
             obs_17[i, :] = np.hstack([
                 self._compute_noisy_error(obs[0:3], self.TARGET_POS, (0.0, 0.001, 3)),
                 self._noisy_quaternion(q_err, (0.0, 0.002, 4)),
@@ -230,6 +225,14 @@ class MED26Quaterion(BaseRLAviary):
         ret = np.array([obs_17[i, :] for i in range(self.NUM_DRONES)]).astype('float32')
         return ret
 
+    @staticmethod
+    def yaw_to_quat_xyzw(yaw: float) -> np.ndarray:
+        return np.array([0.0, 0.0, np.sin(yaw/2.0), np.cos(yaw/2.0)], dtype=np.float32)
+
+    @staticmethod
+    def sample_uniform_yaw(rng: np.random.Generator) -> float:
+        return float(rng.uniform(-np.pi, np.pi))
+
     def reset(
             self,
             seed: int = None,
@@ -237,20 +240,18 @@ class MED26Quaterion(BaseRLAviary):
     ):
         p.resetSimulation(physicsClientId=self.CLIENT)
         self._housekeeping()
-        self.INIT_XYZS = np.array(
-                [
-                    [
-                        np.random.uniform(-1, 1 + 1e-10, 1)[0],
-                        np.random.uniform(-1, 1 + 1e-10, 1)[0],
-                        np.random.uniform(0.1, 2 + 1e-10, 1)[0]
-                    ]
-                ]
-            )
+        self.INIT_XYZS = np.array([[
+            np.random.uniform(-1, 1 + 1e-10, 1)[0],
+            np.random.uniform(-1, 1 + 1e-10, 1)[0],
+            np.random.uniform(0.1, 2 + 1e-10, 1)[0]
+        ]])
         self.INIT_RPYS = np.array([[
             np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
             np.random.uniform(-0.2, 0.2 + 1e-10, 1)[0],
             np.random.uniform(-3.14, 3.14 + 1e-10, 1)[0]
         ]])
+        target_yaw = self.sample_uniform_yaw(self.np_random)
+        self.TARGET_QUATERNION = self.yaw_to_quat_xyzw(target_yaw)
         p.resetBasePositionAndOrientation(self.DRONE_IDS[0], self.INIT_XYZS[0, :],
                                           p.getQuaternionFromEuler(self.INIT_RPYS[0]),
                                           physicsClientId=self.CLIENT)
